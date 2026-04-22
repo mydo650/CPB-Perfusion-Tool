@@ -1,0 +1,178 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  calculateArterialOxygenContent,
+  calculateBsa,
+  calculateDo2i,
+  calculateEstimatedBloodVolume,
+  calculateHctDrop,
+  calculatePredictedPrimeHct,
+  calculatePrimeToBloodRatio,
+  calculateProjectedHctAfterPrbc,
+  calculatePumpFlow,
+  calculateRedCellDeficitToTarget,
+  calculateRequiredCardiacIndex,
+  calculateRequiredHemoglobin,
+  calculateRequiredPrbcVolume,
+  evaluateCalculator,
+  evaluatePrimeCalculator,
+  roundTo,
+  validatePerfusionField,
+  validatePrimeField,
+} from "../calculations.mjs";
+
+test("Mosteller BSA matches expected fixture", () => {
+  const bsa = calculateBsa(170, 70);
+  assert.equal(roundTo(bsa, 2), 1.82);
+});
+
+test("pump flow uses target cardiac index and BSA", () => {
+  const flow = calculatePumpFlow(2.4, 1.82);
+  assert.equal(roundTo(flow, 2), 4.37);
+});
+
+test("arterial oxygen content uses percent converted to fraction via DO2i helper", () => {
+  const content = calculateArterialOxygenContent(12, 0.98, 150);
+  assert.equal(roundTo(content, 2), 16.21);
+
+  const do2i = calculateDo2i(2.4, 12, 98, 150);
+  assert.equal(Math.round(do2i), 389);
+});
+
+test("calculator returns only the affected outputs when some inputs are missing", () => {
+  const evaluated = evaluateCalculator({
+    heightCm: "170",
+    weightKg: "70",
+    cardiacIndex: "",
+    pumpFlow: "",
+    hgb: "12",
+    saO2: "98",
+    paO2: "150",
+  });
+
+  assert.equal(roundTo(evaluated.results.bsa, 2), 1.82);
+  assert.equal(roundTo(evaluated.results.flowRange.low, 2), 2.91);
+  assert.equal(roundTo(evaluated.results.flowRange.high, 2), 4.73);
+  assert.equal(evaluated.results.do2i, null);
+});
+
+test("pump flow overrides cardiac index for DO2i when both are entered", () => {
+  const evaluated = evaluateCalculator({
+    heightCm: "170",
+    weightKg: "70",
+    cardiacIndex: "2.4",
+    pumpFlow: "4.0",
+    hgb: "12",
+    saO2: "98",
+    paO2: "150",
+    do2iTarget: "275",
+  });
+
+  assert.equal(evaluated.results.do2iSource, "pump flow");
+  assert.equal(roundTo(evaluated.results.effectiveCi, 2), 2.20);
+  assert.equal(Math.round(evaluated.results.do2i), 357);
+});
+
+test("required CI and flow can be back-calculated from a DO2i target", () => {
+  const content = calculateArterialOxygenContent(12, 0.98, 150);
+  const requiredCi = calculateRequiredCardiacIndex(275, content);
+  assert.equal(roundTo(requiredCi, 2), 1.70);
+
+  const evaluated = evaluateCalculator({
+    heightCm: "170",
+    weightKg: "70",
+    cardiacIndex: "2.2",
+    pumpFlow: "",
+    hgb: "12",
+    saO2: "98",
+    paO2: "150",
+    do2iTarget: "275",
+  });
+
+  assert.equal(roundTo(evaluated.results.requiredCi, 2), 1.70);
+  assert.equal(roundTo(evaluated.results.requiredFlow, 2), 3.08);
+});
+
+test("required hemoglobin can be back-calculated from the current effective CI", () => {
+  const requiredHgb = calculateRequiredHemoglobin(275, 2.0, 98, 150);
+  assert.equal(roundTo(requiredHgb, 1), 10.1);
+});
+
+test("prime calculations estimate blood volume and post-prime hematocrit", () => {
+  const bloodVolume = calculateEstimatedBloodVolume(70, 70);
+  assert.equal(bloodVolume, 4900);
+
+  const predictedHct = calculatePredictedPrimeHct(4900, 36, 1400);
+  assert.equal(roundTo(predictedHct, 1), 28.0);
+  assert.equal(roundTo(calculateHctDrop(36, predictedHct), 1), 8.0);
+  assert.equal(roundTo(calculatePrimeToBloodRatio(1400, 4900), 2), 0.29);
+});
+
+test("prime calculator solves required PRBC volume to a target hematocrit", () => {
+  const requiredPrbc = calculateRequiredPrbcVolume(30, 36, 4900, 1400, 60);
+  assert.equal(Math.round(requiredPrbc), 420);
+  const redCellDeficit = calculateRedCellDeficitToTarget(30, 36, 4900, 1400);
+  assert.equal(Math.round(redCellDeficit), 126);
+
+  const projectedHct = calculateProjectedHctAfterPrbc(4900, 36, 1400, requiredPrbc, 60);
+  assert.equal(roundTo(projectedHct, 1), 30.0);
+});
+
+test("prime evaluator returns target status and projected hematocrit", () => {
+  const evaluated = evaluatePrimeCalculator({
+    primeWeightKg: "70",
+    primeEbvFactor: "70",
+    primeBaselineHct: "36",
+    primeVolumeMl: "1400",
+    primeTargetHct: "30",
+    primePrbcHct: "60",
+  });
+
+  assert.equal(evaluated.results.bloodVolumeMl, 4900);
+  assert.equal(roundTo(evaluated.results.predictedHct, 1), 28.0);
+  assert.equal(roundTo(evaluated.results.hctDrop, 1), 8.0);
+  assert.equal(roundTo(evaluated.results.primeToBloodRatio, 2), 0.29);
+  assert.equal(Math.round(evaluated.results.redCellDeficitMl), 126);
+  assert.equal(Math.round(evaluated.results.prbcVolumeMl), 420);
+  assert.equal(roundTo(evaluated.results.projectedHct, 1), 30.0);
+  assert.equal(evaluated.results.targetMetWithoutPrbc, false);
+  assert.equal(evaluated.results.prbcTargetReachable, true);
+});
+
+test("prime evaluator recognizes when the target is already met without PRBC", () => {
+  const evaluated = evaluatePrimeCalculator({
+    primeWeightKg: "70",
+    primeEbvFactor: "70",
+    primeBaselineHct: "36",
+    primeVolumeMl: "500",
+    primeTargetHct: "30",
+    primePrbcHct: "60",
+  });
+
+  assert.equal(evaluated.results.targetMetWithoutPrbc, true);
+  assert.equal(Math.round(evaluated.results.prbcVolumeMl), 0);
+  assert.equal(roundTo(evaluated.results.projectedHct, 1), roundTo(evaluated.results.predictedHct, 1));
+});
+
+test("prime evaluator flags unreachable targets when PRBC hematocrit is at or below target", () => {
+  const evaluated = evaluatePrimeCalculator({
+    primeWeightKg: "70",
+    primeEbvFactor: "70",
+    primeBaselineHct: "36",
+    primeVolumeMl: "1400",
+    primeTargetHct: "40",
+    primePrbcHct: "40",
+  });
+
+  assert.equal(evaluated.results.prbcTargetReachable, false);
+  assert.equal(evaluated.results.prbcVolumeMl, null);
+  assert.equal(evaluated.results.projectedHct, null);
+});
+
+test("validation rejects out of range and negative inputs", () => {
+  assert.equal(validatePerfusionField("heightCm", "-1").valid, false);
+  assert.equal(validatePerfusionField("saO2", "102").valid, false);
+  assert.equal(validatePerfusionField("paO2", "0").valid, true);
+  assert.equal(validatePrimeField("primePrbcHct", "95").valid, false);
+});

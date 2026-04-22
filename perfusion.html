@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPB Support Calculator</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Simulation Support Tool</p>
+        <h1>CPB Support Calculator</h1>
+        <p class="intro">
+          Switch between perfusion and prime planning tools designed to reduce
+          mental math, make assumptions visible, and keep high-value calculations
+          one step away during simulation.
+        </p>
+      </section>
+
+      <nav class="module-switcher page-switcher" aria-label="Website pages">
+        <a class="module-button page-link" href="./index.html" aria-current="false">Home</a>
+        <a class="module-button page-link is-active" href="./perfusion.html" aria-current="page">Perfusion</a>
+        <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
+      </nav>
+
+      <section class="workspace page-workspace" aria-label="Perfusion calculator">
+        <section class="panel input-panel" aria-labelledby="inputs-title">
+          <div class="panel-header">
+            <h2 id="inputs-title">Perfusion Inputs</h2>
+            <p>All values use metric units for fast study workflow.</p>
+          </div>
+          <form id="calculator-form" novalidate>
+            <div class="field-grid">
+              <label class="field"><span>Height</span><div class="input-wrap"><input id="heightCm" name="heightCm" type="number" inputmode="decimal" min="30" max="250" step="0.1" autocomplete="off" autofocus /><span class="unit">cm</span></div><small class="hint">Expected range: 30 to 250 cm</small></label>
+              <label class="field"><span>Weight</span><div class="input-wrap"><input id="weightKg" name="weightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" /><span class="unit">kg</span></div><small class="hint">Expected range: 1 to 300 kg</small></label>
+              <label class="field"><span>Cardiac Index (optional)</span><div class="input-wrap"><input id="cardiacIndex" name="cardiacIndex" type="number" inputmode="decimal" min="0.1" max="6" step="0.01" autocomplete="off" /><span class="unit">L/min/m²</span></div><small class="hint">Use when you want DO2i from indexed flow</small></label>
+              <label class="field"><span>Pump Flow (optional)</span><div class="input-wrap"><input id="pumpFlow" name="pumpFlow" type="number" inputmode="decimal" min="0.1" max="12" step="0.01" autocomplete="off" /><span class="unit">L/min</span></div><small class="hint">If entered, this overrides CI for DO2i</small></label>
+              <label class="field"><span>Hemoglobin</span><div class="input-wrap"><input id="hgb" name="hgb" type="number" inputmode="decimal" min="1" max="25" step="0.1" autocomplete="off" /><span class="unit">g/dL</span></div><small class="hint">Expected range: 1 to 25 g/dL</small></label>
+              <label class="field"><span>Arterial Oxygen Saturation (SaO2)</span><div class="input-wrap"><input id="saO2" name="saO2" type="number" inputmode="decimal" min="0" max="100" step="0.1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Entered as percent, converted internally</small></label>
+              <label class="field"><span>Arterial Oxygen Tension (PaO2)</span><div class="input-wrap"><input id="paO2" name="paO2" type="number" inputmode="decimal" min="0" max="600" step="1" autocomplete="off" /><span class="unit">mmHg</span></div><small class="hint">Expected range: 0 to 600 mmHg</small></label>
+              <label class="field"><span>DO<sub>2</sub>i Target</span><div class="input-wrap"><input id="do2iTarget" name="do2iTarget" type="number" inputmode="decimal" min="100" max="500" step="1" value="275" autocomplete="off" /><span class="unit">mL O2/min/m²</span></div><small class="hint">Default threshold target for reverse calculations</small></label>
+            </div>
+          </form>
+          <div id="validationSummary" class="validation-summary" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel output-panel" aria-labelledby="results-title">
+          <div class="panel-header">
+            <h2 id="results-title">Perfusion Results</h2>
+            <p>Outputs update instantly. Incomplete inputs only affect related results.</p>
+          </div>
+          <div class="results-grid">
+            <article class="result-card"><p class="result-label">Body Surface Area</p><output id="bsaOutput" class="result-value">--</output><p id="bsaStatus" class="result-status">Enter height and weight.</p></article>
+            <article class="result-card"><p class="result-label">Recommended Flow Range</p><output id="flowOutput" class="result-value">--</output><p id="flowStatus" class="result-status">Enter height and weight to calculate 1.6 to 2.6 L/min/m².</p></article>
+            <article class="result-card accent-card"><p class="result-label">DO<sub>2</sub>i</p><output id="do2iOutput" class="result-value">--</output><p id="do2iStatus" class="result-status">Enter hemoglobin, SaO2, PaO2, and either CI or pump flow.</p></article>
+            <article class="result-card"><p class="result-label">Flow To Reach Target DO<sub>2</sub>i</p><output id="targetFlowOutput" class="result-value">--</output><p id="targetFlowStatus" class="result-status">Enter BSA, hemoglobin, SaO2, and PaO2.</p></article>
+            <article class="result-card"><p class="result-label">CI To Reach Target DO<sub>2</sub>i</p><output id="targetCiOutput" class="result-value">--</output><p id="targetCiStatus" class="result-status">Enter hemoglobin, SaO2, and PaO2.</p></article>
+            <article class="result-card"><p class="result-label">Hgb To Reach Target DO<sub>2</sub>i</p><output id="targetHgbOutput" class="result-value">--</output><p id="targetHgbStatus" class="result-status">Enter current flow or CI, plus oxygenation values.</p></article>
+          </div>
+
+          <section class="info-tabs" aria-labelledby="perfusion-support-title">
+            <div class="panel-header tabs-header">
+              <h3 id="perfusion-support-title">Support Material</h3>
+              <div class="tab-list" role="tablist" aria-label="Perfusion support material">
+                <button type="button" class="tab-button is-active" id="tab-button-perfusion-calculations" role="tab" aria-selected="true" aria-controls="tab-panel-perfusion-calculations" data-tab-group="perfusion-support" data-tab-target="calculations">Calculations</button>
+                <button type="button" class="tab-button" id="tab-button-perfusion-references" role="tab" aria-selected="false" aria-controls="tab-panel-perfusion-references" data-tab-group="perfusion-support" data-tab-target="references" tabindex="-1">References</button>
+              </div>
+            </div>
+            <section class="formula-panel tab-panel is-active" id="tab-panel-perfusion-calculations" role="tabpanel" aria-labelledby="tab-button-perfusion-calculations" data-tab-group="perfusion-support" data-tab-panel="calculations">
+              <dl class="formula-list">
+                <div><dt>BSA</dt><dd>&radic;((height cm &times; weight kg) / 3600)</dd></div>
+                <div><dt>Recommended Flow Range</dt><dd>1.6 to 2.6 L/min/m² &times; BSA</dd></div>
+                <div><dt>DO<sub>2</sub>i</dt><dd>((Hgb &times; 1.34 &times; SaO2 fraction) + (0.003 &times; PaO2)) &times; 10 &times; effective cardiac index</dd></div>
+                <div><dt>Required CI / Flow / Hgb</dt><dd>Rearranged from the DO<sub>2</sub>i equation using the selected target and current oxygenation inputs</dd></div>
+              </dl>
+              <p class="formula-note">Variable definitions: Hgb = hemoglobin, SaO2 = arterial oxygen saturation, PaO2 = arterial oxygen tension, CI = cardiac index. If pump flow is entered, effective CI = pump flow / BSA.</p>
+              <p class="disclaimer">Decision-support calculator for simulation use. Confirm protocol-specific targets and rounding requirements before clinical use. Aim to maintain DO<sub>2</sub>i above the selected target when clinically appropriate.</p>
+            </section>
+            <section class="formula-panel references-panel tab-panel" id="tab-panel-perfusion-references" role="tabpanel" aria-labelledby="tab-button-perfusion-references" data-tab-group="perfusion-support" data-tab-panel="references" hidden>
+              <ol class="references-list">
+                <li>Mosteller RD. Simplified calculation of body-surface area. <em>N Engl J Med.</em> 1987;317(17):1098. <a href="https://pubmed.ncbi.nlm.nih.gov/3657876/" target="_blank" rel="noreferrer">PubMed</a></li>
+                <li>Newland RF, Baker RA. Low Oxygen Delivery as a Predictor of Acute Kidney Injury during Cardiopulmonary Bypass. <em>J Extra Corpor Technol.</em> 2017;49(4):224-230. <a href="https://pubmed.ncbi.nlm.nih.gov/29302112/" target="_blank" rel="noreferrer">PubMed</a></li>
+                <li>Ranucci M, Johnson I, Willcox T, et al. Goal-directed perfusion to reduce acute kidney injury: A randomized trial. <em>J Thorac Cardiovasc Surg.</em> 2018;156(5):1918-1927.e2. <a href="https://pubmed.ncbi.nlm.nih.gov/29778331/" target="_blank" rel="noreferrer">PubMed</a></li>
+                <li>Gao P, Liu J, Zhang P, et al. Goal-directed perfusion for reducing acute kidney injury in cardiac surgery: A systematic review and meta-analysis. <em>Perfusion.</em> 2023;38(3):591-599. <a href="https://pubmed.ncbi.nlm.nih.gov/35125028/" target="_blank" rel="noreferrer">PubMed</a></li>
+              </ol>
+              <p class="formula-note">The default DO<sub>2</sub>i target of 275 mL O2/min/m² is a practical midpoint between commonly cited perfusion thresholds and should be adjusted to match the study protocol or local practice.</p>
+            </section>
+          </section>
+        </section>
+      </section>
+
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

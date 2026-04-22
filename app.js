@@ -1,0 +1,659 @@
+const PERFUSION_FIELD_CONFIG = {
+  heightCm: { label: "Height", min: 30, max: 250, allowZero: false },
+  weightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
+  cardiacIndex: { label: "Cardiac index", min: 0.1, max: 6, allowZero: false },
+  pumpFlow: { label: "Pump flow", min: 0.1, max: 12, allowZero: false },
+  hgb: { label: "Hemoglobin", min: 1, max: 25, allowZero: false },
+  saO2: { label: "SaO2", min: 0, max: 100, allowZero: true },
+  paO2: { label: "PaO2", min: 0, max: 600, allowZero: true },
+  do2iTarget: { label: "DO2i target", min: 100, max: 500, allowZero: false },
+};
+
+const PRIME_FIELD_CONFIG = {
+  primeWeightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
+  primeEbvFactor: { label: "Estimated blood volume factor", min: 40, max: 100, allowZero: false },
+  primeBaselineHct: { label: "Pre-CPB hematocrit", min: 10, max: 70, allowZero: false },
+  primeVolumeMl: { label: "Prime volume", min: 50, max: 3000, allowZero: false },
+  primeTargetHct: { label: "Target on-pump hematocrit", min: 10, max: 50, allowZero: false },
+  primePrbcHct: { label: "PRBC hematocrit", min: 40, max: 90, allowZero: false },
+};
+
+function roundTo(value, decimals) {
+  const factor = 10 ** decimals;
+  return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
+function validateField(configMap, name, rawValue) {
+  const config = configMap[name];
+  if (!config) return { valid: false, value: null, message: "Unknown field." };
+  if (rawValue === "" || rawValue === null || rawValue === undefined) {
+    return { valid: false, value: null, message: `${config.label} is required.` };
+  }
+
+  const value = Number(rawValue);
+  if (Number.isNaN(value)) {
+    return { valid: false, value: null, message: `${config.label} must be numeric.` };
+  }
+  if (!config.allowZero && value <= 0) {
+    return { valid: false, value: null, message: `${config.label} must be greater than 0.` };
+  }
+  if (config.allowZero && value < 0) {
+    return { valid: false, value: null, message: `${config.label} cannot be negative.` };
+  }
+  if (value < config.min || value > config.max) {
+    return { valid: false, value: null, message: `${config.label} must be between ${config.min} and ${config.max}.` };
+  }
+  return { valid: true, value, message: "" };
+}
+
+function calculateBsa(heightCm, weightKg) {
+  return Math.sqrt((heightCm * weightKg) / 3600);
+}
+
+function calculatePumpFlow(cardiacIndex, bsa) {
+  return cardiacIndex * bsa;
+}
+
+function calculateArterialOxygenContent(hgb, saO2Fraction, paO2) {
+  return hgb * 1.34 * saO2Fraction + 0.003 * paO2;
+}
+
+function calculateDo2i(cardiacIndex, hgb, saO2Percent, paO2) {
+  return calculateArterialOxygenContent(hgb, saO2Percent / 100, paO2) * 10 * cardiacIndex;
+}
+
+function calculateRequiredCardiacIndex(do2iTarget, arterialOxygenContent) {
+  if (arterialOxygenContent <= 0) return null;
+  return do2iTarget / (10 * arterialOxygenContent);
+}
+
+function calculateRequiredHemoglobin(do2iTarget, cardiacIndex, saO2Percent, paO2) {
+  const saO2Fraction = saO2Percent / 100;
+  if (cardiacIndex <= 0 || saO2Fraction <= 0) return null;
+  return (do2iTarget / (10 * cardiacIndex) - 0.003 * paO2) / (1.34 * saO2Fraction);
+}
+
+function calculateEstimatedBloodVolume(weightKg, ebvFactor) {
+  return weightKg * ebvFactor;
+}
+
+function calculatePredictedPrimeHct(bloodVolumeMl, baselineHctPercent, primeVolumeMl) {
+  return ((bloodVolumeMl * (baselineHctPercent / 100)) / (bloodVolumeMl + primeVolumeMl)) * 100;
+}
+
+function calculateRequiredPrbcVolume(targetHctPercent, baselineHctPercent, bloodVolumeMl, primeVolumeMl, prbcHctPercent) {
+  const targetFraction = targetHctPercent / 100;
+  const baselineFraction = baselineHctPercent / 100;
+  const prbcFraction = prbcHctPercent / 100;
+  const numerator = targetFraction * (bloodVolumeMl + primeVolumeMl) - baselineFraction * bloodVolumeMl;
+  const denominator = prbcFraction - targetFraction;
+  if (denominator <= 0) return null;
+  return Math.max(0, numerator / denominator);
+}
+
+function calculateProjectedHctAfterPrbc(bloodVolumeMl, baselineHctPercent, primeVolumeMl, prbcVolumeMl, prbcHctPercent) {
+  const redCellVolume = bloodVolumeMl * (baselineHctPercent / 100) + prbcVolumeMl * (prbcHctPercent / 100);
+  const totalVolume = bloodVolumeMl + primeVolumeMl + prbcVolumeMl;
+  return (redCellVolume / totalVolume) * 100;
+}
+
+function calculateHctDrop(baselineHctPercent, predictedHctPercent) {
+  return baselineHctPercent - predictedHctPercent;
+}
+
+function calculatePrimeToBloodRatio(primeVolumeMl, bloodVolumeMl) {
+  if (bloodVolumeMl <= 0) return null;
+  return primeVolumeMl / bloodVolumeMl;
+}
+
+function calculateRedCellDeficitToTarget(targetHctPercent, baselineHctPercent, bloodVolumeMl, primeVolumeMl) {
+  const targetRedCellVolumeMl = (targetHctPercent / 100) * (bloodVolumeMl + primeVolumeMl);
+  const currentRedCellVolumeMl = (baselineHctPercent / 100) * bloodVolumeMl;
+  return Math.max(0, targetRedCellVolumeMl - currentRedCellVolumeMl);
+}
+
+function evaluateCalculator(rawInputs) {
+  const fields = {};
+  Object.keys(PERFUSION_FIELD_CONFIG).forEach((name) => {
+    fields[name] = validateField(PERFUSION_FIELD_CONFIG, name, rawInputs[name]);
+  });
+
+  const valid = (name) => fields[name].valid;
+  const valueOf = (name) => fields[name].value;
+  const results = {
+    bsa: null,
+    flowRange: null,
+    effectiveCi: null,
+    currentFlow: null,
+    currentHgb: valid("hgb") ? valueOf("hgb") : null,
+    do2i: null,
+    do2iThresholdMet: null,
+    do2iSource: null,
+    do2iTarget: valid("do2iTarget") ? valueOf("do2iTarget") : null,
+    arterialOxygenContent: null,
+    requiredCi: null,
+    requiredFlow: null,
+    requiredHgb: null,
+  };
+
+  if (valid("heightCm") && valid("weightKg")) {
+    results.bsa = calculateBsa(valueOf("heightCm"), valueOf("weightKg"));
+    results.flowRange = {
+      low: calculatePumpFlow(1.6, results.bsa),
+      high: calculatePumpFlow(2.6, results.bsa),
+    };
+  }
+
+  if (results.bsa !== null && valid("pumpFlow")) {
+    results.currentFlow = valueOf("pumpFlow");
+    results.effectiveCi = valueOf("pumpFlow") / results.bsa;
+    results.do2iSource = "pump flow";
+  } else if (valid("cardiacIndex")) {
+    results.effectiveCi = valueOf("cardiacIndex");
+    results.do2iSource = "cardiac index";
+    if (results.bsa !== null) results.currentFlow = calculatePumpFlow(results.effectiveCi, results.bsa);
+  }
+
+  if (valid("hgb") && valid("saO2") && valid("paO2")) {
+    results.arterialOxygenContent = calculateArterialOxygenContent(valueOf("hgb"), valueOf("saO2") / 100, valueOf("paO2"));
+  }
+
+  if (results.effectiveCi !== null && results.arterialOxygenContent !== null) {
+    results.do2i = calculateDo2i(results.effectiveCi, valueOf("hgb"), valueOf("saO2"), valueOf("paO2"));
+    if (results.do2iTarget !== null) results.do2iThresholdMet = results.do2i >= results.do2iTarget;
+  }
+
+  if (results.do2iTarget !== null && results.arterialOxygenContent !== null) {
+    results.requiredCi = calculateRequiredCardiacIndex(results.do2iTarget, results.arterialOxygenContent);
+    if (results.requiredCi !== null && results.bsa !== null) results.requiredFlow = calculatePumpFlow(results.requiredCi, results.bsa);
+  }
+
+  if (results.do2iTarget !== null && results.effectiveCi !== null && valid("saO2") && valid("paO2")) {
+    results.requiredHgb = calculateRequiredHemoglobin(results.do2iTarget, results.effectiveCi, valueOf("saO2"), valueOf("paO2"));
+  }
+
+  return { fields, results };
+}
+
+function evaluatePrimeCalculator(rawInputs) {
+  const fields = {};
+  Object.keys(PRIME_FIELD_CONFIG).forEach((name) => {
+    fields[name] = validateField(PRIME_FIELD_CONFIG, name, rawInputs[name]);
+  });
+
+  const valid = (name) => fields[name].valid;
+  const valueOf = (name) => fields[name].value;
+  const results = {
+    bloodVolumeMl: null,
+    predictedHct: null,
+    hctDrop: null,
+    primeToBloodRatio: null,
+    targetHct: valid("primeTargetHct") ? valueOf("primeTargetHct") : null,
+    redCellDeficitMl: null,
+    prbcVolumeMl: null,
+    projectedHct: null,
+    targetMetWithoutPrbc: null,
+    prbcTargetReachable: null,
+  };
+
+  if (valid("primeWeightKg") && valid("primeEbvFactor")) {
+    results.bloodVolumeMl = calculateEstimatedBloodVolume(valueOf("primeWeightKg"), valueOf("primeEbvFactor"));
+  }
+
+  if (results.bloodVolumeMl !== null && valid("primeBaselineHct") && valid("primeVolumeMl")) {
+    results.predictedHct = calculatePredictedPrimeHct(results.bloodVolumeMl, valueOf("primeBaselineHct"), valueOf("primeVolumeMl"));
+    results.hctDrop = calculateHctDrop(valueOf("primeBaselineHct"), results.predictedHct);
+    results.primeToBloodRatio = calculatePrimeToBloodRatio(valueOf("primeVolumeMl"), results.bloodVolumeMl);
+  }
+
+  if (results.bloodVolumeMl !== null && valid("primeBaselineHct") && valid("primeVolumeMl") && valid("primeTargetHct") && valid("primePrbcHct")) {
+    results.redCellDeficitMl = calculateRedCellDeficitToTarget(valueOf("primeTargetHct"), valueOf("primeBaselineHct"), results.bloodVolumeMl, valueOf("primeVolumeMl"));
+    results.prbcTargetReachable = valueOf("primePrbcHct") > valueOf("primeTargetHct");
+    results.prbcVolumeMl = calculateRequiredPrbcVolume(valueOf("primeTargetHct"), valueOf("primeBaselineHct"), results.bloodVolumeMl, valueOf("primeVolumeMl"), valueOf("primePrbcHct"));
+    if (results.prbcVolumeMl !== null) {
+      results.projectedHct = calculateProjectedHctAfterPrbc(results.bloodVolumeMl, valueOf("primeBaselineHct"), valueOf("primeVolumeMl"), results.prbcVolumeMl, valueOf("primePrbcHct"));
+    }
+    if (results.predictedHct !== null) results.targetMetWithoutPrbc = results.predictedHct >= valueOf("primeTargetHct");
+  }
+
+  return { fields, results };
+}
+
+const perfusionForm = document.querySelector("#calculator-form");
+const perfusionSummary = document.querySelector("#validationSummary");
+const primeForm = document.querySelector("#prime-form");
+const primeSummary = document.querySelector("#primeValidationSummary");
+const primePresetButtons = Array.from(document.querySelectorAll("[data-prime-preset]"));
+const primePlanCard = document.querySelector("#primePlanCard");
+
+const primePlanElements = {
+  tone: document.querySelector("#primePlanTone"),
+  headline: document.querySelector("#primePlanHeadline"),
+  body: document.querySelector("#primePlanBody"),
+  gapBadge: document.querySelector("#primeGapBadge"),
+  unitsBadge: document.querySelector("#primeUnitsBadge"),
+  ratioBadge: document.querySelector("#primeRatioBadge"),
+};
+
+const perfusionOutputs = perfusionForm
+  ? {
+      bsa: {
+        value: document.querySelector("#bsaOutput"),
+        status: document.querySelector("#bsaStatus"),
+        format: (value) => `${roundTo(value, 2).toFixed(2)} m²`,
+        empty: "Enter height and weight.",
+      },
+      flowRange: {
+        value: document.querySelector("#flowOutput"),
+        status: document.querySelector("#flowStatus"),
+        format: (value) => `${roundTo(value.low, 2).toFixed(2)} to ${roundTo(value.high, 2).toFixed(2)} L/min`,
+        empty: "Enter height and weight to calculate 1.6 to 2.6 L/min/m².",
+      },
+      do2i: {
+        value: document.querySelector("#do2iOutput"),
+        status: document.querySelector("#do2iStatus"),
+        format: (value) => `${Math.round(value)} mL O2/min/m²`,
+        empty: "Enter hemoglobin, SaO2, PaO2, and either CI or pump flow.",
+      },
+      requiredFlow: {
+        value: document.querySelector("#targetFlowOutput"),
+        status: document.querySelector("#targetFlowStatus"),
+        format: (value) => `${roundTo(value, 2).toFixed(2)} L/min`,
+        empty: "Enter BSA, hemoglobin, SaO2, and PaO2.",
+      },
+      requiredCi: {
+        value: document.querySelector("#targetCiOutput"),
+        status: document.querySelector("#targetCiStatus"),
+        format: (value) => `${roundTo(value, 2).toFixed(2)} L/min/m²`,
+        empty: "Enter hemoglobin, SaO2, and PaO2.",
+      },
+      requiredHgb: {
+        value: document.querySelector("#targetHgbOutput"),
+        status: document.querySelector("#targetHgbStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} g/dL`,
+        empty: "Enter current flow or CI, plus oxygenation values.",
+      },
+    }
+  : null;
+
+const primeOutputs = primeForm
+  ? {
+      bloodVolumeMl: {
+        value: document.querySelector("#primeEbvOutput"),
+        status: document.querySelector("#primeEbvStatus"),
+        format: (value) => `${Math.round(value)} mL`,
+        empty: "Enter weight and blood volume factor.",
+      },
+      predictedHct: {
+        value: document.querySelector("#primePredictedHctOutput"),
+        status: document.querySelector("#primePredictedHctStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} %`,
+        empty: "Enter weight, pre-CPB Hct, and prime volume.",
+      },
+      hctDrop: {
+        value: document.querySelector("#primeHctDropOutput"),
+        status: document.querySelector("#primeHctDropStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} %`,
+        empty: "Calculated once pre-CPB Hct and prime volume are entered.",
+      },
+      primeToBloodRatio: {
+        value: document.querySelector("#primeRatioOutput"),
+        status: document.querySelector("#primeRatioStatus"),
+        format: (value) => `${roundTo(value, 2).toFixed(2)} : 1`,
+        empty: "Shows how large the clear prime is relative to estimated blood volume.",
+      },
+      prbcVolumeMl: {
+        value: document.querySelector("#primePrbcNeededOutput"),
+        status: document.querySelector("#primePrbcNeededStatus"),
+        format: (value) => `${Math.round(value)} mL`,
+        empty: "Enter target Hct and PRBC Hct assumptions.",
+      },
+      projectedHct: {
+        value: document.querySelector("#primeProjectedHctOutput"),
+        status: document.querySelector("#primeProjectedHctStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} %`,
+        empty: "Calculated from the estimated PRBC volume.",
+      },
+      redCellDeficitMl: {
+        value: document.querySelector("#primeRedCellDeficitOutput"),
+        status: document.querySelector("#primeRedCellDeficitStatus"),
+        format: (value) => `${Math.round(value)} mL RBC`,
+        empty: "Expressed as the red-cell volume missing before any PRBC is added.",
+      },
+    }
+  : null;
+
+const tabButtons = Array.from(document.querySelectorAll("[data-tab-target]"));
+const tabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
+
+function collectInputs(form) {
+  return Object.fromEntries(new FormData(form).entries());
+}
+
+function formatPrimeUnits(prbcVolumeMl) {
+  if (prbcVolumeMl === null) return "--";
+  if (prbcVolumeMl === 0) return "0 units";
+  return `${roundTo(prbcVolumeMl / 300, 1).toFixed(1)} units`;
+}
+
+function setPrimePlan(state, headline, body) {
+  if (!primePlanCard) return;
+  primePlanCard.dataset.planState = state;
+  primePlanElements.tone.textContent = state === "good" ? "Target covered" : state === "warn" ? "Transfusion likely" : state === "critical" ? "Assumption conflict" : "Planning snapshot";
+  primePlanElements.headline.textContent = headline;
+  primePlanElements.body.textContent = body;
+}
+
+function renderPrimePlan(evaluation) {
+  const { results } = evaluation;
+
+  if (results.predictedHct === null) {
+    setPrimePlan("idle", "Build a dilution estimate", "Enter weight, baseline hematocrit, and prime volume to generate a quick bypass planning summary.");
+    primePlanElements.gapBadge.textContent = "Target gap: --";
+    primePlanElements.unitsBadge.textContent = "Estimated PRBC: --";
+    primePlanElements.ratioBadge.textContent = "Prime ratio: --";
+    return;
+  }
+
+  const targetGap = results.targetHct !== null ? Math.max(0, results.targetHct - results.predictedHct) : null;
+  primePlanElements.gapBadge.textContent = targetGap === null ? "Target gap: --" : `Target gap: ${roundTo(targetGap, 1).toFixed(1)} %`;
+  primePlanElements.unitsBadge.textContent = `Estimated PRBC: ${results.prbcVolumeMl === null ? "--" : `${Math.round(results.prbcVolumeMl)} mL (${formatPrimeUnits(results.prbcVolumeMl)})`}`;
+  primePlanElements.ratioBadge.textContent = results.primeToBloodRatio === null ? "Prime ratio: --" : `Prime ratio: ${roundTo(results.primeToBloodRatio, 2).toFixed(2)} : 1`;
+
+  if (results.targetMetWithoutPrbc) {
+    setPrimePlan("good", "Clear prime already stays at or above target", `Predicted post-prime hematocrit is ${roundTo(results.predictedHct, 1).toFixed(1)}%, so no added PRBC volume is needed with the current assumptions.`);
+    return;
+  }
+
+  if (results.prbcTargetReachable === false) {
+    setPrimePlan("critical", "Current PRBC assumption cannot reach the target", "Raise the assumed PRBC hematocrit or lower the target on-pump hematocrit to generate a reachable transfusion estimate.");
+    return;
+  }
+
+  if (results.prbcVolumeMl !== null && results.projectedHct !== null) {
+    setPrimePlan("warn", "Prime plan suggests adding PRBC before bypass", `Estimated PRBC volume is ${Math.round(results.prbcVolumeMl)} mL, which projects an on-pump hematocrit of ${roundTo(results.projectedHct, 1).toFixed(1)}% under the current assumptions.`);
+    return;
+  }
+
+  setPrimePlan("idle", "Complete the remaining target assumptions", "Add a target on-pump hematocrit and PRBC hematocrit assumption to finish the dilution planning summary.");
+}
+
+function syncPrimePresetState() {
+  if (!primeForm) return;
+  primePresetButtons.forEach((button) => {
+    const isActive = primeForm.elements.namedItem("primeEbvFactor").value === button.dataset.primeEbvFactor
+      && primeForm.elements.namedItem("primeTargetHct").value === button.dataset.primeTargetHct
+      && primeForm.elements.namedItem("primePrbcHct").value === button.dataset.primePrbcHct;
+    button.classList.toggle("is-active", isActive);
+  });
+}
+
+function updateFormInvalidState(form, fields, summaryElement) {
+  const invalidMessages = [];
+
+  for (const element of form.elements) {
+    if (!(element instanceof HTMLInputElement)) {
+      continue;
+    }
+
+    const fieldState = fields[element.name];
+    const isInvalid = Boolean(fieldState && !fieldState.valid && element.value !== "");
+    element.setAttribute("aria-invalid", String(isInvalid));
+
+    if (isInvalid) {
+      invalidMessages.push(fieldState.message);
+    }
+  }
+
+  summaryElement.textContent = invalidMessages[0] ?? "";
+}
+
+function formatDelta(value, unit) {
+  const rounded = roundTo(Math.abs(value), unit === "g/dL" ? 1 : 2);
+
+  if (value === 0) {
+    return "No change needed";
+  }
+
+  const direction = value > 0 ? "Increase by" : "Decrease by";
+  return `${direction} ${unit === "g/dL" ? rounded.toFixed(1) : rounded.toFixed(2)} ${unit}`;
+}
+
+function activateTab(groupName, targetName) {
+  tabButtons
+    .filter((button) => button.dataset.tabGroup === groupName)
+    .forEach((button) => {
+      const isActive = button.dataset.tabTarget === targetName;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", String(isActive));
+      button.tabIndex = isActive ? 0 : -1;
+    });
+
+  tabPanels
+    .filter((panel) => panel.dataset.tabGroup === groupName)
+    .forEach((panel) => {
+      const isActive = panel.dataset.tabPanel === targetName;
+      panel.classList.toggle("is-active", isActive);
+      panel.hidden = !isActive;
+    });
+}
+
+function handleTabKeydown(event) {
+  const groupName = event.currentTarget.dataset.tabGroup;
+  const groupButtons = tabButtons.filter((button) => button.dataset.tabGroup === groupName);
+  const currentIndex = groupButtons.indexOf(event.currentTarget);
+
+  if (currentIndex === -1) {
+    return;
+  }
+
+  let nextIndex = null;
+
+  if (event.key === "ArrowRight") {
+    nextIndex = (currentIndex + 1) % groupButtons.length;
+  } else if (event.key === "ArrowLeft") {
+    nextIndex = (currentIndex - 1 + groupButtons.length) % groupButtons.length;
+  } else if (event.key === "Home") {
+    nextIndex = 0;
+  } else if (event.key === "End") {
+    nextIndex = groupButtons.length - 1;
+  }
+
+  if (nextIndex === null) {
+    return;
+  }
+
+  event.preventDefault();
+  const nextButton = groupButtons[nextIndex];
+  activateTab(groupName, nextButton.dataset.tabTarget);
+  nextButton.focus();
+}
+
+function renderPerfusion() {
+  const evaluation = evaluateCalculator(collectInputs(perfusionForm));
+  updateFormInvalidState(perfusionForm, evaluation.fields, perfusionSummary);
+
+  if (evaluation.results.bsa !== null) {
+    perfusionOutputs.bsa.value.textContent = perfusionOutputs.bsa.format(evaluation.results.bsa);
+    perfusionOutputs.bsa.status.textContent = "Calculation ready.";
+  } else {
+    perfusionOutputs.bsa.value.textContent = "--";
+    perfusionOutputs.bsa.status.textContent = perfusionOutputs.bsa.empty;
+  }
+
+  if (evaluation.results.flowRange !== null) {
+    perfusionOutputs.flowRange.value.textContent = perfusionOutputs.flowRange.format(evaluation.results.flowRange);
+    perfusionOutputs.flowRange.status.textContent = "Based on 1.6 to 2.6 L/min/m².";
+  } else {
+    perfusionOutputs.flowRange.value.textContent = "--";
+    perfusionOutputs.flowRange.status.textContent = perfusionOutputs.flowRange.empty;
+  }
+
+  if (evaluation.results.do2i !== null) {
+    perfusionOutputs.do2i.value.textContent = perfusionOutputs.do2i.format(evaluation.results.do2i);
+    const source = evaluation.results.do2iSource === "pump flow" ? "pump flow/BSA" : "cardiac index";
+    const threshold = evaluation.results.do2iThresholdMet ? "above" : "below";
+    perfusionOutputs.do2i.status.textContent = `Using ${source}. Current DO2i is ${threshold} target ${Math.round(evaluation.results.do2iTarget)}.`;
+  } else {
+    perfusionOutputs.do2i.value.textContent = "--";
+
+    if (!evaluation.results.bsa && evaluation.fields.pumpFlow.valid) {
+      perfusionOutputs.do2i.status.textContent = "Height and weight are needed to use pump flow for DO2i.";
+    } else if (!evaluation.fields.cardiacIndex.valid && !evaluation.fields.pumpFlow.valid) {
+      perfusionOutputs.do2i.status.textContent = "Enter either cardiac index or pump flow.";
+    } else {
+      perfusionOutputs.do2i.status.textContent = perfusionOutputs.do2i.empty;
+    }
+  }
+
+  if (evaluation.results.requiredFlow !== null) {
+    perfusionOutputs.requiredFlow.value.textContent = perfusionOutputs.requiredFlow.format(evaluation.results.requiredFlow);
+
+    if (evaluation.results.currentFlow !== null) {
+      perfusionOutputs.requiredFlow.status.textContent = `${formatDelta(evaluation.results.requiredFlow - evaluation.results.currentFlow, "L/min")} from current flow.`;
+    } else {
+      perfusionOutputs.requiredFlow.status.textContent = "Target flow derived from target CI and BSA.";
+    }
+  } else {
+    perfusionOutputs.requiredFlow.value.textContent = "--";
+    perfusionOutputs.requiredFlow.status.textContent = perfusionOutputs.requiredFlow.empty;
+  }
+
+  if (evaluation.results.requiredCi !== null) {
+    perfusionOutputs.requiredCi.value.textContent = perfusionOutputs.requiredCi.format(evaluation.results.requiredCi);
+
+    if (evaluation.results.effectiveCi !== null) {
+      perfusionOutputs.requiredCi.status.textContent = `${formatDelta(evaluation.results.requiredCi - evaluation.results.effectiveCi, "L/min/m²")} from current effective CI.`;
+    } else {
+      perfusionOutputs.requiredCi.status.textContent = "Target based on current Hgb, SaO2, and PaO2.";
+    }
+  } else {
+    perfusionOutputs.requiredCi.value.textContent = "--";
+    perfusionOutputs.requiredCi.status.textContent = perfusionOutputs.requiredCi.empty;
+  }
+
+  if (evaluation.results.requiredHgb !== null) {
+    perfusionOutputs.requiredHgb.value.textContent = perfusionOutputs.requiredHgb.format(evaluation.results.requiredHgb);
+    perfusionOutputs.requiredHgb.status.textContent = `${formatDelta(evaluation.results.requiredHgb - evaluation.results.currentHgb, "g/dL")} from current Hgb.`;
+  } else {
+    perfusionOutputs.requiredHgb.value.textContent = "--";
+
+    if (!evaluation.fields.cardiacIndex.valid && !evaluation.fields.pumpFlow.valid) {
+      perfusionOutputs.requiredHgb.status.textContent = "Enter either cardiac index or pump flow to solve for Hgb.";
+    } else {
+      perfusionOutputs.requiredHgb.status.textContent = perfusionOutputs.requiredHgb.empty;
+    }
+  }
+}
+
+function renderPrime() {
+  const evaluation = evaluatePrimeCalculator(collectInputs(primeForm));
+  updateFormInvalidState(primeForm, evaluation.fields, primeSummary);
+  renderPrimePlan(evaluation);
+  syncPrimePresetState();
+
+  if (evaluation.results.bloodVolumeMl !== null) {
+    primeOutputs.bloodVolumeMl.value.textContent = primeOutputs.bloodVolumeMl.format(evaluation.results.bloodVolumeMl);
+    primeOutputs.bloodVolumeMl.status.textContent = "Estimated as weight × blood volume factor.";
+  } else {
+    primeOutputs.bloodVolumeMl.value.textContent = "--";
+    primeOutputs.bloodVolumeMl.status.textContent = primeOutputs.bloodVolumeMl.empty;
+  }
+
+  if (evaluation.results.predictedHct !== null) {
+    primeOutputs.predictedHct.value.textContent = primeOutputs.predictedHct.format(evaluation.results.predictedHct);
+
+    if (evaluation.results.targetHct !== null) {
+      const threshold = evaluation.results.predictedHct >= evaluation.results.targetHct ? "meets" : "is below";
+      primeOutputs.predictedHct.status.textContent = `Predicted post-prime Hct ${threshold} the current target.`;
+    } else {
+      primeOutputs.predictedHct.status.textContent = "Assumes a clear prime before PRBC addition.";
+    }
+  } else {
+    primeOutputs.predictedHct.value.textContent = "--";
+    primeOutputs.predictedHct.status.textContent = primeOutputs.predictedHct.empty;
+  }
+
+  if (evaluation.results.hctDrop !== null) {
+    primeOutputs.hctDrop.value.textContent = primeOutputs.hctDrop.format(evaluation.results.hctDrop);
+    primeOutputs.hctDrop.status.textContent = "Difference between baseline and diluted hematocrit.";
+  } else {
+    primeOutputs.hctDrop.value.textContent = "--";
+    primeOutputs.hctDrop.status.textContent = primeOutputs.hctDrop.empty;
+  }
+
+  if (evaluation.results.primeToBloodRatio !== null) {
+    primeOutputs.primeToBloodRatio.value.textContent = primeOutputs.primeToBloodRatio.format(evaluation.results.primeToBloodRatio);
+    primeOutputs.primeToBloodRatio.status.textContent = "Higher ratios indicate more dilution from the clear prime.";
+  } else {
+    primeOutputs.primeToBloodRatio.value.textContent = "--";
+    primeOutputs.primeToBloodRatio.status.textContent = primeOutputs.primeToBloodRatio.empty;
+  }
+
+  if (evaluation.results.prbcVolumeMl !== null) {
+    primeOutputs.prbcVolumeMl.value.textContent = primeOutputs.prbcVolumeMl.format(evaluation.results.prbcVolumeMl);
+
+    if (evaluation.results.targetMetWithoutPrbc) {
+      primeOutputs.prbcVolumeMl.status.textContent = "Predicted Hct already meets target; no added PRBC volume needed.";
+    } else {
+      primeOutputs.prbcVolumeMl.status.textContent = "Exact mass-balance estimate using the selected PRBC hematocrit.";
+    }
+  } else {
+    primeOutputs.prbcVolumeMl.value.textContent = "--";
+    if (evaluation.results.prbcTargetReachable === false) {
+      primeOutputs.prbcVolumeMl.status.textContent = "Target cannot be reached when PRBC hematocrit is at or below the selected target Hct.";
+    } else {
+      primeOutputs.prbcVolumeMl.status.textContent = primeOutputs.prbcVolumeMl.empty;
+    }
+  }
+
+  if (evaluation.results.projectedHct !== null) {
+    primeOutputs.projectedHct.value.textContent = primeOutputs.projectedHct.format(evaluation.results.projectedHct);
+    primeOutputs.projectedHct.status.textContent = "Checks the resulting Hct after the estimated PRBC addition.";
+  } else {
+    primeOutputs.projectedHct.value.textContent = "--";
+    if (evaluation.results.prbcTargetReachable === false) {
+      primeOutputs.projectedHct.status.textContent = "Choose a PRBC hematocrit above the target to project a reachable result.";
+    } else {
+      primeOutputs.projectedHct.status.textContent = primeOutputs.projectedHct.empty;
+    }
+  }
+
+  if (evaluation.results.redCellDeficitMl !== null) {
+    primeOutputs.redCellDeficitMl.value.textContent = primeOutputs.redCellDeficitMl.format(evaluation.results.redCellDeficitMl);
+
+    if (evaluation.results.targetMetWithoutPrbc) {
+      primeOutputs.redCellDeficitMl.status.textContent = "No red-cell deficit remains at the selected target.";
+    } else {
+      primeOutputs.redCellDeficitMl.status.textContent = "Red-cell volume gap before accounting for PRBC product concentration.";
+    }
+  } else {
+    primeOutputs.redCellDeficitMl.value.textContent = "--";
+    primeOutputs.redCellDeficitMl.status.textContent = primeOutputs.redCellDeficitMl.empty;
+  }
+}
+
+tabButtons.forEach((button) => {
+  button.addEventListener("click", () => activateTab(button.dataset.tabGroup, button.dataset.tabTarget));
+  button.addEventListener("keydown", handleTabKeydown);
+});
+
+if (perfusionForm) {
+  perfusionForm.addEventListener("input", renderPerfusion);
+  perfusionForm.addEventListener("change", renderPerfusion);
+  renderPerfusion();
+}
+
+if (primeForm) {
+  primeForm.addEventListener("input", renderPrime);
+  primeForm.addEventListener("change", renderPrime);
+  primePresetButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      primeForm.elements.namedItem("primeEbvFactor").value = button.dataset.primeEbvFactor;
+      primeForm.elements.namedItem("primeTargetHct").value = button.dataset.primeTargetHct;
+      primeForm.elements.namedItem("primePrbcHct").value = button.dataset.primePrbcHct;
+      renderPrime();
+    });
+  });
+  renderPrime();
+}

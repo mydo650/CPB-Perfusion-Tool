@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPB Prime Planner</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Simulation Support Tool</p>
+        <h1>CPB Prime Planner</h1>
+        <p class="intro">
+          Review dilution assumptions, estimate target hematocrit after clear
+          prime, and turn prime-planning math into a quick transfusion plan.
+        </p>
+      </section>
+
+      <nav class="module-switcher page-switcher" aria-label="Website pages">
+        <a class="module-button page-link" href="./index.html" aria-current="false">Home</a>
+        <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
+        <a class="module-button page-link is-active" href="./prime.html" aria-current="page">Prime</a>
+      </nav>
+
+      <section class="workspace page-workspace" aria-label="Prime calculator">
+        <section class="panel input-panel" aria-labelledby="prime-inputs-title">
+          <div class="panel-header">
+            <h2 id="prime-inputs-title">Prime Inputs</h2>
+            <p>Adult-default assumptions are editable so the math stays transparent.</p>
+          </div>
+          <section class="assumption-strip" aria-labelledby="prime-presets-title">
+            <div class="assumption-strip-header">
+              <h3 id="prime-presets-title">Quick Assumptions</h3>
+              <p>Use a preset to swap the editable planning assumptions without touching patient-specific inputs.</p>
+            </div>
+            <div class="assumption-chip-row">
+              <button type="button" class="assumption-chip is-active" data-prime-preset data-prime-ebv-factor="70" data-prime-target-hct="24" data-prime-prbc-hct="60">Adult default</button>
+              <button type="button" class="assumption-chip" data-prime-preset data-prime-ebv-factor="70" data-prime-target-hct="28" data-prime-prbc-hct="60">Higher target</button>
+              <button type="button" class="assumption-chip" data-prime-preset data-prime-ebv-factor="80" data-prime-target-hct="24" data-prime-prbc-hct="65">Higher EBV / richer PRBC</button>
+            </div>
+          </section>
+          <form id="prime-form" novalidate>
+            <div class="field-grid">
+              <label class="field"><span>Weight</span><div class="input-wrap"><input id="primeWeightKg" name="primeWeightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" autofocus /><span class="unit">kg</span></div><small class="hint">Used to estimate blood volume</small></label>
+              <label class="field"><span>Estimated Blood Volume Factor</span><div class="input-wrap"><input id="primeEbvFactor" name="primeEbvFactor" type="number" inputmode="decimal" min="40" max="100" step="1" value="70" autocomplete="off" /><span class="unit">mL/kg</span></div><small class="hint">Adult default; adjust to local protocol</small></label>
+              <label class="field"><span>Pre-CPB Hematocrit</span><div class="input-wrap"><input id="primeBaselineHct" name="primeBaselineHct" type="number" inputmode="decimal" min="10" max="70" step="0.1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Patient hematocrit before clear-prime dilution</small></label>
+              <label class="field"><span>Prime Volume</span><div class="input-wrap"><input id="primeVolumeMl" name="primeVolumeMl" type="number" inputmode="decimal" min="50" max="3000" step="1" autocomplete="off" /><span class="unit">mL</span></div><small class="hint">Circuit prime or total diluting clear volume</small></label>
+              <label class="field"><span>Target On-Pump Hematocrit</span><div class="input-wrap"><input id="primeTargetHct" name="primeTargetHct" type="number" inputmode="decimal" min="10" max="50" step="0.1" value="24" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Editable target threshold for prime planning</small></label>
+              <label class="field"><span>PRBC Hematocrit</span><div class="input-wrap"><input id="primePrbcHct" name="primePrbcHct" type="number" inputmode="decimal" min="40" max="90" step="1" value="60" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Default packed-cell hematocrit assumption</small></label>
+            </div>
+          </form>
+          <div id="primeValidationSummary" class="validation-summary" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel output-panel" aria-labelledby="prime-results-title">
+          <div class="panel-header">
+            <h2 id="prime-results-title">Prime Results</h2>
+            <p>Designed for dilution planning before bypass or when revisiting the prime.</p>
+          </div>
+          <section class="prime-plan-card" id="primePlanCard" data-plan-state="idle" aria-live="polite">
+            <div class="prime-plan-header">
+              <p class="prime-plan-kicker" id="primePlanTone">Planning snapshot</p>
+              <h3 id="primePlanHeadline">Build a dilution estimate</h3>
+            </div>
+            <p class="prime-plan-body" id="primePlanBody">Enter weight, baseline hematocrit, and prime volume to generate a quick bypass planning summary.</p>
+            <div class="prime-plan-badges">
+              <span class="prime-badge" id="primeGapBadge">Target gap: --</span>
+              <span class="prime-badge" id="primeUnitsBadge">Estimated PRBC: --</span>
+              <span class="prime-badge" id="primeRatioBadge">Prime ratio: --</span>
+            </div>
+          </section>
+          <div class="results-grid">
+            <article class="result-card"><p class="result-label">Estimated Blood Volume</p><output id="primeEbvOutput" class="result-value">--</output><p id="primeEbvStatus" class="result-status">Enter weight and blood volume factor.</p></article>
+            <article class="result-card accent-card"><p class="result-label">Predicted Post-Prime Hct</p><output id="primePredictedHctOutput" class="result-value">--</output><p id="primePredictedHctStatus" class="result-status">Enter weight, pre-CPB Hct, and prime volume.</p></article>
+            <article class="result-card"><p class="result-label">Hct Drop From Baseline</p><output id="primeHctDropOutput" class="result-value">--</output><p id="primeHctDropStatus" class="result-status">Calculated once pre-CPB Hct and prime volume are entered.</p></article>
+            <article class="result-card"><p class="result-label">Prime To Blood Volume Ratio</p><output id="primeRatioOutput" class="result-value">--</output><p id="primeRatioStatus" class="result-status">Shows how large the clear prime is relative to estimated blood volume.</p></article>
+            <article class="result-card"><p class="result-label">PRBC Volume To Reach Target</p><output id="primePrbcNeededOutput" class="result-value">--</output><p id="primePrbcNeededStatus" class="result-status">Enter target Hct and PRBC Hct assumptions.</p></article>
+            <article class="result-card"><p class="result-label">Projected Hct After Added PRBC</p><output id="primeProjectedHctOutput" class="result-value">--</output><p id="primeProjectedHctStatus" class="result-status">Calculated from the estimated PRBC volume.</p></article>
+            <article class="result-card"><p class="result-label">Red Cell Deficit To Target</p><output id="primeRedCellDeficitOutput" class="result-value">--</output><p id="primeRedCellDeficitStatus" class="result-status">Expressed as the red-cell volume missing before any PRBC is added.</p></article>
+          </div>
+
+          <section class="info-tabs" aria-labelledby="prime-support-title">
+            <div class="panel-header tabs-header">
+              <h3 id="prime-support-title">Support Material</h3>
+              <div class="tab-list" role="tablist" aria-label="Prime support material">
+                <button type="button" class="tab-button is-active" id="tab-button-prime-calculations" role="tab" aria-selected="true" aria-controls="tab-panel-prime-calculations" data-tab-group="prime-support" data-tab-target="calculations">Calculations</button>
+                <button type="button" class="tab-button" id="tab-button-prime-references" role="tab" aria-selected="false" aria-controls="tab-panel-prime-references" data-tab-group="prime-support" data-tab-target="references" tabindex="-1">References</button>
+              </div>
+            </div>
+            <section class="formula-panel tab-panel is-active" id="tab-panel-prime-calculations" role="tabpanel" aria-labelledby="tab-button-prime-calculations" data-tab-group="prime-support" data-tab-panel="calculations">
+              <dl class="formula-list">
+                <div><dt>Estimated Blood Volume</dt><dd>weight (kg) &times; blood volume factor (mL/kg)</dd></div>
+                <div><dt>Predicted Post-Prime Hct</dt><dd>(estimated blood volume &times; pre-CPB Hct) / (estimated blood volume + prime volume)</dd></div>
+                <div><dt>Hct Drop</dt><dd>pre-CPB Hct - predicted post-prime Hct</dd></div>
+                <div><dt>Prime : Blood Ratio</dt><dd>prime volume / estimated blood volume</dd></div>
+                <div><dt>PRBC Volume Needed</dt><dd>Exact mass-balance solution using target Hct, current red-cell mass, total diluted volume, and assumed PRBC hematocrit</dd></div>
+                <div><dt>Red Cell Deficit</dt><dd>Target red-cell volume after dilution - current red-cell volume before added PRBC</dd></div>
+              </dl>
+              <p class="formula-note">This tab assumes a clear prime and uses a configurable adult-default blood volume factor of 70 mL/kg. If your prime strategy or patient population differs, change the assumptions before using the result.</p>
+              <p class="disclaimer">Prime calculations are decision-support only and do not replace local transfusion policy, product labeling, or clinician judgment.</p>
+            </section>
+            <section class="formula-panel references-panel tab-panel" id="tab-panel-prime-references" role="tabpanel" aria-labelledby="tab-button-prime-references" data-tab-group="prime-support" data-tab-panel="references" hidden>
+              <ol class="references-list">
+                <li>Asopa S, Elahi M. Hemodilution during cardiopulmonary bypass: optimal hematocrit for safe outcome. <em>Acute Card Care.</em> 2007;9(1):63-64. <a href="https://pubmed.ncbi.nlm.nih.gov/17453543/" target="_blank" rel="noreferrer">PubMed</a></li>
+                <li>Ranucci M, Carboni G, Cotza M, et al. Hemodilution on cardiopulmonary bypass as a determinant of early postoperative hyperlactatemia. <em>PLoS One.</em> 2015;10(5):e0126939. <a href="https://pubmed.ncbi.nlm.nih.gov/25992896/" target="_blank" rel="noreferrer">PubMed</a></li>
+                <li>Blood-volume factor and PRBC hematocrit are editable because these are practice-dependent assumptions rather than universal constants.</li>
+              </ol>
+            </section>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
