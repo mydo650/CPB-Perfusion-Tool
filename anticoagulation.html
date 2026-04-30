@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPB Anticoagulation Support</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Simulation Support Tool</p>
+        <h1>CPB Anticoagulation Support</h1>
+        <p class="intro">
+          Estimate a heparin loading dose and protamine reversal dose from the
+          shared patient weight so anticoagulation planning stays in the same
+          workflow as the rest of the support tool.
+        </p>
+      </section>
+
+      <nav class="module-switcher page-switcher" aria-label="Website pages">
+        <a class="module-button page-link" href="./index.html" aria-current="false">Home</a>
+        <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
+        <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
+        <a class="module-button page-link is-active" href="./anticoagulation.html" aria-current="page">Anticoagulation</a>
+      </nav>
+
+      <section class="workspace page-workspace" aria-label="Anticoagulation calculator">
+        <section class="panel input-panel" aria-labelledby="anticoag-inputs-title">
+          <div class="panel-header">
+            <h2 id="anticoag-inputs-title">Anticoagulation Inputs</h2>
+            <p>Weight is shared across tabs. Dosing assumptions stay editable so the math is transparent.</p>
+          </div>
+          <form id="anticoag-form" novalidate>
+            <div class="field-grid">
+              <label class="field"><span>Weight</span><div class="input-wrap"><input id="anticoagWeightKg" name="anticoagWeightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" autofocus /><span class="unit">kg</span></div><small class="hint">Shared from other tabs when already entered</small></label>
+              <label class="field"><span>Heparin Loading Dose</span><div class="input-wrap"><input id="heparinDosePerKg" name="heparinDosePerKg" type="number" inputmode="decimal" min="50" max="1000" step="1" value="300" autocomplete="off" /><span class="unit">units/kg</span></div><small class="hint">Editable assumption for the initial loading dose</small></label>
+              <label class="field"><span>Protamine Reversal Ratio</span><div class="input-wrap"><input id="protamineRatioMgPer100U" name="protamineRatioMgPer100U" type="number" inputmode="decimal" min="0.1" max="5" step="0.1" value="1" autocomplete="off" /><span class="unit">mg / 100 units</span></div><small class="hint">Default 1 mg protamine per 100 units heparin</small></label>
+            </div>
+          </form>
+          <div id="anticoagValidationSummary" class="validation-summary" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel output-panel" aria-labelledby="anticoag-results-title">
+          <div class="panel-header">
+            <h2 id="anticoag-results-title">Anticoagulation Results</h2>
+            <p>Focused on quick loading and reversal estimates for the current workflow.</p>
+          </div>
+          <div class="results-grid results-grid-compact">
+            <article class="result-card accent-card"><p class="result-label">Heparin Loading Dose</p><output id="heparinLoadingOutput" class="result-value">--</output><p id="heparinLoadingStatus" class="result-status">Enter weight and a heparin units/kg assumption.</p></article>
+            <article class="result-card"><p class="result-label">Protamine Reversal Dose</p><output id="protamineDoseOutput" class="result-value">--</output><p id="protamineDoseStatus" class="result-status">Calculated from the estimated heparin loading dose.</p></article>
+          </div>
+
+          <section class="info-tabs" aria-labelledby="anticoag-support-title">
+            <div class="panel-header tabs-header">
+              <h3 id="anticoag-support-title">Support Material</h3>
+              <div class="tab-list" role="tablist" aria-label="Anticoagulation support material">
+                <button type="button" class="tab-button is-active" id="tab-button-anticoag-calculations" role="tab" aria-selected="true" aria-controls="tab-panel-anticoag-calculations" data-tab-group="anticoag-support" data-tab-target="calculations">Calculations</button>
+                <button type="button" class="tab-button" id="tab-button-anticoag-references" role="tab" aria-selected="false" aria-controls="tab-panel-anticoag-references" data-tab-group="anticoag-support" data-tab-target="references" tabindex="-1">References</button>
+              </div>
+            </div>
+            <section class="formula-panel tab-panel is-active" id="tab-panel-anticoag-calculations" role="tabpanel" aria-labelledby="tab-button-anticoag-calculations" data-tab-group="anticoag-support" data-tab-panel="calculations">
+              <dl class="formula-list">
+                <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
+                <div><dt>Protamine Reversal Dose</dt><dd>(estimated heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>
+              </dl>
+              <p class="formula-note">This page currently estimates loading and reversal doses from weight-based assumptions only. It does not yet account for supplemental heparin boluses, ACT response, heparin concentration assays, or elapsed time since dosing.</p>
+              <p class="disclaimer">Decision-support for simulation and workflow use only. Confirm local anticoagulation protocols and product labeling before clinical application.</p>
+            </section>
+            <section class="formula-panel references-panel tab-panel" id="tab-panel-anticoag-references" role="tabpanel" aria-labelledby="tab-button-anticoag-references" data-tab-group="anticoag-support" data-tab-panel="references" hidden>
+              <ol class="references-list">
+                <li>American Society of ExtraCorporeal Technology. AmSECT standards and guidelines for perfusion practice. <a href="https://amsect.org/Policy-Practice/AmSECTs-Standards-and-Guidelines" target="_blank" rel="noreferrer">AmSECT</a></li>
+                <li>Default dosing assumptions are editable because anticoagulation strategies vary by institution, patient response, and clinician protocol.</li>
+              </ol>
+            </section>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

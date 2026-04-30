@@ -18,6 +18,12 @@ const PRIME_FIELD_CONFIG = {
   primePrbcHct: { label: "PRBC hematocrit", min: 40, max: 90, allowZero: false },
 };
 
+const ANTICOAG_FIELD_CONFIG = {
+  anticoagWeightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
+  heparinDosePerKg: { label: "Heparin loading dose", min: 50, max: 1000, allowZero: false },
+  protamineRatioMgPer100U: { label: "Protamine ratio", min: 0.1, max: 5, allowZero: false },
+};
+
 export function roundTo(value, decimals) {
   const factor = 10 ** decimals;
   return Math.round((value + Number.EPSILON) * factor) / factor;
@@ -52,6 +58,10 @@ export function validatePerfusionField(name, rawValue) {
 
 export function validatePrimeField(name, rawValue) {
   return validateField(PRIME_FIELD_CONFIG, name, rawValue);
+}
+
+export function validateAnticoagField(name, rawValue) {
+  return validateField(ANTICOAG_FIELD_CONFIG, name, rawValue);
 }
 
 export function calculateBsa(heightCm, weightKg) {
@@ -118,6 +128,14 @@ export function calculateRedCellDeficitToTarget(targetHctPercent, baselineHctPer
   const targetRedCellVolumeMl = (targetHctPercent / 100) * (bloodVolumeMl + primeVolumeMl);
   const currentRedCellVolumeMl = (baselineHctPercent / 100) * bloodVolumeMl;
   return Math.max(0, targetRedCellVolumeMl - currentRedCellVolumeMl);
+}
+
+export function calculateHeparinLoadingDose(weightKg, heparinDosePerKg) {
+  return weightKg * heparinDosePerKg;
+}
+
+export function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
+  return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
 
 export function evaluateCalculator(rawInputs) {
@@ -225,6 +243,30 @@ export function evaluatePrimeCalculator(rawInputs) {
       results.projectedHct = calculateProjectedHctAfterPrbc(results.bloodVolumeMl, valueOf("primeBaselineHct"), valueOf("primeVolumeMl"), results.prbcVolumeMl, valueOf("primePrbcHct"));
     }
     if (results.predictedHct !== null) results.targetMetWithoutPrbc = results.predictedHct >= valueOf("primeTargetHct");
+  }
+
+  return { fields, results };
+}
+
+export function evaluateAnticoagulationCalculator(rawInputs) {
+  const fields = {};
+  Object.keys(ANTICOAG_FIELD_CONFIG).forEach((name) => {
+    fields[name] = validateAnticoagField(name, rawInputs[name]);
+  });
+
+  const valid = (name) => fields[name].valid;
+  const valueOf = (name) => fields[name].value;
+  const results = {
+    heparinLoadingUnits: null,
+    protamineDoseMg: null,
+  };
+
+  if (valid("anticoagWeightKg") && valid("heparinDosePerKg")) {
+    results.heparinLoadingUnits = calculateHeparinLoadingDose(valueOf("anticoagWeightKg"), valueOf("heparinDosePerKg"));
+  }
+
+  if (results.heparinLoadingUnits !== null && valid("protamineRatioMgPer100U")) {
+    results.protamineDoseMg = calculateProtamineDose(results.heparinLoadingUnits, valueOf("protamineRatioMgPer100U"));
   }
 
   return { fields, results };

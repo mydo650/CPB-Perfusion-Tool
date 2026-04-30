@@ -18,9 +18,78 @@ const PRIME_FIELD_CONFIG = {
   primePrbcHct: { label: "PRBC hematocrit", min: 40, max: 90, allowZero: false },
 };
 
+const ANTICOAG_FIELD_CONFIG = {
+  anticoagWeightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
+  heparinDosePerKg: { label: "Heparin loading dose", min: 50, max: 1000, allowZero: false },
+  protamineRatioMgPer100U: { label: "Protamine ratio", min: 0.1, max: 5, allowZero: false },
+};
+
+const SHARED_FIELD_GROUPS = {
+  patientWeightKg: ["weightKg", "primeWeightKg", "anticoagWeightKg"],
+  patientHeightCm: ["heightCm"],
+};
+
+const SHARED_FIELD_STORAGE_KEY = "cpbSupportSharedFields";
+
 function roundTo(value, decimals) {
   const factor = 10 ** decimals;
   return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
+function readSharedFieldState() {
+  try {
+    return JSON.parse(window.localStorage.getItem(SHARED_FIELD_STORAGE_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+function writeSharedFieldState(nextState) {
+  try {
+    window.localStorage.setItem(SHARED_FIELD_STORAGE_KEY, JSON.stringify(nextState));
+  } catch {
+    // Ignore storage failures so calculators still work in restrictive browsers.
+  }
+}
+
+function findSharedGroupForField(fieldName) {
+  return Object.entries(SHARED_FIELD_GROUPS).find(([, fieldNames]) => fieldNames.includes(fieldName)) ?? null;
+}
+
+function hydrateSharedFields(form) {
+  if (!form) return;
+
+  const sharedState = readSharedFieldState();
+
+  Object.entries(SHARED_FIELD_GROUPS).forEach(([groupName, fieldNames]) => {
+    const storedValue = sharedState[groupName];
+    if (storedValue === undefined || storedValue === null || storedValue === "") return;
+
+    fieldNames.forEach((fieldName) => {
+      const field = form.elements.namedItem(fieldName);
+      if (field instanceof HTMLInputElement && field.value === "") {
+        field.value = storedValue;
+      }
+    });
+  });
+}
+
+function syncSharedFieldValue(input) {
+  if (!(input instanceof HTMLInputElement) || !input.name) return;
+
+  const sharedGroup = findSharedGroupForField(input.name);
+  if (!sharedGroup) return;
+
+  const [groupName] = sharedGroup;
+  const sharedState = readSharedFieldState();
+
+  if (input.value === "") {
+    delete sharedState[groupName];
+  } else {
+    sharedState[groupName] = input.value;
+  }
+
+  writeSharedFieldState(sharedState);
 }
 
 function validateField(configMap, name, rawValue) {
@@ -110,6 +179,14 @@ function calculateRedCellDeficitToTarget(targetHctPercent, baselineHctPercent, b
   const targetRedCellVolumeMl = (targetHctPercent / 100) * (bloodVolumeMl + primeVolumeMl);
   const currentRedCellVolumeMl = (baselineHctPercent / 100) * bloodVolumeMl;
   return Math.max(0, targetRedCellVolumeMl - currentRedCellVolumeMl);
+}
+
+function calculateHeparinLoadingDose(weightKg, heparinDosePerKg) {
+  return weightKg * heparinDosePerKg;
+}
+
+function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
+  return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
 
 function evaluateCalculator(rawInputs) {
@@ -219,10 +296,36 @@ function evaluatePrimeCalculator(rawInputs) {
   return { fields, results };
 }
 
+function evaluateAnticoagulationCalculator(rawInputs) {
+  const fields = {};
+  Object.keys(ANTICOAG_FIELD_CONFIG).forEach((name) => {
+    fields[name] = validateField(ANTICOAG_FIELD_CONFIG, name, rawInputs[name]);
+  });
+
+  const valid = (name) => fields[name].valid;
+  const valueOf = (name) => fields[name].value;
+  const results = {
+    heparinLoadingUnits: null,
+    protamineDoseMg: null,
+  };
+
+  if (valid("anticoagWeightKg") && valid("heparinDosePerKg")) {
+    results.heparinLoadingUnits = calculateHeparinLoadingDose(valueOf("anticoagWeightKg"), valueOf("heparinDosePerKg"));
+  }
+
+  if (results.heparinLoadingUnits !== null && valid("protamineRatioMgPer100U")) {
+    results.protamineDoseMg = calculateProtamineDose(results.heparinLoadingUnits, valueOf("protamineRatioMgPer100U"));
+  }
+
+  return { fields, results };
+}
+
 const perfusionForm = document.querySelector("#calculator-form");
 const perfusionSummary = document.querySelector("#validationSummary");
 const primeForm = document.querySelector("#prime-form");
 const primeSummary = document.querySelector("#primeValidationSummary");
+const anticoagForm = document.querySelector("#anticoag-form");
+const anticoagSummary = document.querySelector("#anticoagValidationSummary");
 const primePresetButtons = Array.from(document.querySelectorAll("[data-prime-preset]"));
 const primePlanCard = document.querySelector("#primePlanCard");
 
@@ -319,6 +422,23 @@ const primeOutputs = primeForm
         status: document.querySelector("#primeRedCellDeficitStatus"),
         format: (value) => `${Math.round(value)} mL RBC`,
         empty: "Expressed as the red-cell volume missing before any PRBC is added.",
+      },
+    }
+  : null;
+
+const anticoagOutputs = anticoagForm
+  ? {
+      heparinLoadingUnits: {
+        value: document.querySelector("#heparinLoadingOutput"),
+        status: document.querySelector("#heparinLoadingStatus"),
+        format: (value) => `${Math.round(value).toLocaleString()} units`,
+        empty: "Enter weight and a heparin units/kg assumption.",
+      },
+      protamineDoseMg: {
+        value: document.querySelector("#protamineDoseOutput"),
+        status: document.querySelector("#protamineDoseStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
+        empty: "Calculated from the estimated heparin loading dose.",
       },
     }
   : null;
@@ -633,20 +753,47 @@ function renderPrime() {
   }
 }
 
+function renderAnticoagulation() {
+  const evaluation = evaluateAnticoagulationCalculator(collectInputs(anticoagForm));
+  updateFormInvalidState(anticoagForm, evaluation.fields, anticoagSummary);
+
+  if (evaluation.results.heparinLoadingUnits !== null) {
+    anticoagOutputs.heparinLoadingUnits.value.textContent = anticoagOutputs.heparinLoadingUnits.format(evaluation.results.heparinLoadingUnits);
+    anticoagOutputs.heparinLoadingUnits.status.textContent = "Weight × loading dose assumption.";
+  } else {
+    anticoagOutputs.heparinLoadingUnits.value.textContent = "--";
+    anticoagOutputs.heparinLoadingUnits.status.textContent = anticoagOutputs.heparinLoadingUnits.empty;
+  }
+
+  if (evaluation.results.protamineDoseMg !== null) {
+    anticoagOutputs.protamineDoseMg.value.textContent = anticoagOutputs.protamineDoseMg.format(evaluation.results.protamineDoseMg);
+    anticoagOutputs.protamineDoseMg.status.textContent = "Based on the estimated heparin loading dose and selected protamine ratio.";
+  } else {
+    anticoagOutputs.protamineDoseMg.value.textContent = "--";
+    anticoagOutputs.protamineDoseMg.status.textContent = anticoagOutputs.protamineDoseMg.empty;
+  }
+}
+
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => activateTab(button.dataset.tabGroup, button.dataset.tabTarget));
   button.addEventListener("keydown", handleTabKeydown);
 });
 
 if (perfusionForm) {
+  hydrateSharedFields(perfusionForm);
   perfusionForm.addEventListener("input", renderPerfusion);
   perfusionForm.addEventListener("change", renderPerfusion);
+  perfusionForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
+  perfusionForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
   renderPerfusion();
 }
 
 if (primeForm) {
+  hydrateSharedFields(primeForm);
   primeForm.addEventListener("input", renderPrime);
   primeForm.addEventListener("change", renderPrime);
+  primeForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
+  primeForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
   primePresetButtons.forEach((button) => {
     button.addEventListener("click", () => {
       primeForm.elements.namedItem("primeEbvFactor").value = button.dataset.primeEbvFactor;
@@ -656,4 +803,13 @@ if (primeForm) {
     });
   });
   renderPrime();
+}
+
+if (anticoagForm) {
+  hydrateSharedFields(anticoagForm);
+  anticoagForm.addEventListener("input", renderAnticoagulation);
+  anticoagForm.addEventListener("change", renderAnticoagulation);
+  anticoagForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
+  anticoagForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
+  renderAnticoagulation();
 }

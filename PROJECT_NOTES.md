@@ -4,41 +4,127 @@
 
 Build a clear, mobile-friendly web tool for perfusion education, simulation, and planning support around common cardiopulmonary bypass calculations.
 
+The bigger goal is for this to become more than a static calculator. It is intended to grow into a front-end cognitive aid and interactive workflow tool for perfusionists and perfusion students.
+
+## Main Direction
+
+The current main goal is:
+
+- finish the static/front-end tool first
+- continue building it into an interactive workflow tool
+- reassess backend support later only if the project truly grows into needing it
+
+For now, the project should remain:
+
+- web-based
+- front-end focused
+- workflow oriented
+- educational and simulation friendly
+
 ## Current Modules
 
 - Home page
 - Perfusion calculator
 - Prime planner
+- Anticoagulation support
+
+## Current Workflow Vision
+
+The tool is meant to support a typical perfusion workflow and reduce repeated mental math across the perioperative period. The broader vision includes support for:
+
+- patient height and weight
+- procedure planning
+- cannula selection
+- flow calculations
+- anticoagulation
+- priming
+- drug support or library content
+- algorithm support if something catastrophic happens
+- interactive charts and visual aids
 
 ## Roadmap
 
-- Refine calculation formulas and assumptions with reliable references.
-- Improve mobile workflow for fast input during simulation.
-- Add clearer result explanations and unit labels where helpful.
-- Expand validation and edge-case handling.
-- Prepare the app for presentation or deployment.
+### Phase 1: Front-End Foundation
+
+- refine calculation formulas and assumptions with reliable references
+- improve mobile workflow for fast input during simulation
+- add clearer result explanations and unit labels where helpful
+- expand validation and edge-case handling
+- prepare the app for presentation or deployment
+- keep patient context shared across tabs where appropriate
+
+### Phase 2: Interactive Workflow Tool
+
+- expand the site from separate calculators into a more connected perfusion workflow
+- add more tabs or modules for common perioperative support tasks
+- add clearer workflow guidance and decision-support style explanations
+- improve cross-tab continuity so repeated patient information is not re-entered
+- create more interactive front-end tools instead of static output-only pages
+
+### Phase 3: Advanced Interactive Features
+
+- add interactive graphs for perfusion cannula selection
+- add an interactive Heparin Dose Response Curve tool
+- add richer anticoagulation workflow support
+- add more interactive recommendations and visual aids
+- expand emergency or catastrophic event algorithm support
+
+### Phase 4: Reassess Backend Need
+
+Only consider backend support later if the project starts needing things like:
+
+- saved cases
+- user accounts
+- shared workflows
+- institutional customization
+- protected data
+- more advanced decision-support behavior
 
 ## Feature Ideas
 
-- Save or reset common patient scenarios.
-- Add preset adult/pediatric assumptions.
-- Add reference ranges or protocol notes.
-- Add print/export-friendly summary view.
-- Add dark mode or presentation mode.
-- Add a dedicated references page.
+- save or reset common patient scenarios
+- add preset adult or pediatric assumptions
+- add reference ranges or protocol notes
+- add print or export-friendly summary view
+- add dark mode or presentation mode
+- add a dedicated references page
+- build a broader drug support or medication reference section
+- add workflow-based support rather than isolated calculators only
+
+## Platform Plan
+
+The working platform plan is:
+
+- keep building in the current HTML, CSS, and JavaScript format
+- use GitHub for collaboration and version control
+- use Netlify later if ready to launch the front-end publicly
+- keep Streamlit in mind only later if the project becomes much more Python or data-app heavy
+
+## Collaboration Plan
+
+- use GitHub for collaboration
+- use feature branches for separate tasks
+- keep `main` as the stable version
+- merge when a small feature is stable and tested
+- if a partner also uses Codex, divide ownership clearly by feature or file area
 
 ## Decisions
 
-- Keep project planning notes in Markdown so they are easy to read on GitHub and easy to update in Codex.
-- Keep calculation logic separated from UI code so formulas can be tested directly.
+- keep project planning notes in Markdown so they are easy to read on GitHub and easy to update in Codex
+- keep calculation logic separated from UI code so formulas can be tested directly
+- prioritize the front-end workflow tool before deciding on backend complexity
+- keep this tool educational, simulation-friendly, and practically useful during development
 
 ## Open Questions
 
-- Is the main audience students, simulation participants, practicing perfusionists, or instructors?
-- Should the tool stay educational only, or should it be framed as clinical decision support with stronger disclaimers?
-- What formulas and institutional assumptions should be considered authoritative for this project?
-- Should the final version be deployed publicly through GitHub Pages?
+- is the main audience students, simulation participants, practicing perfusionists, or instructors?
+- should the tool stay educational only, or should it be framed as clinical decision support with stronger disclaimers?
+- what formulas and institutional assumptions should be considered authoritative for this project?
+- when the tool becomes more comprehensive, which modules should be prioritized first?
+- when does the project truly cross the line into needing backend support?
 
 ## Next Session Notes
 
-- Add any new ideas, pending tasks, or reminders here before ending a work session.
+- add any new ideas, pending tasks, or reminders here before ending a work session
+- continue building the front-end workflow tool first
+- revisit backend support only later if the project clearly outgrows the static/front-end model

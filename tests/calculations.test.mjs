@@ -2,11 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  calculateProtamineDose,
   calculateArterialOxygenContent,
   calculateBsa,
   calculateDo2i,
   calculateEstimatedBloodVolume,
   calculateHctDrop,
+  calculateHeparinLoadingDose,
   calculatePredictedPrimeHct,
   calculatePrimeToBloodRatio,
   calculateProjectedHctAfterPrbc,
@@ -15,9 +17,11 @@ import {
   calculateRequiredCardiacIndex,
   calculateRequiredHemoglobin,
   calculateRequiredPrbcVolume,
+  evaluateAnticoagulationCalculator,
   evaluateCalculator,
   evaluatePrimeCalculator,
   roundTo,
+  validateAnticoagField,
   validatePerfusionField,
   validatePrimeField,
 } from "../calculations.mjs";
@@ -170,9 +174,27 @@ test("prime evaluator flags unreachable targets when PRBC hematocrit is at or be
   assert.equal(evaluated.results.projectedHct, null);
 });
 
+test("anticoagulation calculations estimate heparin loading and protamine reversal doses", () => {
+  const heparinUnits = calculateHeparinLoadingDose(70, 300);
+  assert.equal(heparinUnits, 21000);
+
+  const protamineDose = calculateProtamineDose(heparinUnits, 1);
+  assert.equal(protamineDose, 210);
+
+  const evaluated = evaluateAnticoagulationCalculator({
+    anticoagWeightKg: "70",
+    heparinDosePerKg: "300",
+    protamineRatioMgPer100U: "1",
+  });
+
+  assert.equal(evaluated.results.heparinLoadingUnits, 21000);
+  assert.equal(evaluated.results.protamineDoseMg, 210);
+});
+
 test("validation rejects out of range and negative inputs", () => {
   assert.equal(validatePerfusionField("heightCm", "-1").valid, false);
   assert.equal(validatePerfusionField("saO2", "102").valid, false);
   assert.equal(validatePerfusionField("paO2", "0").valid, true);
   assert.equal(validatePrimeField("primePrbcHct", "95").valid, false);
+  assert.equal(validateAnticoagField("heparinDosePerKg", "20").valid, false);
 });
