@@ -21,6 +21,9 @@ const PRIME_FIELD_CONFIG = {
 const ANTICOAG_FIELD_CONFIG = {
   anticoagWeightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
   heparinDosePerKg: { label: "Heparin loading dose", min: 50, max: 1000, allowZero: false },
+  baselineActSeconds: { label: "Baseline ACT", min: 50, max: 400, allowZero: false },
+  postHeparinActSeconds: { label: "Post-heparin ACT", min: 50, max: 1200, allowZero: false },
+  targetActSeconds: { label: "Target ACT", min: 200, max: 1200, allowZero: false },
   protamineRatioMgPer100U: { label: "Protamine ratio", min: 0.1, max: 5, allowZero: false },
 };
 
@@ -136,6 +139,30 @@ export function calculateHeparinLoadingDose(weightKg, heparinDosePerKg) {
 
 export function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
+}
+
+export function calculateHeparinResponseCurve(baselineActSeconds, postHeparinActSeconds, heparinDosePerKg, targetActSeconds, weightKg) {
+  const actDelta = postHeparinActSeconds - baselineActSeconds;
+  if (actDelta <= 0 || heparinDosePerKg <= 0) return null;
+
+  const slopeActPerUnitKg = actDelta / heparinDosePerKg;
+  const requiredHeparinDosePerKg = Math.max(0, (targetActSeconds - baselineActSeconds) / slopeActPerUnitKg);
+  const requiredHeparinUnits = requiredHeparinDosePerKg * weightKg;
+  const givenHeparinUnits = heparinDosePerKg * weightKg;
+
+  return {
+    slopeActPerUnitKg,
+    requiredHeparinDosePerKg,
+    requiredHeparinUnits,
+    givenHeparinUnits,
+    additionalHeparinUnits: Math.max(0, requiredHeparinUnits - givenHeparinUnits),
+    targetReachedByTestDose: postHeparinActSeconds >= targetActSeconds,
+    points: {
+      baseline: { dosePerKg: 0, actSeconds: baselineActSeconds },
+      measured: { dosePerKg: heparinDosePerKg, actSeconds: postHeparinActSeconds },
+      target: { dosePerKg: requiredHeparinDosePerKg, actSeconds: targetActSeconds },
+    },
+  };
 }
 
 export function evaluateCalculator(rawInputs) {
@@ -259,6 +286,7 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
   const results = {
     heparinLoadingUnits: null,
     protamineDoseMg: null,
+    heparinResponseCurve: null,
   };
 
   if (valid("anticoagWeightKg") && valid("heparinDosePerKg")) {
@@ -267,6 +295,16 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
 
   if (results.heparinLoadingUnits !== null && valid("protamineRatioMgPer100U")) {
     results.protamineDoseMg = calculateProtamineDose(results.heparinLoadingUnits, valueOf("protamineRatioMgPer100U"));
+  }
+
+  if (valid("anticoagWeightKg") && valid("heparinDosePerKg") && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
+    results.heparinResponseCurve = calculateHeparinResponseCurve(
+      valueOf("baselineActSeconds"),
+      valueOf("postHeparinActSeconds"),
+      valueOf("heparinDosePerKg"),
+      valueOf("targetActSeconds"),
+      valueOf("anticoagWeightKg"),
+    );
   }
 
   return { fields, results };

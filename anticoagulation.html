@@ -34,7 +34,10 @@
           <form id="anticoag-form" novalidate>
             <div class="field-grid">
               <label class="field"><span>Weight</span><div class="input-wrap"><input id="anticoagWeightKg" name="anticoagWeightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" autofocus /><span class="unit">kg</span></div><small class="hint">Shared from other tabs when already entered</small></label>
-              <label class="field"><span>Heparin Loading Dose</span><div class="input-wrap"><input id="heparinDosePerKg" name="heparinDosePerKg" type="number" inputmode="decimal" min="50" max="1000" step="1" value="300" autocomplete="off" /><span class="unit">units/kg</span></div><small class="hint">Editable assumption for the initial loading dose</small></label>
+              <label class="field"><span>Heparin Loading Dose</span><div class="input-wrap"><input id="heparinDosePerKg" name="heparinDosePerKg" type="number" inputmode="decimal" min="50" max="1000" step="1" value="300" autocomplete="off" /><span class="unit">units/kg</span></div><small class="hint">Initial bolus or dose used for the measured ACT response</small></label>
+              <label class="field"><span>Baseline ACT</span><div class="input-wrap"><input id="baselineActSeconds" name="baselineActSeconds" type="number" inputmode="decimal" min="50" max="400" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT before heparin administration</small></label>
+              <label class="field"><span>Post-Heparin ACT</span><div class="input-wrap"><input id="postHeparinActSeconds" name="postHeparinActSeconds" type="number" inputmode="decimal" min="50" max="1200" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT after the test dose has circulated</small></label>
+              <label class="field"><span>Target ACT</span><div class="input-wrap"><input id="targetActSeconds" name="targetActSeconds" type="number" inputmode="decimal" min="200" max="1200" step="1" value="480" autocomplete="off" /><span class="unit">sec</span></div><div class="quick-select-row" aria-label="Quick target ACT values"><button type="button" class="quick-select-button" data-target-act="500">500</button><button type="button" class="quick-select-button" data-target-act="550">550</button><button type="button" class="quick-select-button" data-target-act="600">600</button></div><small class="hint">Editable protocol target for initiating bypass</small></label>
               <label class="field"><span>Protamine Reversal Ratio</span><div class="input-wrap"><input id="protamineRatioMgPer100U" name="protamineRatioMgPer100U" type="number" inputmode="decimal" min="0.1" max="5" step="0.1" value="1" autocomplete="off" /><span class="unit">mg / 100 units</span></div><small class="hint">Default 1 mg protamine per 100 units heparin</small></label>
             </div>
           </form>
@@ -48,8 +51,31 @@
           </div>
           <div class="results-grid results-grid-compact">
             <article class="result-card accent-card"><p class="result-label">Heparin Loading Dose</p><output id="heparinLoadingOutput" class="result-value">--</output><p id="heparinLoadingStatus" class="result-status">Enter weight and a heparin units/kg assumption.</p></article>
+            <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
             <article class="result-card"><p class="result-label">Protamine Reversal Dose</p><output id="protamineDoseOutput" class="result-value">--</output><p id="protamineDoseStatus" class="result-status">Calculated from the estimated heparin loading dose.</p></article>
           </div>
+
+          <section class="curve-panel" aria-labelledby="heparin-curve-title">
+            <div class="curve-header">
+              <div>
+                <h3 id="heparin-curve-title">Heparin Dose Response Curve</h3>
+                <p id="heparinCurveSummary">Enter ACT response values to plot the baseline, measured response, and projected target dose.</p>
+                <div class="curve-legend" aria-label="Graph key">
+                  <span><span class="legend-symbol legend-star" aria-hidden="true"></span>ACT 480</span>
+                  <span><span class="legend-symbol legend-dot" aria-hidden="true"></span>ACT 600</span>
+                </div>
+              </div>
+              <div class="curve-actions" aria-label="Graph controls">
+                <button type="button" class="curve-action-button" id="expandCurveButton" aria-pressed="false">Expand</button>
+                <button type="button" class="curve-action-button" id="zoomCurveButton" aria-pressed="false">Zoom out</button>
+              </div>
+            </div>
+            <div class="curve-chart-wrap">
+              <svg id="heparinCurveChart" class="curve-chart" viewBox="0 0 640 360" role="img" aria-labelledby="heparin-curve-title heparinCurveSummary"></svg>
+              <div id="heparinCurveTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+            </div>
+            <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
+          </section>
 
           <section class="info-tabs" aria-labelledby="anticoag-support-title">
             <div class="panel-header tabs-header">
@@ -62,9 +88,11 @@
             <section class="formula-panel tab-panel is-active" id="tab-panel-anticoag-calculations" role="tabpanel" aria-labelledby="tab-button-anticoag-calculations" data-tab-group="anticoag-support" data-tab-panel="calculations">
               <dl class="formula-list">
                 <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
+                <div><dt>Dose Response Slope</dt><dd>(post-heparin ACT - baseline ACT) / heparin dose (units/kg)</dd></div>
+                <div><dt>Projected Dose to Target</dt><dd>(target ACT - baseline ACT) / dose response slope</dd></div>
                 <div><dt>Protamine Reversal Dose</dt><dd>(estimated heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>
               </dl>
-              <p class="formula-note">This page currently estimates loading and reversal doses from weight-based assumptions only. It does not yet account for supplemental heparin boluses, ACT response, heparin concentration assays, or elapsed time since dosing.</p>
+              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the test dose. It does not yet account for heparin concentration assays, supplemental bolus timing, heparin in the pump prime, or elapsed time since dosing.</p>
               <p class="disclaimer">Decision-support for simulation and workflow use only. Confirm local anticoagulation protocols and product labeling before clinical application.</p>
             </section>
             <section class="formula-panel references-panel tab-panel" id="tab-panel-anticoag-references" role="tabpanel" aria-labelledby="tab-button-anticoag-references" data-tab-group="anticoag-support" data-tab-panel="references" hidden>
@@ -77,6 +105,23 @@
         </section>
       </section>
     </main>
+
+    <section class="curve-modal" id="heparinCurveModal" aria-labelledby="heparin-curve-modal-title" aria-modal="true" role="dialog" hidden>
+      <div class="curve-modal-panel">
+        <div class="curve-modal-header">
+          <div>
+            <h3 id="heparin-curve-modal-title">Heparin Dose Response Curve</h3>
+            <p id="heparinCurveModalSummary">Expanded view</p>
+          </div>
+          <button type="button" class="curve-action-button" id="closeCurveModalButton">Close</button>
+        </div>
+        <div class="curve-modal-chart-wrap">
+          <svg id="heparinCurveModalChart" class="curve-chart" viewBox="0 0 1100 620" role="img" aria-labelledby="heparin-curve-modal-title heparinCurveModalSummary"></svg>
+          <div id="heparinCurveModalTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+        </div>
+        <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
+      </div>
+    </section>
 
     <script src="./app.js"></script>
   </body>

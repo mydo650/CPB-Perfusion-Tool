@@ -9,6 +9,7 @@ import {
   calculateEstimatedBloodVolume,
   calculateHctDrop,
   calculateHeparinLoadingDose,
+  calculateHeparinResponseCurve,
   calculatePredictedPrimeHct,
   calculatePrimeToBloodRatio,
   calculateProjectedHctAfterPrbc,
@@ -184,11 +185,34 @@ test("anticoagulation calculations estimate heparin loading and protamine revers
   const evaluated = evaluateAnticoagulationCalculator({
     anticoagWeightKg: "70",
     heparinDosePerKg: "300",
+    baselineActSeconds: "130",
+    postHeparinActSeconds: "430",
+    targetActSeconds: "480",
     protamineRatioMgPer100U: "1",
   });
 
   assert.equal(evaluated.results.heparinLoadingUnits, 21000);
   assert.equal(evaluated.results.protamineDoseMg, 210);
+});
+
+test("heparin dose response curve projects target dose and additional heparin", () => {
+  const curve = calculateHeparinResponseCurve(130, 430, 300, 480, 70);
+  assert.equal(roundTo(curve.slopeActPerUnitKg, 2), 1);
+  assert.equal(Math.round(curve.requiredHeparinDosePerKg), 350);
+  assert.equal(Math.round(curve.requiredHeparinUnits), 24500);
+  assert.equal(Math.round(curve.additionalHeparinUnits), 3500);
+  assert.equal(curve.targetReachedByTestDose, false);
+
+  const evaluated = evaluateAnticoagulationCalculator({
+    anticoagWeightKg: "70",
+    heparinDosePerKg: "300",
+    baselineActSeconds: "130",
+    postHeparinActSeconds: "430",
+    targetActSeconds: "480",
+    protamineRatioMgPer100U: "1",
+  });
+
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 24500);
 });
 
 test("validation rejects out of range and negative inputs", () => {
@@ -197,4 +221,5 @@ test("validation rejects out of range and negative inputs", () => {
   assert.equal(validatePerfusionField("paO2", "0").valid, true);
   assert.equal(validatePrimeField("primePrbcHct", "95").valid, false);
   assert.equal(validateAnticoagField("heparinDosePerKg", "20").valid, false);
+  assert.equal(validateAnticoagField("targetActSeconds", "120").valid, false);
 });

@@ -45,6 +45,10 @@ body::before {
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 72%);
 }
 
+body.has-expanded-curve {
+  overflow: hidden;
+}
+
 .app-shell {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
@@ -351,6 +355,46 @@ input[aria-invalid="true"] {
   font-weight: 500;
 }
 
+.quick-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.quick-select-button,
+.curve-action-button {
+  min-height: 2rem;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--accent-strong);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.quick-select-button {
+  padding: 0.35rem 0.7rem;
+}
+
+.curve-action-button {
+  padding: 0.45rem 0.85rem;
+}
+
+.quick-select-button:hover,
+.curve-action-button:hover {
+  transform: translateY(-1px);
+}
+
+.quick-select-button.is-active,
+.curve-action-button[aria-pressed="true"] {
+  background: var(--accent-strong);
+  border-color: transparent;
+  color: #f8fffd;
+}
+
 .validation-summary {
   min-height: 1.5rem;
   margin-top: 1rem;
@@ -464,6 +508,278 @@ input[aria-invalid="true"] {
   margin: 0.45rem 0 0;
   min-height: 1.4rem;
   line-height: 1.4;
+}
+
+.curve-panel {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.curve-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.curve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.curve-header h3 {
+  font-size: 1.05rem;
+}
+
+.curve-header p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.curve-chart-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 340px;
+}
+
+.curve-chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.curve-modal[hidden] {
+  display: none;
+}
+
+.curve-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(22, 33, 38, 0.42);
+  backdrop-filter: blur(10px);
+}
+
+.curve-modal-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  width: calc(100vw - 2.5rem);
+  height: calc(100vh - 2.5rem);
+  max-width: 1800px;
+  padding: 1.15rem;
+  border: 1px solid rgba(22, 33, 38, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 252, 246, 0.99);
+  box-shadow: 0 28px 80px rgba(22, 33, 38, 0.32);
+}
+
+.curve-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.curve-modal-header p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.curve-modal-chart-wrap {
+  position: relative;
+  min-height: 0;
+}
+
+.curve-modal-chart-wrap .curve-chart {
+  height: 100%;
+  min-height: 0;
+}
+
+.curve-bg {
+  fill: rgba(253, 250, 245, 0.96);
+}
+
+.curve-gridline line {
+  stroke: rgba(22, 33, 38, 0.09);
+  stroke-width: 1;
+}
+
+.curve-gridline text,
+.curve-axis-label,
+.curve-point text,
+.curve-reference text,
+.curve-empty-text {
+  fill: var(--muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.curve-axis {
+  stroke: rgba(22, 33, 38, 0.48);
+  stroke-width: 2;
+}
+
+.curve-response-line {
+  stroke: var(--accent-strong);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.curve-target-line {
+  stroke: var(--warning);
+  stroke-width: 2;
+  stroke-dasharray: 8 7;
+}
+
+.curve-point circle {
+  fill: var(--panel-strong);
+  stroke: var(--accent-strong);
+  stroke-width: 4;
+}
+
+.curve-point {
+  cursor: help;
+}
+
+.curve-point:focus,
+.curve-reference:focus {
+  outline: none;
+}
+
+.curve-point:focus circle,
+.curve-reference:focus circle,
+.curve-reference:focus polygon {
+  filter: drop-shadow(0 0 6px rgba(15, 118, 110, 0.45));
+}
+
+.curve-point-target circle {
+  stroke: var(--warning);
+}
+
+.curve-reference {
+  cursor: help;
+}
+
+.curve-reference polygon {
+  fill: var(--warning);
+  stroke: #7c2d12;
+  stroke-width: 1.5;
+}
+
+.curve-reference-600 circle,
+.legend-dot {
+  fill: #16a34a;
+  stroke: #166534;
+  stroke-width: 2;
+}
+
+.curve-reference text {
+  fill: var(--ink);
+}
+
+.curve-selected-target {
+  cursor: help;
+}
+
+.curve-selected-target rect {
+  fill: #2563eb;
+  stroke: #1e3a8a;
+  stroke-width: 2;
+}
+
+.curve-selected-target text {
+  fill: #1e3a8a;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.curve-selected-target:focus {
+  outline: none;
+}
+
+.curve-selected-target:focus rect {
+  filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.45));
+}
+
+.curve-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.6rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.curve-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-symbol {
+  display: inline-block;
+  flex: none;
+}
+
+.legend-star {
+  width: 1rem;
+  height: 1rem;
+  color: var(--warning);
+  clip-path: polygon(50% 0%, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
+  background: currentColor;
+}
+
+.legend-dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: #16a34a;
+}
+
+.curve-tooltip {
+  position: absolute;
+  z-index: 2;
+  max-width: min(280px, calc(100% - 1rem));
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(22, 33, 38, 0.94);
+  color: #fffdf8;
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.35;
+  box-shadow: 0 12px 28px rgba(22, 33, 38, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(3px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.curve-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.curve-caveat {
+  margin: 0.85rem 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
 }
 
 .formula-panel {
@@ -677,6 +993,30 @@ input[aria-invalid="true"] {
     padding: 1rem;
   }
 
+  .curve-panel {
+    padding: 0.85rem;
+  }
+
+  .curve-chart-wrap {
+    min-height: 280px;
+  }
+
+  .curve-modal {
+    padding: 0.5rem;
+  }
+
+  .curve-modal-panel {
+    width: calc(100vw - 1rem);
+    height: calc(100vh - 1rem);
+    padding: 0.8rem;
+    border-radius: 18px;
+  }
+
+  .curve-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .result-label {
     font-size: 0.84rem;
     letter-spacing: 0.07em;
@@ -691,6 +1031,16 @@ input[aria-invalid="true"] {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .curve-header,
+  .curve-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .curve-action-button {
+    width: 100%;
   }
 
   .tab-button {
