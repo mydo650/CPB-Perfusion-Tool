@@ -494,6 +494,7 @@ const anticoagOutputs = anticoagForm
       curveChart: document.querySelector("#heparinCurveChart"),
       curveSummary: document.querySelector("#heparinCurveSummary"),
       curveTooltip: document.querySelector("#heparinCurveTooltip"),
+      heparinResistanceWarning: document.querySelector("#heparinResistanceWarning"),
       curveModal: document.querySelector("#heparinCurveModal"),
       curveModalChart: document.querySelector("#heparinCurveModalChart"),
       curveModalSummary: document.querySelector("#heparinCurveModalSummary"),
@@ -882,8 +883,10 @@ function renderHeparinCurve(curve, options = {}) {
     .join("");
   const act480DosePerKg = Math.max(0, (480 - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg);
   const act600DosePerKg = Math.max(0, (600 - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg);
-  const targetLabel = `Target ACT ${roundTo(curve.points.target.actSeconds, 0).toFixed(0)}`;
-  const targetTooltip = formatHover(targetLabel, curve.points.target);
+  const targetAct = roundTo(curve.points.target.actSeconds, 0).toFixed(0);
+  const targetAdditionalUnits = Math.round(curve.additionalHeparinUnits).toLocaleString();
+  const targetLabel = `Target ACT ${targetAct}`;
+  const targetTooltip = `${targetLabel}: ${roundTo(curve.points.target.dosePerKg, 0).toFixed(0)} units/kg, ${targetAdditionalUnits} additional units`;
   const referencePointMarkup = `
     <g class="curve-reference curve-reference-480" tabindex="0" data-tooltip="${formatReferenceHover("ACT 480 reference", 480)}">
       <polygon points="${starPoints(x(act480DosePerKg), y(480), 12, 5)}"></polygon>
@@ -895,7 +898,10 @@ function renderHeparinCurve(curve, options = {}) {
     </g>
     <g class="curve-selected-target" tabindex="0" data-tooltip="${targetTooltip}">
       <rect x="${x(curve.points.target.dosePerKg) - 8}" y="${y(curve.points.target.actSeconds) - 8}" width="16" height="16" transform="rotate(45 ${x(curve.points.target.dosePerKg)} ${y(curve.points.target.actSeconds)})"></rect>
-      <text x="${x(curve.points.target.dosePerKg)}" y="${y(curve.points.target.actSeconds) + 28}" text-anchor="middle">${targetLabel}</text>
+      <text x="${x(curve.points.target.dosePerKg)}" y="${y(curve.points.target.actSeconds) + 28}" text-anchor="middle">
+        <tspan x="${x(curve.points.target.dosePerKg)}">${targetLabel}</tspan>
+        <tspan x="${x(curve.points.target.dosePerKg)}" dy="16">${targetAdditionalUnits} units addl.</tspan>
+      </text>
     </g>
   `;
 
@@ -1012,15 +1018,27 @@ function renderAnticoagulation() {
   }
 
   if (evaluation.results.heparinResponseCurve !== null) {
+    const projectedDosePerKg = evaluation.results.heparinResponseCurve.requiredHeparinDosePerKg;
     anticoagOutputs.additionalHeparin.value.textContent = anticoagOutputs.additionalHeparin.format(evaluation.results.heparinResponseCurve);
     anticoagOutputs.additionalHeparin.status.textContent = evaluation.results.heparinResponseCurve.targetReachedByTestDose
       ? "Measured ACT already reaches the selected target."
-      : `${roundTo(evaluation.results.heparinResponseCurve.requiredHeparinDosePerKg, 0).toFixed(0)} units/kg total projected to reach target ACT.`;
+      : `Extra heparin needed beyond the ${Math.round(evaluation.results.heparinResponseCurve.givenHeparinUnits).toLocaleString()} unit loading dose.`;
+
+    if (anticoagOutputs.heparinResistanceWarning) {
+      anticoagOutputs.heparinResistanceWarning.hidden = projectedDosePerKg < 500;
+      anticoagOutputs.heparinResistanceWarning.textContent = projectedDosePerKg >= 500
+        ? `Projected dose is ${roundTo(projectedDosePerKg, 0).toFixed(0)} units/kg to reach the selected ACT. Consider local heparin-resistance protocol, antithrombin status, timing, ACT device, and clinician review.`
+        : "";
+    }
   } else {
     anticoagOutputs.additionalHeparin.value.textContent = "--";
     anticoagOutputs.additionalHeparin.status.textContent = evaluation.fields.baselineActSeconds?.valid && evaluation.fields.postHeparinActSeconds?.valid
       ? "Post-heparin ACT must be greater than baseline ACT."
       : anticoagOutputs.additionalHeparin.empty;
+    if (anticoagOutputs.heparinResistanceWarning) {
+      anticoagOutputs.heparinResistanceWarning.hidden = true;
+      anticoagOutputs.heparinResistanceWarning.textContent = "";
+    }
   }
 
   if (evaluation.results.protamineDoseMg !== null) {

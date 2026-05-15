@@ -510,6 +510,21 @@ input[aria-invalid="true"] {
   line-height: 1.4;
 }
 
+.clinical-warning {
+  margin-top: 1rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(180, 83, 9, 0.26);
+  border-radius: 18px;
+  background: rgba(255, 246, 232, 0.9);
+  color: #7c2d12;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.clinical-warning[hidden] {
+  display: none;
+}
+
 .curve-panel {
   margin-top: 1rem;
   padding: 1.1rem;

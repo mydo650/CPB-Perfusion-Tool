@@ -215,6 +215,35 @@ test("heparin dose response curve projects target dose and additional heparin", 
   assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 24500);
 });
 
+test("heparin dose response curve follows the selected target ACT", () => {
+  const evaluated = evaluateAnticoagulationCalculator({
+    anticoagWeightKg: "70",
+    heparinDosePerKg: "300",
+    baselineActSeconds: "130",
+    postHeparinActSeconds: "430",
+    targetActSeconds: "550",
+    protamineRatioMgPer100U: "1",
+  });
+
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinDosePerKg), 420);
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 29400);
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.additionalHeparinUnits), 8400);
+});
+
+test("heparin dose response curve exposes high projected dose scenarios", () => {
+  const evaluated = evaluateAnticoagulationCalculator({
+    anticoagWeightKg: "70",
+    heparinDosePerKg: "300",
+    baselineActSeconds: "130",
+    postHeparinActSeconds: "330",
+    targetActSeconds: "500",
+    protamineRatioMgPer100U: "1",
+  });
+
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinDosePerKg), 555);
+  assert.equal(evaluated.results.heparinResponseCurve.requiredHeparinDosePerKg >= 500, true);
+});
+
 test("validation rejects out of range and negative inputs", () => {
   assert.equal(validatePerfusionField("heightCm", "-1").valid, false);
   assert.equal(validatePerfusionField("saO2", "102").valid, false);
