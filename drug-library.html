@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPB Drug Library</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Simulation Support Tool</p>
+        <h1>CPB Drug Library</h1>
+        <p class="intro">
+          A reference space for commonly used perfusion medications, dosing
+          reminders, and protocol notes during simulation planning.
+        </p>
+      </section>
+
+      <nav class="module-switcher page-switcher" aria-label="Website pages">
+        <a class="module-button page-link" href="./index.html" aria-current="false">Home</a>
+        <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
+        <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
+        <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
+        <a class="module-button page-link is-active" href="./drug-library.html" aria-current="page">Drug Library</a>
+      </nav>
+
+      <section class="workspace page-workspace" aria-label="Drug library">
+        <section class="panel output-panel" aria-labelledby="drug-library-title">
+          <div class="panel-header">
+            <h2 id="drug-library-title">Drug Library</h2>
+            <p>Add medication references, dosing ranges, and local simulation notes here.</p>
+          </div>
+          <div class="results-grid results-grid-compact">
+            <article class="result-card">
+              <p class="result-label">Vasopressors</p>
+              <p class="result-status">Add commonly used pressors and concentration notes.</p>
+            </article>
+            <article class="result-card">
+              <p class="result-label">Anticoagulation</p>
+              <p class="result-status">Add heparin, protamine, and ACT-related notes.</p>
+            </article>
+            <article class="result-card">
+              <p class="result-label">Electrolytes</p>
+              <p class="result-status">Add potassium, calcium, magnesium, and correction reminders.</p>
+            </article>
+          </div>
+          <p class="disclaimer">
+            Educational and simulation support only. Confirm medication
+            concentrations, dose ranges, and administration requirements against
+            local protocol before use.
+          </p>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
