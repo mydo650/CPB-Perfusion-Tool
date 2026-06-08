@@ -6,7 +6,7 @@
     <title>CPB Drug Library</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
+  <body class="page-drug-library">
     <main class="app-shell">
       <section class="hero">
         <p class="eyebrow">Simulation Support Tool</p>
@@ -35,7 +35,29 @@
           <div class="results-grid results-grid-compact">
             <article class="result-card">
               <p class="result-label">Anticoagulants</p>
-              <p class="result-status">Add heparin, direct thrombin inhibitors, and anticoagulation monitoring notes.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Heparin</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>MOA:</dt>
+                      <dd>Indirect anticoagulant that potentiates antithrombin III, which inhibits thrombin (factor IIa) and factor Xa.</dd>
+                    </div>
+                    <div>
+                      <dt>Dose for Loading for CPB:</dt>
+                      <dd>Common adult loading dose range is about 300 to 400 units/kg IV, with dosing then confirmed by ACT or other anticoagulation monitoring per protocol.</dd>
+                    </div>
+                    <div>
+                      <dt>Metabolism:</dt>
+                      <dd>Primarily cleared by hepatic metabolism and the reticuloendothelial system; clearance is dose dependent.</dd>
+                    </div>
+                    <div>
+                      <dt>T1/2:</dt>
+                      <dd>Approximately 0.5 to 2 hours, depending on dose.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
             <article class="result-card">
               <p class="result-label">Reversals for Anticoagulants</p>

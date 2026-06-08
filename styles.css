@@ -170,6 +170,10 @@ h1 {
   gap: 1.25rem;
 }
 
+.page-drug-library .workspace {
+  grid-template-columns: 1fr;
+}
+
 .page-workspace {
   display: grid;
 }
@@ -508,6 +512,69 @@ input[aria-invalid="true"] {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(22, 33, 38, 0.08);
+}
+
+.drug-accordion {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.drug-item {
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+
+.drug-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.95rem 1rem;
+  font-weight: 800;
+  color: var(--accent-strong);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.drug-summary::-webkit-details-marker {
+  display: none;
+}
+
+.drug-summary::after {
+  content: "+";
+  flex: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.drug-item[open] .drug-summary::after {
+  content: "\2212";
+}
+
+.drug-detail-list {
+  margin: 0;
+  padding: 0 1rem 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.drug-detail-list div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.drug-detail-list dt {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.drug-detail-list dd {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 .accent-card {
