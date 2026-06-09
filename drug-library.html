@@ -22,8 +22,30 @@
         <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
-        <a class="module-button page-link is-active" href="./drug-library.html" aria-current="page">Drug Library</a>
-        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes</a>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link is-active" aria-current="page">Drug Library</summary>
+          <div class="dropdown-menu">
+            <a href="./drug-library.html">Overview</a>
+            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
+            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
+            <a href="./drug-library.html#vasopressors">Vasopressors</a>
+            <a href="./drug-library.html#inotropes">Inotropes</a>
+            <a href="./drug-library.html#vasodilators">Vasodilators</a>
+            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
+            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
+          </div>
+        </details>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link">Electrolytes</summary>
+          <div class="dropdown-menu">
+            <a href="./electrolytes.html">Overview</a>
+            <a href="./electrolytes.html#potassium">Potassium</a>
+            <a href="./electrolytes.html#calcium">Calcium</a>
+            <a href="./electrolytes.html#magnesium">Magnesium</a>
+            <a href="./electrolytes.html#sodium">Sodium</a>
+            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
+          </div>
+        </details>
       </nav>
 
       <section class="workspace page-workspace" aria-label="Drug library">
@@ -33,7 +55,7 @@
             <p>Add medication references, dosing ranges, and local simulation notes here.</p>
           </div>
           <div class="results-grid results-grid-compact">
-            <article class="result-card">
+            <article class="result-card" id="anticoagulants">
               <p class="result-label">Anticoagulants</p>
               <div class="drug-accordion">
                 <details class="drug-item" open>
@@ -84,7 +106,7 @@
                 </details>
               </div>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="reversals-anticoagulants">
               <p class="result-label">Reversals for Anticoagulants</p>
               <div class="drug-accordion">
                 <details class="drug-item" open>
@@ -143,23 +165,23 @@
                 </details>
               </div>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="vasopressors">
               <p class="result-label">Vasopressors</p>
               <p class="result-status">Add commonly used pressors, concentration notes, and titration reminders.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="inotropes">
               <p class="result-label">Inotropes</p>
               <p class="result-status">Add medications used for contractility support and cardiac output optimization.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="vasodilators">
               <p class="result-label">Vasodilators</p>
               <p class="result-status">Add systemic and pulmonary vasodilator references for perfusion planning.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="antihypertensives">
               <p class="result-label">Antihypertensives</p>
               <p class="result-status">Add blood pressure control medications and protocol-specific notes.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="inhaled-anesthetics">
               <p class="result-label">Inhaled Anesthetics</p>
               <p class="result-status">Add volatile agent references and simulation reminders.</p>
             </article>
