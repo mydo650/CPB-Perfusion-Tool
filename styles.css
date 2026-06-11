@@ -174,6 +174,10 @@ h1 {
   grid-template-columns: 1fr;
 }
 
+.page-references .workspace {
+  grid-template-columns: 1fr;
+}
+
 .page-workspace {
   display: grid;
 }
@@ -967,6 +971,10 @@ input[aria-invalid="true"] {
 .references-list a {
   color: var(--accent-strong);
   font-weight: 700;
+}
+
+.reference-group + .reference-group {
+  margin-top: 1.5rem;
 }
 
 .formula-list {

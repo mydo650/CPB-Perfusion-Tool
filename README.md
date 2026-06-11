@@ -18,6 +18,12 @@ For anyone helping with this project, including AI collaborators:
 - Check the current repo status before editing
 - Keep new changes inside this repository so commits, diffs, and reviews stay accurate
 
+## Reference Workflow
+
+- The master source list lives in `/Users/mydo/Documents/GitHub/CPB-Perfusion-Tool/references.html`
+- When a new reference is used for project content, add it to the master reference list
+- Page-level reference sections can stay in place, but the master references page should remain the complete source list
+
 ## Current Scope
 
 - Perfusion calculator

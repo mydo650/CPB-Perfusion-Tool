@@ -364,7 +364,7 @@ const primeForm = document.querySelector("#prime-form");
 const primeSummary = document.querySelector("#primeValidationSummary");
 const anticoagForm = document.querySelector("#anticoag-form");
 const anticoagSummary = document.querySelector("#anticoagValidationSummary");
-const primePresetButtons = Array.from(document.querySelectorAll("[data-prime-preset]"));
+const primeEbvQuickButtons = Array.from(document.querySelectorAll("[data-prime-ebv-quick]"));
 const targetActButtons = Array.from(document.querySelectorAll("[data-target-act]"));
 const primePlanCard = document.querySelector("#primePlanCard");
 const heparinCurvePanel = document.querySelector(".curve-panel");
@@ -557,13 +557,11 @@ function renderPrimePlan(evaluation) {
   setPrimePlan("idle", "Complete the remaining target assumptions", "Add a target on-pump hematocrit and PRBC hematocrit assumption to finish the dilution planning summary.");
 }
 
-function syncPrimePresetState() {
+function syncPrimeEbvQuickState() {
   if (!primeForm) return;
-  primePresetButtons.forEach((button) => {
-    const isActive = primeForm.elements.namedItem("primeEbvFactor").value === button.dataset.primeEbvFactor
-      && primeForm.elements.namedItem("primeTargetHct").value === button.dataset.primeTargetHct
-      && primeForm.elements.namedItem("primePrbcHct").value === button.dataset.primePrbcHct;
-    button.classList.toggle("is-active", isActive);
+  const currentEbvFactor = primeForm.elements.namedItem("primeEbvFactor")?.value;
+  primeEbvQuickButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.primeEbvQuick === currentEbvFactor);
   });
 }
 
@@ -729,7 +727,7 @@ function renderPrime() {
   const evaluation = evaluatePrimeCalculator(collectInputs(primeForm));
   updateFormInvalidState(primeForm, evaluation.fields, primeSummary);
   renderPrimePlan(evaluation);
-  syncPrimePresetState();
+  syncPrimeEbvQuickState();
 
   if (evaluation.results.bloodVolumeMl !== null) {
     primeOutputs.bloodVolumeMl.value.textContent = primeOutputs.bloodVolumeMl.format(evaluation.results.bloodVolumeMl);
@@ -1079,11 +1077,9 @@ if (primeForm) {
   primeForm.addEventListener("change", renderPrime);
   primeForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
   primeForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
-  primePresetButtons.forEach((button) => {
+  primeEbvQuickButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      primeForm.elements.namedItem("primeEbvFactor").value = button.dataset.primeEbvFactor;
-      primeForm.elements.namedItem("primeTargetHct").value = button.dataset.primeTargetHct;
-      primeForm.elements.namedItem("primePrbcHct").value = button.dataset.primePrbcHct;
+      primeForm.elements.namedItem("primeEbvFactor").value = button.dataset.primeEbvQuick;
       renderPrime();
     });
   });
