@@ -6,7 +6,7 @@
     <title>CPB Electrolytes</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
+  <body class="page-electrolytes">
     <main class="app-shell">
       <section class="hero">
         <p class="eyebrow">Simulation Support Tool</p>
@@ -22,8 +22,30 @@
         <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
-        <a class="module-button page-link" href="./drug-library.html" aria-current="false">Drug Library</a>
-        <a class="module-button page-link is-active" href="./electrolytes.html" aria-current="page">Electrolytes</a>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link">Drug Library</summary>
+          <div class="dropdown-menu">
+            <a href="./drug-library.html">Overview</a>
+            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
+            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
+            <a href="./drug-library.html#vasopressors">Vasopressors</a>
+            <a href="./drug-library.html#inotropes">Inotropes</a>
+            <a href="./drug-library.html#vasodilators">Vasodilators</a>
+            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
+            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
+          </div>
+        </details>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link is-active" aria-current="page">Electrolytes</summary>
+          <div class="dropdown-menu">
+            <a href="./electrolytes.html">Overview</a>
+            <a href="./electrolytes.html#potassium">Potassium</a>
+            <a href="./electrolytes.html#calcium">Calcium</a>
+            <a href="./electrolytes.html#magnesium">Magnesium</a>
+            <a href="./electrolytes.html#sodium">Sodium</a>
+            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
+          </div>
+        </details>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
 
@@ -34,23 +56,23 @@
             <p>Add replacement references, target ranges, and local simulation notes here.</p>
           </div>
           <div class="results-grid results-grid-compact">
-            <article class="result-card">
+            <article class="result-card" id="potassium">
               <p class="result-label">Potassium</p>
               <p class="result-status">Add potassium replacement notes and monitoring reminders.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="calcium">
               <p class="result-label">Calcium</p>
               <p class="result-status">Add calcium chloride or calcium gluconate references and protocol notes.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="magnesium">
               <p class="result-label">Magnesium</p>
               <p class="result-status">Add magnesium replacement notes and rhythm-related reminders.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="sodium">
               <p class="result-label">Sodium</p>
               <p class="result-status">Add sodium and osmolality considerations for perfusion scenarios.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="bicarbonate">
               <p class="result-label">Bicarbonate</p>
               <p class="result-status">Add acid-base correction notes and protocol-specific guidance.</p>
             </article>

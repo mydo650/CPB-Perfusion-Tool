@@ -22,8 +22,30 @@
         <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
-        <a class="module-button page-link is-active" href="./drug-library.html" aria-current="page">Drug Library</a>
-        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes</a>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link is-active" aria-current="page">Drug Library</summary>
+          <div class="dropdown-menu">
+            <a href="./drug-library.html">Overview</a>
+            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
+            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
+            <a href="./drug-library.html#vasopressors">Vasopressors</a>
+            <a href="./drug-library.html#inotropes">Inotropes</a>
+            <a href="./drug-library.html#vasodilators">Vasodilators</a>
+            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
+            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
+          </div>
+        </details>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link">Electrolytes</summary>
+          <div class="dropdown-menu">
+            <a href="./electrolytes.html">Overview</a>
+            <a href="./electrolytes.html#potassium">Potassium</a>
+            <a href="./electrolytes.html#calcium">Calcium</a>
+            <a href="./electrolytes.html#magnesium">Magnesium</a>
+            <a href="./electrolytes.html#sodium">Sodium</a>
+            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
+          </div>
+        </details>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
 
@@ -34,7 +56,7 @@
             <p>Add medication references, dosing ranges, and local simulation notes here.</p>
           </div>
           <div class="results-grid results-grid-compact">
-            <article class="result-card">
+            <article class="result-card" id="anticoagulants">
               <p class="result-label">Anticoagulants</p>
               <div class="drug-accordion">
                 <details class="drug-item" open>
@@ -58,29 +80,109 @@
                     </div>
                   </dl>
                 </details>
+                <details class="drug-item">
+                  <summary class="drug-summary">Bivalirudin</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>MOA:</dt>
+                      <dd>Direct thrombin inhibitor that binds thrombin and inhibits thrombin-mediated fibrin formation, platelet activation, and clot propagation.</dd>
+                    </div>
+                    <div>
+                      <dt>Dose for Loading for CPB:</dt>
+                      <dd>Common adult on-pump CPB regimen: 1 mg/kg IV loading bolus, with 50 mg added to the pump prime per protocol.</dd>
+                    </div>
+                    <div>
+                      <dt>Continuing Dose While on Bypass:</dt>
+                      <dd>Common adult on-pump CPB infusion: 2.5 mg/kg/hr while anticoagulation is required, titrated to ACT or institutional monitoring targets.</dd>
+                    </div>
+                    <div>
+                      <dt>Metabolism:</dt>
+                      <dd>Primarily metabolized by proteolytic cleavage, with partial renal clearance. Clearance is reduced when renal function is impaired.</dd>
+                    </div>
+                    <div>
+                      <dt>T1/2:</dt>
+                      <dd>Approximately 25 minutes in patients with normal renal function; prolonged with renal impairment.</dd>
+                    </div>
+                  </dl>
+                </details>
               </div>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="reversals-anticoagulants">
               <p class="result-label">Reversals for Anticoagulants</p>
-              <p class="result-status">Add protamine and other reversal references for anticoagulant management.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Protamine</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>MOA:</dt>
+                      <dd>Strongly cationic protein that binds acidic unfractionated heparin to form a stable inactive salt complex, neutralizing the anticoagulant effect of both drugs.</dd>
+                    </div>
+                    <div>
+                      <dt>Dose and Ratio to Heparin:</dt>
+                      <dd>Common reversal ratio is 1 mg protamine per 100 units of unfractionated heparin. Dose should be adjusted for time since heparin administration and guided by ACT, aPTT, or institutional protocol.</dd>
+                    </div>
+                    <div>
+                      <dt>Metabolism:</dt>
+                      <dd>The metabolic fate of the heparin-protamine complex is not fully defined; it may be partially metabolized or degraded by fibrinolysin, which can contribute to heparin rebound.</dd>
+                    </div>
+                    <div>
+                      <dt>T1/2:</dt>
+                      <dd>Short half-life, approximately 7 to 10 minutes, so repeat dosing may be needed when heparin effect persists or rebounds.</dd>
+                    </div>
+                  </dl>
+                </details>
+                <details class="drug-item">
+                  <summary class="drug-summary">Bivalirudin Reversal / Bleeding Management</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>Direct Antidote:</dt>
+                      <dd>No specific direct reversal agent is available. Management relies on stopping bivalirudin, allowing drug clearance, and supporting hemostasis.</dd>
+                    </div>
+                    <div>
+                      <dt>Modified Ultrafiltration:</dt>
+                      <dd>May be used after CPB to help reduce circulating bivalirudin effect and manage excessive bleeding in select cases.</dd>
+                    </div>
+                    <div>
+                      <dt>Hemodialysis:</dt>
+                      <dd>Bivalirudin is dialyzable and hemodialysis may be considered when anticoagulant effect is prolonged, especially with renal impairment.</dd>
+                    </div>
+                    <div>
+                      <dt>Recombinant Factor VIIa:</dt>
+                      <dd>May be considered as rescue therapy for severe refractory bleeding or coagulopathy after bivalirudin anticoagulation, guided by institutional protocol.</dd>
+                    </div>
+                    <div>
+                      <dt>FFP:</dt>
+                      <dd>Adjunctive hemostatic support to replace coagulation factors during balanced resuscitation; it does not directly neutralize bivalirudin.</dd>
+                    </div>
+                    <div>
+                      <dt>Cryoprecipitate:</dt>
+                      <dd>Adjunctive support for fibrinogen replacement when fibrinogen is low or bleeding is consistent with hypofibrinogenemia.</dd>
+                    </div>
+                    <div>
+                      <dt>Platelets:</dt>
+                      <dd>Adjunctive support for thrombocytopenia or platelet dysfunction after CPB when clinically indicated.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="vasopressors">
               <p class="result-label">Vasopressors</p>
               <p class="result-status">Add commonly used pressors, concentration notes, and titration reminders.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="inotropes">
               <p class="result-label">Inotropes</p>
               <p class="result-status">Add medications used for contractility support and cardiac output optimization.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="vasodilators">
               <p class="result-label">Vasodilators</p>
               <p class="result-status">Add systemic and pulmonary vasodilator references for perfusion planning.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="antihypertensives">
               <p class="result-label">Antihypertensives</p>
               <p class="result-status">Add blood pressure control medications and protocol-specific notes.</p>
             </article>
-            <article class="result-card">
+            <article class="result-card" id="inhaled-anesthetics">
               <p class="result-label">Inhaled Anesthetics</p>
               <p class="result-status">Add volatile agent references and simulation reminders.</p>
             </article>
