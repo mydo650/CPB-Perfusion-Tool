@@ -581,6 +581,10 @@ input[aria-invalid="true"] {
   gap: 0.75rem;
 }
 
+.nested-drug-accordion {
+  padding: 0 1rem 1rem;
+}
+
 .drug-item {
   border: 1px solid rgba(22, 33, 38, 0.08);
   border-radius: 18px;
