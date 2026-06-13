@@ -6,6 +6,20 @@ Build a clear, mobile-friendly web tool for perfusion education, simulation, and
 
 The bigger goal is for this to become more than a static calculator. It is intended to grow into a front-end cognitive aid and interactive workflow tool for perfusionists and perfusion students.
 
+## PICOT Question
+
+This PICOT should remain a central reference point for the project and should be reviewed when making design, workflow, and content decisions.
+
+- P: perfusionists or perfusion students in simulated CPB/perfusion tasks
+- I: CPB support tool, workflow calculator, or decision-support/cognitive aid
+- C: usual practice, manual calculation, or no tool
+- O: reduced cognitive load/workload, fewer calculation errors, improved workflow
+- T: during simulation-based CPB activities
+
+Working PICOT question:
+
+In perfusionists or perfusion students performing simulated CPB or perfusion tasks, does use of a CPB support tool, workflow calculator, or decision-support cognitive aid, compared with usual practice, manual calculation, or no tool, reduce cognitive workload, reduce calculation errors, and improve workflow during simulation-based CPB activities?
+
 ## Main Direction
 
 The current main goal is:
