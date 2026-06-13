@@ -20,6 +20,19 @@ Working PICOT question:
 
 In perfusionists or perfusion students performing simulated CPB or perfusion tasks, does use of a CPB support tool, workflow calculator, or decision-support cognitive aid, compared with usual practice, manual calculation, or no tool, reduce cognitive workload, reduce calculation errors, and improve workflow during simulation-based CPB activities?
 
+## Preferred Evidence Sources
+
+Because this project is clinically grounded and includes formula- and workflow-based content, evidence sources should be chosen carefully.
+
+- Use peer-reviewed primary literature when possible
+- Use specialty guidelines, standards, and society statements when available
+- Use PubMed as the main literature database for clinical source gathering
+- Use AmSECT, STS, SCA, and similar professional guidance when relevant to perfusion practice
+- Use NCBI Bookshelf and StatPearls as supportive references, not the only authority for major formulas or recommendations
+- Use other strong databases when needed, such as Cochrane Library, CINAHL, Embase, Google Scholar for citation tracing, and major perfusion, anesthesia, and cardiac surgery journals
+- When a formula, dosing recommendation, or clinical target is important to the tool, try to trace it back to the most authoritative source available
+- Add every new source used in the project to the master reference list in `references.html`
+
 ## Main Direction
 
 The current main goal is:
