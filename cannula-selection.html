@@ -3,17 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CPB Electrolytes</title>
+    <title>CPB Cannula Selection</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body class="page-electrolytes">
+  <body class="page-cannula-selection">
     <main class="app-shell">
       <section class="hero">
         <p class="eyebrow">Simulation Support Tool</p>
-        <h1>CPB Electrolytes</h1>
+        <h1>CPB Cannula Selection</h1>
         <p class="intro">
-          A reference space for electrolyte monitoring, replacement notes, and
-          perfusion-specific correction reminders during simulation planning.
+          Organize arterial and venous cannula planning, size-selection
+          considerations, and workflow notes in one place for simulation and
+          case preparation.
         </p>
       </section>
 
@@ -22,7 +23,7 @@
         <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
-        <a class="module-button page-link" href="./cannula-selection.html" aria-current="false">Cannula Selection</a>
+        <a class="module-button page-link is-active" href="./cannula-selection.html" aria-current="page">Cannula Selection</a>
         <details class="nav-dropdown">
           <summary class="module-button page-link">Drug Library</summary>
           <div class="dropdown-menu">
@@ -37,7 +38,7 @@
           </div>
         </details>
         <details class="nav-dropdown">
-          <summary class="module-button page-link is-active" aria-current="page">Electrolytes</summary>
+          <summary class="module-button page-link">Electrolytes</summary>
           <div class="dropdown-menu">
             <a href="./electrolytes.html">Overview</a>
             <a href="./electrolytes.html#potassium">Potassium</a>
@@ -50,38 +51,44 @@
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
 
-      <section class="workspace page-workspace" aria-label="Electrolytes">
-        <section class="panel output-panel" aria-labelledby="electrolytes-title">
+      <section class="workspace page-workspace" aria-label="Cannula selection">
+        <section class="panel output-panel" aria-labelledby="cannula-selection-title">
           <div class="panel-header">
-            <h2 id="electrolytes-title">Electrolytes</h2>
-            <p>Add replacement references, target ranges, and local simulation notes here.</p>
+            <h2 id="cannula-selection-title">Cannula Selection</h2>
+            <p>Build this section into a practical planning tool for flow goals, access strategy, and cannula sizing support.</p>
           </div>
+
           <div class="results-grid results-grid-compact">
-            <article class="result-card" id="potassium">
-              <p class="result-label">Potassium</p>
-              <p class="result-status">Add potassium replacement notes and monitoring reminders.</p>
+            <article class="result-card">
+              <p class="result-label">Arterial Cannulation</p>
+              <p class="result-status">Add aortic and peripheral arterial cannula options, flow considerations, and size-selection notes.</p>
             </article>
-            <article class="result-card" id="calcium">
-              <p class="result-label">Calcium</p>
-              <p class="result-status">Add calcium chloride or calcium gluconate references and protocol notes.</p>
+            <article class="result-card">
+              <p class="result-label">Venous Cannulation</p>
+              <p class="result-status">Add dual-stage, bicaval, and peripheral venous drainage planning notes.</p>
             </article>
-            <article class="result-card" id="magnesium">
-              <p class="result-label">Magnesium</p>
-              <p class="result-status">Add magnesium replacement notes and rhythm-related reminders.</p>
+            <article class="result-card">
+              <p class="result-label">Patient Factors</p>
+              <p class="result-status">Add body size, vessel size, procedure type, access approach, and drainage expectations.</p>
             </article>
-            <article class="result-card" id="sodium">
-              <p class="result-label">Sodium</p>
-              <p class="result-status">Add sodium and osmolality considerations for perfusion scenarios.</p>
+            <article class="result-card">
+              <p class="result-label">Flow Targets</p>
+              <p class="result-status">Link target flow ranges and expected drainage performance to cannula choice.</p>
             </article>
-            <article class="result-card" id="bicarbonate">
-              <p class="result-label">Bicarbonate</p>
-              <p class="result-status">Add acid-base correction notes and protocol-specific guidance.</p>
+            <article class="result-card">
+              <p class="result-label">Troubleshooting</p>
+              <p class="result-status">Add notes for inadequate drainage, line chatter, high arterial line pressure, and repositioning considerations.</p>
+            </article>
+            <article class="result-card">
+              <p class="result-label">Reference Tables</p>
+              <p class="result-status">Add size ranges, manufacturer comparisons, and quick-reference planning tables as the section develops.</p>
             </article>
           </div>
+
           <p class="disclaimer">
-            Educational and simulation support only. Confirm replacement dose,
-            concentration, and administration requirements against local protocol
-            before use.
+            Educational and simulation support only. Confirm cannula choice,
+            access strategy, and manufacturer-specific flow guidance against
+            institutional practice and product information before use.
           </p>
         </section>
       </section>

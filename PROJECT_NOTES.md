@@ -54,6 +54,7 @@ For now, the project should remain:
 - Perfusion calculator
 - Prime planner
 - Anticoagulation support
+- Cannula selection
 
 ## Current Workflow Vision
 
