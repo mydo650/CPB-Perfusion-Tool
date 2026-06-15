@@ -427,6 +427,21 @@ input:focus {
   outline: none;
 }
 
+select {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+select:focus {
+  outline: none;
+}
+
 input[aria-invalid="true"] {
   color: var(--danger);
 }
@@ -488,6 +503,23 @@ input[aria-invalid="true"] {
   background: var(--accent-strong);
   border-color: transparent;
   color: #f8fffd;
+}
+
+.range-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.range-header output {
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+.cannula-flow-slider {
+  width: 100%;
+  accent-color: var(--accent-strong);
 }
 
 .validation-summary {
@@ -727,10 +759,78 @@ input[aria-invalid="true"] {
   min-height: 340px;
 }
 
+.cannula-chart-wrap {
+  min-height: 380px;
+}
+
 .curve-chart {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.cannula-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+
+.cannula-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.cannula-legend-swatch {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+  flex: none;
+}
+
+.cannula-curve-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
+}
+
+.cannula-curve-line.is-selected {
+  stroke-width: 4.5;
+  opacity: 1;
+}
+
+.cannula-guide-line {
+  stroke: rgba(22, 33, 38, 0.22);
+  stroke-dasharray: 6 6;
+}
+
+.cannula-selected-point circle {
+  fill: var(--panel-strong);
+  stroke: currentColor;
+  stroke-width: 3;
+}
+
+.cannula-selected-point text {
+  fill: currentColor;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.curve-axis-label {
+  fill: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .curve-modal[hidden] {

@@ -33,6 +33,65 @@ const SHARED_FIELD_GROUPS = {
 };
 
 const SHARED_FIELD_STORAGE_KEY = "cpbSupportSharedFields";
+const CANNULA_LINE_COLORS = ["#0f766e", "#2563eb", "#b45309", "#b91c1c", "#7c3aed", "#0f766e"];
+const CANNULA_LIBRARY = {
+  medtronic: {
+    label: "Medtronic Bio-Medicus NextGen",
+    sourceLabel: "Medtronic chart set",
+    maxFlow: 7,
+    families: {
+      femoralArterial: {
+        label: "Femoral arterial",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        sizes: [
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 8], [2, 26], [3, 55], [4, 94], [5, 145], [6, 210], [7, 286]] },
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 6], [2, 18], [3, 39], [4, 66], [5, 103], [6, 150], [7, 206]] },
+          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 4], [2, 12], [3, 27], [4, 47], [5, 71], [6, 108], [7, 152]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 3], [2, 9], [3, 20], [4, 33], [5, 52], [6, 77], [7, 109]] },
+        ],
+      },
+      femoralVenousMultiStage: {
+        label: "Femoral venous multi-stage",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        sizes: [
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 9], [2, 26], [3, 55], [4, 97], [5, 152], [6, 221], [7, 306]] },
+          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 6], [2, 16], [3, 35], [4, 59], [5, 90], [6, 129], [7, 178]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 5], [2, 13], [3, 28], [4, 47], [5, 70], [6, 101], [7, 139]] },
+          { id: "29 Fr", label: "29 Fr", points: [[0, 0], [1, 3], [2, 8], [3, 17], [4, 28], [5, 42], [6, 60], [7, 82]] },
+        ],
+      },
+    },
+  },
+  getinge: {
+    label: "Getinge HLS Cannulae",
+    sourceLabel: "Getinge HLS brochure",
+    maxFlow: 7,
+    families: {
+      arterialHls: {
+        label: "Arterial HLS cannulae",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        sizes: [
+          { id: "15 Fr", label: "15 Fr", points: [[0, 0], [1, 11], [2, 36], [3, 76], [4, 132], [5, 202], [6, 286], [7, 388]] },
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 7], [2, 22], [3, 47], [4, 78], [5, 122], [6, 176], [7, 244]] },
+          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 4], [2, 13], [3, 27], [4, 44], [5, 67], [6, 95], [7, 129]] },
+        ],
+      },
+      venousHls: {
+        label: "Venous HLS cannulae",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        sizes: [
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 8], [2, 24], [3, 50], [4, 86], [5, 133], [6, 191], [7, 262]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 5], [2, 14], [3, 30], [4, 50], [5, 76], [6, 108], [7, 148]] },
+          { id: "29 Fr", label: "29 Fr", points: [[0, 0], [1, 3], [2, 9], [3, 18], [4, 30], [5, 45], [6, 65], [7, 88]] },
+        ],
+      },
+    },
+  },
+};
 
 function roundTo(value, decimals) {
   const factor = 10 ** decimals;
@@ -382,6 +441,30 @@ const primePlanElements = {
   unitsBadge: document.querySelector("#primeUnitsBadge"),
   ratioBadge: document.querySelector("#primeRatioBadge"),
 };
+const cannulaManufacturerSelect = document.querySelector("#cannulaManufacturer");
+const cannulaFamilySelect = document.querySelector("#cannulaFamily");
+const cannulaSizeButtons = document.querySelector("#cannulaSizeButtons");
+const cannulaFlowSlider = document.querySelector("#cannulaFlowSlider");
+const cannulaFlowDisplay = document.querySelector("#cannulaFlowDisplay");
+const cannulaChart = document.querySelector("#cannulaChart");
+const cannulaChartSummary = document.querySelector("#cannulaChartSummary");
+const cannulaLegend = document.querySelector("#cannulaLegend");
+const cannulaChartTooltip = document.querySelector("#cannulaChartTooltip");
+const cannulaSelectedOutput = document.querySelector("#cannulaSelectedOutput");
+const cannulaSelectedStatus = document.querySelector("#cannulaSelectedStatus");
+const cannulaPressureOutput = document.querySelector("#cannulaPressureOutput");
+const cannulaPressureStatus = document.querySelector("#cannulaPressureStatus");
+const cannulaFlowOutput = document.querySelector("#cannulaFlowOutput");
+const cannulaFlowStatus = document.querySelector("#cannulaFlowStatus");
+const cannulaSourceOutput = document.querySelector("#cannulaSourceOutput");
+const cannulaSourceStatus = document.querySelector("#cannulaSourceStatus");
+const cannulaState = {
+  manufacturerId: "medtronic",
+  familyId: "femoralArterial",
+  sizeId: "23 Fr",
+  flow: 4,
+  dragging: false,
+};
 
 const perfusionOutputs = perfusionForm
   ? {
@@ -594,6 +677,241 @@ function formatDelta(value, unit) {
 
   const direction = value > 0 ? "Increase by" : "Decrease by";
   return `${direction} ${unit === "g/dL" ? rounded.toFixed(1) : rounded.toFixed(2)} ${unit}`;
+}
+
+function interpolateCurve(points, flow) {
+  if (!points.length) return null;
+  if (flow <= points[0][0]) return points[0][1];
+  if (flow >= points[points.length - 1][0]) return points[points.length - 1][1];
+
+  for (let index = 1; index < points.length; index += 1) {
+    const [rightX, rightY] = points[index];
+    const [leftX, leftY] = points[index - 1];
+    if (flow <= rightX) {
+      const ratio = (flow - leftX) / (rightX - leftX);
+      return leftY + (rightY - leftY) * ratio;
+    }
+  }
+
+  return points[points.length - 1][1];
+}
+
+function getCannulaManufacturer() {
+  return CANNULA_LIBRARY[cannulaState.manufacturerId];
+}
+
+function getCannulaFamily() {
+  return getCannulaManufacturer().families[cannulaState.familyId];
+}
+
+function getCannulaSizes() {
+  return getCannulaFamily().sizes;
+}
+
+function getSelectedCannulaSize() {
+  return getCannulaSizes().find((size) => size.id === cannulaState.sizeId) ?? getCannulaSizes()[0];
+}
+
+function syncCannulaManufacturerOptions() {
+  if (!cannulaManufacturerSelect) return;
+  cannulaManufacturerSelect.innerHTML = Object.entries(CANNULA_LIBRARY)
+    .map(([id, config]) => `<option value="${id}">${config.label}</option>`)
+    .join("");
+  cannulaManufacturerSelect.value = cannulaState.manufacturerId;
+}
+
+function syncCannulaFamilyOptions() {
+  if (!cannulaFamilySelect) return;
+  const manufacturer = getCannulaManufacturer();
+  const familyEntries = Object.entries(manufacturer.families);
+  if (!manufacturer.families[cannulaState.familyId]) {
+    [cannulaState.familyId] = familyEntries[0];
+  }
+  cannulaFamilySelect.innerHTML = familyEntries
+    .map(([id, family]) => `<option value="${id}">${family.label}</option>`)
+    .join("");
+  cannulaFamilySelect.value = cannulaState.familyId;
+}
+
+function syncCannulaSizeButtons() {
+  if (!cannulaSizeButtons) return;
+  const sizes = getCannulaSizes();
+  if (!sizes.some((size) => size.id === cannulaState.sizeId)) {
+    cannulaState.sizeId = sizes[0].id;
+  }
+  cannulaSizeButtons.innerHTML = sizes
+    .map((size) => `<button type="button" class="quick-select-button${size.id === cannulaState.sizeId ? " is-active" : ""}" data-cannula-size="${size.id}">${size.label}</button>`)
+    .join("");
+}
+
+function syncCannulaFlowControls() {
+  if (!cannulaFlowSlider || !cannulaFlowDisplay) return;
+  const manufacturer = getCannulaManufacturer();
+  cannulaFlowSlider.max = String(manufacturer.maxFlow);
+  if (cannulaState.flow > manufacturer.maxFlow) {
+    cannulaState.flow = manufacturer.maxFlow;
+  }
+  cannulaFlowSlider.value = String(cannulaState.flow);
+  cannulaFlowDisplay.textContent = `${roundTo(cannulaState.flow, 1).toFixed(1)} L/min`;
+}
+
+function buildCurvePath(points, x, y) {
+  return points.map(([flow, pressure], index) => `${index === 0 ? "M" : "L"} ${x(flow)} ${y(pressure)}`).join(" ");
+}
+
+function renderCannulaLegend() {
+  if (!cannulaLegend) return;
+  const sizes = getCannulaSizes();
+  cannulaLegend.innerHTML = sizes
+    .map((size, index) => `
+      <span class="cannula-legend-item">
+        <span class="cannula-legend-swatch" style="background:${CANNULA_LINE_COLORS[index % CANNULA_LINE_COLORS.length]}"></span>
+        ${size.label}
+      </span>
+    `)
+    .join("");
+}
+
+function renderCannulaOutputs() {
+  const manufacturer = getCannulaManufacturer();
+  const family = getCannulaFamily();
+  const selectedSize = getSelectedCannulaSize();
+  const pressureDrop = interpolateCurve(selectedSize.points, cannulaState.flow);
+
+  cannulaSelectedOutput.textContent = selectedSize.label;
+  cannulaSelectedStatus.textContent = `${manufacturer.label} ${family.label}.`;
+  cannulaPressureOutput.textContent = `${Math.round(pressureDrop)} mmHg`;
+  cannulaPressureStatus.textContent = `Estimated pressure drop at ${roundTo(cannulaState.flow, 1).toFixed(1)} L/min for the selected size.`;
+  cannulaFlowOutput.textContent = `${roundTo(cannulaState.flow, 1).toFixed(1)} L/min`;
+  cannulaFlowStatus.textContent = "Click and drag on the chart or use the slider to move the target flow.";
+  cannulaSourceOutput.textContent = manufacturer.sourceLabel;
+  cannulaSourceStatus.textContent = "Prototype values should be refined against verified manufacturer chart points before relying on them for detailed interpretation.";
+}
+
+function updateCannulaFlowFromPointer(event) {
+  if (!cannulaChart) return;
+  const bounds = cannulaChart.getBoundingClientRect();
+  const margin = { left: 70, right: 32 };
+  const usableWidth = bounds.width - margin.left - margin.right;
+  const relativeX = Math.min(Math.max(event.clientX - bounds.left - margin.left, 0), usableWidth);
+  const manufacturer = getCannulaManufacturer();
+  cannulaState.flow = roundTo((relativeX / usableWidth) * manufacturer.maxFlow, 1);
+  syncCannulaFlowControls();
+  renderCannulaChart();
+  renderCannulaOutputs();
+}
+
+function renderCannulaChart() {
+  if (!cannulaChart || !cannulaChartSummary) return;
+  const manufacturer = getCannulaManufacturer();
+  const family = getCannulaFamily();
+  const selectedSize = getSelectedCannulaSize();
+  const width = 720;
+  const height = 400;
+  const margin = { top: 26, right: 32, bottom: 58, left: 70 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const yMaxRaw = Math.max(...family.sizes.flatMap((size) => size.points.map(([, pressure]) => pressure)));
+  const yMax = Math.ceil(yMaxRaw / 50) * 50;
+  const xMax = manufacturer.maxFlow;
+  const x = (flow) => margin.left + (flow / xMax) * plotWidth;
+  const y = (pressure) => margin.top + plotHeight - (pressure / yMax) * plotHeight;
+  const xTicks = Array.from({ length: xMax + 1 }, (_, index) => index);
+  const yTicks = Array.from({ length: yMax / 50 + 1 }, (_, index) => index * 50);
+  const selectedPressure = interpolateCurve(selectedSize.points, cannulaState.flow);
+  const guideX = x(cannulaState.flow);
+
+  cannulaChartSummary.textContent = `${manufacturer.label} ${family.label}. Drag across the chart to estimate pressure drop at the target flow.`;
+  cannulaChart.innerHTML = `
+    <rect class="curve-bg" x="0" y="0" width="${width}" height="${height}" rx="18"></rect>
+    ${yTicks.map((tick) => `
+      <g class="curve-gridline">
+        <line x1="${margin.left}" y1="${y(tick)}" x2="${width - margin.right}" y2="${y(tick)}"></line>
+        <text x="${margin.left - 12}" y="${y(tick) + 4}" text-anchor="end">${tick}</text>
+      </g>
+    `).join("")}
+    ${xTicks.map((tick) => `
+      <g class="curve-gridline">
+        <line x1="${x(tick)}" y1="${margin.top}" x2="${x(tick)}" y2="${height - margin.bottom}"></line>
+        <text x="${x(tick)}" y="${height - margin.bottom + 26}" text-anchor="middle">${tick}</text>
+      </g>
+    `).join("")}
+    <line class="curve-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
+    <line class="curve-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"></line>
+    <line class="cannula-guide-line" x1="${guideX}" y1="${margin.top}" x2="${guideX}" y2="${height - margin.bottom}"></line>
+    ${family.sizes.map((size, index) => `
+      <path class="cannula-curve-line${size.id === selectedSize.id ? " is-selected" : ""}" d="${buildCurvePath(size.points, x, y)}" stroke="${CANNULA_LINE_COLORS[index % CANNULA_LINE_COLORS.length]}"></path>
+    `).join("")}
+    <g class="cannula-selected-point" style="color:${CANNULA_LINE_COLORS[family.sizes.findIndex((size) => size.id === selectedSize.id) % CANNULA_LINE_COLORS.length]}">
+      <circle cx="${x(cannulaState.flow)}" cy="${y(selectedPressure)}" r="7"></circle>
+      <text x="${x(cannulaState.flow)}" y="${y(selectedPressure) - 14}" text-anchor="middle">${selectedSize.label}: ${Math.round(selectedPressure)} mmHg</text>
+    </g>
+    <text class="curve-axis-label" x="${width / 2}" y="${height - 18}" text-anchor="middle">Flow (L/min)</text>
+    <text class="curve-axis-label" transform="translate(20 ${height / 2}) rotate(-90)" text-anchor="middle">Pressure drop (mmHg)</text>
+  `;
+}
+
+function initializeCannulaSelection() {
+  if (!cannulaManufacturerSelect || !cannulaFamilySelect || !cannulaFlowSlider) return;
+  syncCannulaManufacturerOptions();
+  syncCannulaFamilyOptions();
+  syncCannulaSizeButtons();
+  syncCannulaFlowControls();
+  renderCannulaLegend();
+  renderCannulaOutputs();
+  renderCannulaChart();
+
+  cannulaManufacturerSelect.addEventListener("change", () => {
+    cannulaState.manufacturerId = cannulaManufacturerSelect.value;
+    cannulaState.familyId = Object.keys(getCannulaManufacturer().families)[0];
+    cannulaState.sizeId = getCannulaFamily().sizes[0].id;
+    cannulaState.flow = Math.min(cannulaState.flow, getCannulaManufacturer().maxFlow);
+    syncCannulaFamilyOptions();
+    syncCannulaSizeButtons();
+    syncCannulaFlowControls();
+    renderCannulaLegend();
+    renderCannulaOutputs();
+    renderCannulaChart();
+  });
+
+  cannulaFamilySelect.addEventListener("change", () => {
+    cannulaState.familyId = cannulaFamilySelect.value;
+    cannulaState.sizeId = getCannulaFamily().sizes[0].id;
+    syncCannulaSizeButtons();
+    renderCannulaLegend();
+    renderCannulaOutputs();
+    renderCannulaChart();
+  });
+
+  cannulaSizeButtons.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-cannula-size]");
+    if (!button) return;
+    cannulaState.sizeId = button.dataset.cannulaSize;
+    syncCannulaSizeButtons();
+    renderCannulaOutputs();
+    renderCannulaChart();
+  });
+
+  cannulaFlowSlider.addEventListener("input", () => {
+    cannulaState.flow = Number(cannulaFlowSlider.value);
+    syncCannulaFlowControls();
+    renderCannulaOutputs();
+    renderCannulaChart();
+  });
+
+  cannulaChart.addEventListener("pointerdown", (event) => {
+    cannulaState.dragging = true;
+    updateCannulaFlowFromPointer(event);
+  });
+
+  window.addEventListener("pointermove", (event) => {
+    if (!cannulaState.dragging) return;
+    updateCannulaFlowFromPointer(event);
+  });
+
+  window.addEventListener("pointerup", () => {
+    cannulaState.dragging = false;
+  });
 }
 
 function activateTab(groupName, targetName) {
@@ -1123,3 +1441,5 @@ if (anticoagForm) {
   syncCurveControlState();
   renderAnticoagulation();
 }
+
+initializeCannulaSelection();

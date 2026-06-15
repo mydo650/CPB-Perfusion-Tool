@@ -55,35 +55,138 @@
         <section class="panel output-panel" aria-labelledby="cannula-selection-title">
           <div class="panel-header">
             <h2 id="cannula-selection-title">Cannula Selection</h2>
-            <p>Build this section into a practical planning tool for flow goals, access strategy, and cannula sizing support.</p>
+            <p>Build this section into a practical planning tool for flow goals, access strategy, cannula sizing support, and pressure-drop visualization.</p>
           </div>
+
+          <form id="cannulaSelectionForm" novalidate>
+            <div class="field-grid">
+              <label class="field">
+                <span>Manufacturer Family</span>
+                <div class="input-wrap">
+                  <select id="cannulaManufacturer" name="cannulaManufacturer"></select>
+                </div>
+                <small class="hint">Start with one published manufacturer family at a time so pressure-drop data stays traceable.</small>
+              </label>
+              <label class="field">
+                <span>Cannula Family</span>
+                <div class="input-wrap">
+                  <select id="cannulaFamily" name="cannulaFamily"></select>
+                </div>
+                <small class="hint">Compare arterial or venous families with their own size-specific curves.</small>
+              </label>
+            </div>
+
+            <div class="field">
+              <span>Available Sizes</span>
+              <div id="cannulaSizeButtons" class="quick-select-row" aria-label="Available cannula sizes"></div>
+              <small class="hint">Choose a size to highlight its curve and live pressure-drop readout.</small>
+            </div>
+
+            <div class="field">
+              <div class="range-header">
+                <span>Target Flow</span>
+                <output id="cannulaFlowDisplay" for="cannulaFlowSlider">4.0 L/min</output>
+              </div>
+              <input id="cannulaFlowSlider" class="cannula-flow-slider" type="range" min="0" max="7" step="0.1" value="4" />
+              <small class="hint">Use the slider or click and drag directly on the chart to move to the desired liters per minute.</small>
+            </div>
+          </form>
 
           <div class="results-grid results-grid-compact">
             <article class="result-card">
-              <p class="result-label">Arterial Cannulation</p>
-              <p class="result-status">Add aortic and peripheral arterial cannula options, flow considerations, and size-selection notes.</p>
+              <p class="result-label">Selected Cannula</p>
+              <output id="cannulaSelectedOutput" class="result-value">--</output>
+              <p id="cannulaSelectedStatus" class="result-status">Choose a manufacturer family, cannula family, and size.</p>
             </article>
             <article class="result-card">
-              <p class="result-label">Venous Cannulation</p>
-              <p class="result-status">Add dual-stage, bicaval, and peripheral venous drainage planning notes.</p>
+              <p class="result-label">Pressure Drop</p>
+              <output id="cannulaPressureOutput" class="result-value">--</output>
+              <p id="cannulaPressureStatus" class="result-status">Pressure drop updates at the selected target flow.</p>
             </article>
             <article class="result-card">
-              <p class="result-label">Patient Factors</p>
-              <p class="result-status">Add body size, vessel size, procedure type, access approach, and drainage expectations.</p>
+              <p class="result-label">Target Flow</p>
+              <output id="cannulaFlowOutput" class="result-value">--</output>
+              <p id="cannulaFlowStatus" class="result-status">Adjust liters per minute with the slider or chart drag control.</p>
             </article>
             <article class="result-card">
-              <p class="result-label">Flow Targets</p>
-              <p class="result-status">Link target flow ranges and expected drainage performance to cannula choice.</p>
-            </article>
-            <article class="result-card">
-              <p class="result-label">Troubleshooting</p>
-              <p class="result-status">Add notes for inadequate drainage, line chatter, high arterial line pressure, and repositioning considerations.</p>
-            </article>
-            <article class="result-card">
-              <p class="result-label">Reference Tables</p>
-              <p class="result-status">Add size ranges, manufacturer comparisons, and quick-reference planning tables as the section develops.</p>
+              <p class="result-label">Curve Source</p>
+              <output id="cannulaSourceOutput" class="result-value">--</output>
+              <p id="cannulaSourceStatus" class="result-status">Each family should stay linked to its published manufacturer chart source.</p>
             </article>
           </div>
+
+          <section class="curve-panel" aria-labelledby="cannula-chart-panel-title">
+            <div class="curve-header">
+              <div>
+                <h3 id="cannula-chart-panel-title">Pressure Drop vs. Flow</h3>
+                <p id="cannulaChartSummary">Compare size-specific curves and drag to the target flow to estimate the selected cannula pressure drop.</p>
+              </div>
+            </div>
+            <div class="curve-chart-wrap cannula-chart-wrap">
+              <svg id="cannulaChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-chart-panel-title cannulaChartSummary"></svg>
+              <div id="cannulaChartTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+            </div>
+            <div id="cannulaLegend" class="cannula-legend" aria-label="Displayed cannula sizes"></div>
+            <p class="curve-caveat">Prototype chart model for educational and simulation planning. Curve points are a first-pass build aligned to published manufacturer flow-performance charts and should be refined as size-specific values are verified.</p>
+          </section>
+
+          <section class="formula-panel" aria-labelledby="cannula-groups-title">
+            <h3 id="cannula-groups-title">Cannula Groups In Scope</h3>
+            <dl class="formula-list">
+              <div>
+                <dt>Arterial perfusion cannulas</dt>
+                <dd>Central aortic, femoral or peripheral arterial, and pediatric arterial options that are used for forward perfusion support.</dd>
+              </div>
+              <div>
+                <dt>Venous drainage cannulas</dt>
+                <dd>Single-stage, dual-stage, multi-stage femoral venous, bicaval or two-stage venous, internal jugular venous, and pediatric venous options used for bypass drainage planning.</dd>
+              </div>
+              <div>
+                <dt>Patient and procedure factors</dt>
+                <dd>Body size, vessel size, target flow, access approach, procedure type, and expected drainage demands should all influence the selection workflow.</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="formula-panel" aria-labelledby="cannula-chart-title">
+            <h3 id="cannula-chart-title">Interactive Chart Workflow</h3>
+            <ol class="references-list">
+              <li>Select a manufacturer family and cannula type.</li>
+              <li>Select or compare one or more cannula sizes.</li>
+              <li>Drag or set a target blood flow.</li>
+              <li>Read the expected pressure drop at that flow from the published performance curve.</li>
+              <li>Use the visual comparison to support selection and discussion during simulation planning.</li>
+            </ol>
+          </section>
+
+          <section class="formula-panel" aria-labelledby="cannula-manufacturer-title">
+            <h3 id="cannula-manufacturer-title">Manufacturer Families To Build From</h3>
+            <dl class="formula-list">
+              <div>
+                <dt>Medtronic Bio-Medicus NextGen</dt>
+                <dd>Strong first candidate because public product information includes pressure drop versus flow charts for femoral arterial, internal jugular venous, femoral venous multi-stage, femoral venous bi-caval, pediatric arterial, and pediatric venous models.</dd>
+              </div>
+              <div>
+                <dt>Getinge HLS Cannulae</dt>
+                <dd>Strong second candidate because the brochure includes arterial and venous HLS cannula pressure-drop curves across multiple sizes.</dd>
+              </div>
+              <div>
+                <dt>LivaNova adult and pediatric cannulae</dt>
+                <dd>Useful for later expansion because the portfolio clearly covers adult arterial, adult venous return, pediatric arterial, and pediatric venous categories.</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="formula-panel references-panel" aria-labelledby="cannula-references-title">
+            <h3 id="cannula-references-title">Cannula References</h3>
+            <ol class="references-list">
+              <li>Medtronic. Cannula catalog. <a href="https://www.medtronic.com/content/dam/medtronic-wide/public/united-states/products/cardiac-vascular/cardiovascular/cannulae/cannulae-us-product-catalog.pdf" target="_blank" rel="noreferrer">Medtronic PDF</a></li>
+              <li>Medtronic. Bio-Medicus NextGen cannula. <a href="https://www.medtronic.com/en-us/healthcare-professionals/products/cardiovascular/cannulae/femoral-cannulae/bio-medicus-nextgen-cannula.html" target="_blank" rel="noreferrer">Medtronic product page</a></li>
+              <li>Getinge. HLS Cannulae brochure. <a href="https://www.getinge.com/dam/hospital/documents/english/hls_cannulae_brochure-32284-en.pdf" target="_blank" rel="noreferrer">Getinge PDF</a></li>
+              <li>Getinge. Venous and arterial HLS Cannulae. <a href="https://www.getinge.com/int/products/hls-cannulae/" target="_blank" rel="noreferrer">Getinge product page</a></li>
+              <li>LivaNova. Cardiopulmonary cannulae, adult and pediatric. <a href="https://www.livanova.com/cannulae/en-gb" target="_blank" rel="noreferrer">LivaNova cannulae page</a></li>
+            </ol>
+          </section>
 
           <p class="disclaimer">
             Educational and simulation support only. Confirm cannula choice,
@@ -93,5 +196,6 @@
         </section>
       </section>
     </main>
+    <script src="./app.js"></script>
   </body>
 </html>
