@@ -54,34 +54,188 @@
         <section class="panel output-panel" aria-labelledby="electrolytes-title">
           <div class="panel-header">
             <h2 id="electrolytes-title">Electrolytes</h2>
-            <p>Add replacement references, target ranges, and local simulation notes here.</p>
+            <p>Adult reference ranges and CPB-focused correction reminders for simulation planning.</p>
           </div>
+          <p class="formula-note">
+            Laboratory ranges, cardioplegia strategy, renal function, temperature, pH, and local protocols can change treatment thresholds. Confirm unexpected results with a fresh blood gas before adding medication to the circuit.
+          </p>
           <div class="results-grid results-grid-compact">
             <article class="result-card" id="potassium">
               <p class="result-label">Potassium</p>
-              <p class="result-status">Add potassium replacement notes and monitoring reminders.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Potassium Management</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>Normal Range:</dt>
+                      <dd>3.5 to 5.0 mEq/L. Cardiac-surgery teams commonly aim for a high-normal value before separation from CPB, based on rhythm, renal function, and local protocol.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a Low Value on CPB:</dt>
+                      <dd>Confirm the result and check magnesium and acid-base status. Potassium chloride may be given in small protocol-defined aliquots through the venous reservoir with thorough mixing and continued circulation, or through a central line by anesthesia. Adult aliquots are often 10 mEq, followed by repeat blood gas testing; avoid rapid concentrated boluses and dextrose-containing replacement fluid.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a High Value on CPB:</dt>
+                      <dd>Exclude a cardioplegia-contaminated or hemolyzed sample, stop potassium sources, and reassess pH, glucose, renal function, and circuit flow. For significant hyperkalemia, use the institutional pathway: calcium for ECG instability, insulin with glucose to shift potassium intracellularly, bicarbonate when clinically appropriate for acidemia, and potassium removal with ultrafiltration, zero-balance ultrafiltration, or dialysis when needed.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When Low:</dt>
+                      <dd>Delayed repolarization, flattened T waves, ST depression, U waves, prolonged QT, atrial or ventricular ectopy, torsades, ventricular tachycardia or fibrillation, and increased sensitivity to digoxin. Concurrent hypomagnesemia makes arrhythmias and replacement resistance more likely.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When High:</dt>
+                      <dd>Peaked T waves, PR prolongation, loss of P waves, QRS widening, bradycardia, heart block, ventricular fibrillation, or asystole. ECG changes or a rapidly rising value require urgent treatment even before a repeat laboratory result returns.</dd>
+                    </div>
+                    <div>
+                      <dt>When to Correct During Cardiac Surgery:</dt>
+                      <dd>Correct promptly for dysrhythmia, ischemia, rapid change, or values below 3.0 mEq/L. Replete values below the local target during rewarming and before separation from bypass. Treat hyperkalemia urgently when ECG changes are present, when potassium approaches or exceeds 6.0 mEq/L, or before cross-clamp removal and separation if the level remains unsafe.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
             <article class="result-card" id="calcium">
               <p class="result-label">Calcium</p>
-              <p class="result-status">Add calcium chloride or calcium gluconate references and protocol notes.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Calcium Management</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>Normal Range:</dt>
+                      <dd>Ionized calcium is approximately 1.12 to 1.32 mmol/L; total calcium is roughly 8.5 to 10.5 mg/dL and must be interpreted with albumin and pH. Ionized calcium is the preferred intraoperative measurement.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a Low Value on CPB:</dt>
+                      <dd>Confirm ionized calcium and pH. Calcium chloride may be administered in small protocol-defined doses through the circuit or a central line; a common adult dose is 500 to 1,000 mg, followed by repeat ionized calcium and hemodynamic assessment. Calcium gluconate supplies less elemental calcium and is more suitable when central access is unavailable.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a High Value on CPB:</dt>
+                      <dd>Stop calcium administration, confirm the result and pH, review cardioplegia and transfusion exposure, and avoid additional calcium. Optimize volume and renal clearance; severe or persistent hypercalcemia may require ultrafiltration or renal replacement therapy with a low-calcium solution under specialist direction.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When Low:</dt>
+                      <dd>Reduced myocardial contractility, hypotension, impaired vascular tone, prolonged QT, ventricular dysrhythmias, and reduced response to vasoactive medications. Citrate from transfusion and alkalemia can acutely lower ionized calcium.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When High:</dt>
+                      <dd>Shortened QT, PR prolongation, widened QRS, bradycardia, heart block, ventricular ectopy, increased vascular tone, and possible cardiac arrest at severe levels.</dd>
+                    </div>
+                    <div>
+                      <dt>When to Correct During Cardiac Surgery:</dt>
+                      <dd>Correct symptomatic or marked ionized hypocalcemia, especially with hypotension, poor contractility, massive transfusion, or difficulty separating from CPB. Many teams reassess during rewarming and immediately before separation rather than treating mild hemodilution routinely. Treat significant hypercalcemia when ECG or hemodynamic effects are present.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
             <article class="result-card" id="magnesium">
               <p class="result-label">Magnesium</p>
-              <p class="result-status">Add magnesium replacement notes and rhythm-related reminders.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Magnesium Management</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>Normal Range:</dt>
+                      <dd>Approximately 1.7 to 2.4 mg/dL, or 0.70 to 1.0 mmol/L. Use the laboratory-specific range and consider renal function.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a Low Value on CPB:</dt>
+                      <dd>Magnesium sulfate may be given slowly through the venous reservoir or central line with adequate mixing. A common adult replacement dose is 1 to 2 g IV, reduced or withheld for significant renal dysfunction, followed by repeat level and rhythm assessment.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a High Value on CPB:</dt>
+                      <dd>Stop magnesium sources and assess renal clearance. For symptomatic hypermagnesemia, calcium chloride or calcium gluconate may temporarily oppose cardiac and neuromuscular effects; promote removal with diuresis when appropriate, ultrafiltration, or dialysis for severe elevation or renal failure.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When Low:</dt>
+                      <dd>Atrial and ventricular ectopy, atrial fibrillation, prolonged QT, torsades de pointes, ventricular tachycardia, and difficulty correcting hypokalemia.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When High:</dt>
+                      <dd>Hypotension, vasodilation, bradycardia, PR or QRS prolongation, heart block, reduced contractility, and cardiac arrest at severe levels.</dd>
+                    </div>
+                    <div>
+                      <dt>When to Correct During Cardiac Surgery:</dt>
+                      <dd>Correct below-range magnesium when ectopy, prolonged QT, torsades, refractory hypokalemia, or anticipated separation from CPB makes electrical stability important. Treat high values when symptomatic, progressively rising, or associated with renal dysfunction and conduction changes.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
             <article class="result-card" id="sodium">
               <p class="result-label">Sodium</p>
-              <p class="result-status">Add sodium and osmolality considerations for perfusion scenarios.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Sodium Management</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>Normal Range:</dt>
+                      <dd>135 to 145 mEq/L. Interpret sodium with glucose, osmolality, volume status, prime composition, and the rate and duration of change.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a Low Value on CPB:</dt>
+                      <dd>Determine whether the change is acute dilution from the prime, hyperglycemia-related, or preexisting. Mild stable dilutional hyponatremia often requires monitoring rather than rapid correction. For marked acute or symptomatic hyponatremia, use protocol-directed sodium-containing fluid or hypertonic saline and consider hemoconcentration; avoid overcorrection and recheck sodium and osmolality frequently.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a High Value on CPB:</dt>
+                      <dd>Stop unnecessary sodium bicarbonate and high-sodium fluids, review cardioplegia and prime composition, and correct the free-water deficit gradually with an appropriate compatible hypotonic solution or adjusted hemofiltration replacement fluid. Never add sterile water directly to the circuit.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When Low:</dt>
+                      <dd>Severe acute hyponatremia can cause cerebral edema and seizures, with secondary sympathetic surges, hypoxia, hemodynamic instability, and impaired myocardial performance. Associated potassium, magnesium, calcium, and osmolality abnormalities often drive the direct rhythm risk.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When High:</dt>
+                      <dd>Hyperosmolality and cellular dehydration can reduce effective circulating volume, causing tachycardia and hypotension; severe elevation may contribute to impaired contractility, neurologic injury, and dysrhythmia.</dd>
+                    </div>
+                    <div>
+                      <dt>When to Correct During Cardiac Surgery:</dt>
+                      <dd>Address rapid intraoperative changes, neurologic symptoms, sodium below about 125 mEq/L, sodium above about 150 mEq/L, or a substantial deviation from the pre-CPB baseline. Avoid abrupt normalization of chronic abnormalities; chronic sodium correction generally should not exceed the institution's daily correction limit.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
             <article class="result-card" id="bicarbonate">
               <p class="result-label">Bicarbonate</p>
-              <p class="result-status">Add acid-base correction notes and protocol-specific guidance.</p>
+              <div class="drug-accordion">
+                <details class="drug-item" open>
+                  <summary class="drug-summary">Bicarbonate and Metabolic Acid-Base Management</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>Normal Range:</dt>
+                      <dd>Approximately 22 to 26 mEq/L on arterial blood gas analysis. Always interpret bicarbonate with pH, PaCO2, base excess or deficit, chloride, lactate, and the selected alpha-stat or pH-stat strategy.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a Low Value on CPB:</dt>
+                      <dd>Treat the cause first: verify pump flow and oxygen delivery, arterial and venous line position, oxygenator function, hematocrit, temperature, perfusion pressure, glucose, lactate, and ventilation or sweep. Sodium bicarbonate should be reserved for protocol-defined severe acidemia, selected bicarbonate-loss states, or life-threatening hyperkalemia; dose from the measured base deficit in divided aliquots and repeat the blood gas.</dd>
+                    </div>
+                    <div>
+                      <dt>Correcting a High Value on CPB:</dt>
+                      <dd>Stop exogenous bicarbonate, review excessive ventilation or sweep and chloride depletion, and correct associated hypokalemia, hypochloremia, volume contraction, and low ionized calcium. Adjust gas management to the chosen CPB strategy; persistent severe metabolic alkalosis may require specialist-directed chloride replacement, acetazolamide, or renal replacement therapy.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When Low:</dt>
+                      <dd>Acidemia reduces myocardial contractility, promotes vasodilation, decreases catecholamine responsiveness, increases pulmonary vascular resistance, and can worsen hyperkalemia and ventricular dysrhythmias.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations When High:</dt>
+                      <dd>Alkalemia can lower ionized calcium and potassium, reduce coronary blood flow, prolong repolarization, and increase atrial or ventricular dysrhythmia risk. It can also shift the oxyhemoglobin curve left and impair tissue oxygen unloading.</dd>
+                    </div>
+                    <div>
+                      <dt>When to Correct During Cardiac Surgery:</dt>
+                      <dd>Correct the underlying perfusion or ventilation problem whenever pH and lactate trend in the wrong direction. Consider buffer therapy for severe acidemia with hemodynamic compromise after reversible causes are addressed. Treat marked alkalemia, especially pH above about 7.55, when accompanied by dysrhythmia, hypotension, low ionized calcium, or difficulty separating from CPB.</dd>
+                    </div>
+                  </dl>
+                </details>
+              </div>
             </article>
           </div>
           <p class="disclaimer">
-            Educational and simulation support only. Confirm replacement dose,
-            concentration, and administration requirements against local protocol
-            before use.
+            Educational and simulation support only. Electrolyte correction on
+            bypass requires real-time review by the perfusionist, anesthesiologist,
+            and surgical team. Confirm every dose, concentration, route, correction
+            rate, blood-gas result, and treatment threshold against local protocol.
           </p>
         </section>
       </section>
