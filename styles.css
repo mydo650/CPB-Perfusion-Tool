@@ -63,6 +63,18 @@ body.page-perfusion {
     linear-gradient(180deg, #fff1f2 0%, #ffe4e6 48%, #fecdd3 100%);
 }
 
+body.page-cannula-selection {
+  --accent: #b91c1c;
+  --accent-strong: #991b1b;
+  --accent-soft: rgba(185, 28, 28, 0.12);
+  --line: rgba(153, 27, 27, 0.16);
+  --shadow: 0 28px 60px rgba(127, 29, 29, 0.14);
+  background:
+    radial-gradient(circle at top left, rgba(220, 38, 38, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(248, 113, 113, 0.18), transparent 24%),
+    linear-gradient(180deg, #fff1f2 0%, #ffe4e6 48%, #fecdd3 100%);
+}
+
 .app-shell {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
@@ -769,44 +781,12 @@ input[aria-invalid="true"] {
   height: 100%;
 }
 
-.cannula-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 0.85rem;
-}
-
-.cannula-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 2rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(22, 33, 38, 0.08);
-  color: var(--ink);
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.cannula-legend-swatch {
-  width: 0.8rem;
-  height: 0.8rem;
-  border-radius: 999px;
-  flex: none;
-}
-
 .cannula-curve-line {
   fill: none;
-  stroke-width: 3;
+  stroke: var(--accent-strong);
+  stroke-width: 4.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.7;
-}
-
-.cannula-curve-line.is-selected {
-  stroke-width: 4.5;
   opacity: 1;
 }
 
@@ -815,14 +795,27 @@ input[aria-invalid="true"] {
   stroke-dasharray: 6 6;
 }
 
+.cannula-threshold-line {
+  stroke: rgba(185, 28, 28, 0.7);
+  stroke-width: 2;
+  stroke-dasharray: 10 7;
+}
+
+.cannula-threshold-label {
+  fill: #991b1b;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .cannula-selected-point circle {
   fill: var(--panel-strong);
-  stroke: currentColor;
+  stroke: var(--accent-strong);
   stroke-width: 3;
 }
 
 .cannula-selected-point text {
-  fill: currentColor;
+  fill: var(--accent-strong);
   font-size: 0.88rem;
   font-weight: 800;
 }

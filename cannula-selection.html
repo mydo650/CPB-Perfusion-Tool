@@ -77,9 +77,9 @@
             </div>
 
             <div class="field">
-              <span>Available Sizes</span>
+              <span>Manual Size Override</span>
               <div id="cannulaSizeButtons" class="quick-select-row" aria-label="Available cannula sizes"></div>
-              <small class="hint">Choose a size to highlight its curve and live pressure-drop readout.</small>
+              <small class="hint">The tool recommends a size automatically from target flow. Use these buttons only if you want to inspect a different size manually.</small>
             </div>
 
             <div class="field">
@@ -94,9 +94,14 @@
 
           <div class="results-grid results-grid-compact">
             <article class="result-card">
-              <p class="result-label">Selected Cannula</p>
+              <p class="result-label">Recommended Size</p>
+              <output id="cannulaRecommendedOutput" class="result-value">--</output>
+              <p id="cannulaRecommendedStatus" class="result-status">Set a target flow to generate a recommendation.</p>
+            </article>
+            <article class="result-card">
+              <p class="result-label">Displayed Cannula</p>
               <output id="cannulaSelectedOutput" class="result-value">--</output>
-              <p id="cannulaSelectedStatus" class="result-status">Choose a manufacturer family, cannula family, and size.</p>
+              <p id="cannulaSelectedStatus" class="result-status">The chart follows the recommended size unless you choose a manual override.</p>
             </article>
             <article class="result-card">
               <p class="result-label">Pressure Drop</p>
@@ -104,9 +109,19 @@
               <p id="cannulaPressureStatus" class="result-status">Pressure drop updates at the selected target flow.</p>
             </article>
             <article class="result-card">
-              <p class="result-label">Target Flow</p>
+              <p class="result-label">Target Flow (2.6 CI Default)</p>
               <output id="cannulaFlowOutput" class="result-value">--</output>
               <p id="cannulaFlowStatus" class="result-status">Adjust liters per minute with the slider or chart drag control.</p>
+            </article>
+            <article class="result-card">
+              <p class="result-label">Target Cardiac Index</p>
+              <output id="cannulaCiOutput" class="result-value">--</output>
+              <p id="cannulaCiStatus" class="result-status">Enter height and weight in the Perfusion tab to link liters per minute back to cardiac index.</p>
+            </article>
+            <article class="result-card">
+              <p class="result-label">Patient BSA</p>
+              <output id="cannulaBsaOutput" class="result-value">--</output>
+              <p id="cannulaBsaStatus" class="result-status">Pulled from Perfusion tab height and weight when available.</p>
             </article>
             <article class="result-card">
               <p class="result-label">Curve Source</p>
@@ -119,14 +134,13 @@
             <div class="curve-header">
               <div>
                 <h3 id="cannula-chart-panel-title">Pressure Drop vs. Flow</h3>
-                <p id="cannulaChartSummary">Compare size-specific curves and drag to the target flow to estimate the selected cannula pressure drop.</p>
+                <p id="cannulaChartSummary">View the individualized pressure-drop curve for the displayed cannula and drag to the target flow.</p>
               </div>
             </div>
             <div class="curve-chart-wrap cannula-chart-wrap">
               <svg id="cannulaChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-chart-panel-title cannulaChartSummary"></svg>
               <div id="cannulaChartTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
             </div>
-            <div id="cannulaLegend" class="cannula-legend" aria-label="Displayed cannula sizes"></div>
             <p class="curve-caveat">Prototype chart model for educational and simulation planning. Curve points are a first-pass build aligned to published manufacturer flow-performance charts and should be refined as size-specific values are verified.</p>
           </section>
 
@@ -152,10 +166,10 @@
             <h3 id="cannula-chart-title">Interactive Chart Workflow</h3>
             <ol class="references-list">
               <li>Select a manufacturer family and cannula type.</li>
-              <li>Select or compare one or more cannula sizes.</li>
               <li>Drag or set a target blood flow.</li>
+              <li>Let the tool recommend the smallest suitable size based on the modeled pressure-drop target.</li>
               <li>Read the expected pressure drop at that flow from the published performance curve.</li>
-              <li>Use the visual comparison to support selection and discussion during simulation planning.</li>
+              <li>Optionally override the displayed size to compare nearby choices.</li>
             </ol>
           </section>
 
