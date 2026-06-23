@@ -44,6 +44,7 @@ const CANNULA_LIBRARY = {
     families: {
       femoralArterial: {
         label: "Femoral arterial",
+        category: "arterial",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
         chartThresholdPressure: 100,
@@ -57,6 +58,7 @@ const CANNULA_LIBRARY = {
       },
       femoralVenousMultiStage: {
         label: "Femoral venous multi-stage",
+        category: "venous",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
         chartThresholdPressure: 40,
@@ -77,6 +79,7 @@ const CANNULA_LIBRARY = {
     families: {
       arterialHls: {
         label: "Arterial HLS cannulae",
+        category: "arterial",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
         chartThresholdPressure: 100,
@@ -89,6 +92,7 @@ const CANNULA_LIBRARY = {
       },
       venousHls: {
         label: "Venous HLS cannulae",
+        category: "venous",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
         chartThresholdPressure: 40,
@@ -856,6 +860,29 @@ function buildCurvePath(points, x, y) {
   return points.map(([flow, pressure], index) => `${index === 0 ? "M" : "L"} ${x(flow)} ${y(pressure)}`).join(" ");
 }
 
+function getNiceAxisStep(maxValue, targetTickCount = 6) {
+  const roughStep = maxValue / targetTickCount;
+  const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+  const normalizedStep = roughStep / magnitude;
+
+  if (normalizedStep <= 1) return magnitude;
+  if (normalizedStep <= 2) return 2 * magnitude;
+  if (normalizedStep <= 2.5) return 2.5 * magnitude;
+  if (normalizedStep <= 5) return 5 * magnitude;
+  return 10 * magnitude;
+}
+
+function getCannulaYAxisConfig(selectedSize, family) {
+  const thresholdPressure = family.chartThresholdPressure ?? family.recommendedMaxPressure;
+  const selectedCurveMax = Math.max(...selectedSize.points.map(([, pressure]) => pressure));
+  const paddedMax = Math.max(selectedCurveMax, thresholdPressure) * 1.12;
+  const tickStep = getNiceAxisStep(paddedMax);
+  const yMax = Math.ceil(paddedMax / tickStep) * tickStep;
+  const yTicks = Array.from({ length: Math.round(yMax / tickStep) + 1 }, (_, index) => roundTo(index * tickStep, 2));
+
+  return { thresholdPressure, yMax, yTicks };
+}
+
 function renderCannulaOutputs() {
   const manufacturer = getCannulaManufacturer();
   const family = getCannulaFamily();
@@ -935,16 +962,13 @@ function renderCannulaChart() {
   const margin = { top: 26, right: 32, bottom: 58, left: 70 };
   const plotWidth = width - margin.left - margin.right;
   const plotHeight = height - margin.top - margin.bottom;
-  const yMaxRaw = Math.max(...family.sizes.flatMap((size) => size.points.map(([, pressure]) => pressure)));
-  const yMax = Math.ceil(yMaxRaw / 50) * 50;
+  const { thresholdPressure, yMax, yTicks } = getCannulaYAxisConfig(selectedSize, family);
   const xMax = manufacturer.maxFlow;
   const x = (flow) => margin.left + (flow / xMax) * plotWidth;
   const y = (pressure) => margin.top + plotHeight - (pressure / yMax) * plotHeight;
   const xTicks = Array.from({ length: xMax + 1 }, (_, index) => index);
-  const yTicks = Array.from({ length: yMax / 50 + 1 }, (_, index) => index * 50);
   const selectedPressure = interpolateCurve(selectedSize.points, cannulaState.flow);
   const guideX = x(cannulaState.flow);
-  const thresholdPressure = family.chartThresholdPressure ?? family.recommendedMaxPressure;
   const thresholdY = y(thresholdPressure);
   const thresholdLabel = `${thresholdPressure} mmHg ${family.label.toLowerCase().includes("venous") ? "venous" : "arterial"} reference`;
 
@@ -966,7 +990,7 @@ function renderCannulaChart() {
     <line class="curve-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
     <line class="curve-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"></line>
     <line class="cannula-threshold-line" x1="${margin.left}" y1="${thresholdY}" x2="${width - margin.right}" y2="${thresholdY}"></line>
-    <text class="cannula-threshold-label" x="${width - margin.right - 6}" y="${thresholdY - 8}" text-anchor="end">${thresholdLabel}</text>
+    <text class="cannula-threshold-label" x="${margin.left + 8}" y="${thresholdY - 8}" text-anchor="start">${thresholdLabel}</text>
     <line class="cannula-guide-line" x1="${guideX}" y1="${margin.top}" x2="${guideX}" y2="${height - margin.bottom}"></line>
     <path class="cannula-curve-line" d="${buildCurvePath(selectedSize.points, x, y)}"></path>
     <g class="cannula-selected-point">
