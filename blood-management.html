@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPB Blood Products and Blood Management Strategies</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="page-blood-management">
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Simulation Support Tool</p>
+        <h1>CPB Blood Products and Blood Management Strategies</h1>
+        <p class="intro">
+          A reference space for transfusion products, hemostasis planning, and
+          perfusion blood-conservation strategies during simulation planning.
+        </p>
+      </section>
+
+      <nav class="module-switcher page-switcher" aria-label="Website pages">
+        <a class="module-button page-link" href="./index.html" aria-current="false">Home</a>
+        <a class="module-button page-link" href="./perfusion.html" aria-current="false">Perfusion</a>
+        <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
+        <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
+        <a class="module-button page-link" href="./cannula-selection.html" aria-current="false">Cannula Selection</a>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link">Drug Library</summary>
+          <div class="dropdown-menu">
+            <a href="./drug-library.html">Overview</a>
+            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
+            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
+            <a href="./drug-library.html#vasopressors">Vasopressors</a>
+            <a href="./drug-library.html#inotropes">Inotropes</a>
+            <a href="./drug-library.html#vasodilators">Vasodilators</a>
+            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
+            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
+          </div>
+        </details>
+        <details class="nav-dropdown">
+          <summary class="module-button page-link">Electrolytes/Blood Gas Ranges</summary>
+          <div class="dropdown-menu">
+            <a href="./electrolytes.html">Overview</a>
+            <a href="./electrolytes.html#potassium">Potassium</a>
+            <a href="./electrolytes.html#calcium">Calcium</a>
+            <a href="./electrolytes.html#magnesium">Magnesium</a>
+            <a href="./electrolytes.html#sodium">Sodium</a>
+            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
+          </div>
+        </details>
+        <a class="module-button page-link is-active" href="./blood-management.html" aria-current="page">Blood Products/Blood Management</a>
+        <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
+      </nav>
+
+      <section class="workspace page-workspace" aria-label="Blood products and blood management strategies">
+        <section class="panel output-panel" aria-labelledby="blood-management-title">
+          <div class="panel-header">
+            <h2 id="blood-management-title">Blood Products and Blood Management Strategies</h2>
+            <p>Use this page to organize transfusion products, conservation strategies, and local protocol reminders.</p>
+          </div>
+          <div class="results-grid results-grid-compact">
+            <article class="result-card" id="blood-products">
+              <p class="result-label">Blood Products</p>
+              <p class="home-copy">Add PRBCs, FFP, platelets, cryoprecipitate, fibrinogen concentrate, PCC, and other blood product notes here.</p>
+            </article>
+            <article class="result-card" id="blood-management-strategies">
+              <p class="result-label">Blood Management Strategies</p>
+              <p class="home-copy">Add ultrafiltration, cell salvage, antifibrinolytics, hemodilution, autologous priming, and transfusion-threshold notes here.</p>
+            </article>
+          </div>
+          <p class="disclaimer">
+            Educational and simulation support only. Confirm transfusion
+            thresholds, product availability, and blood-management protocols
+            against local policy before use.
+          </p>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

@@ -241,6 +241,7 @@ h1 {
 
 .page-drug-library .workspace,
 .page-electrolytes .workspace,
+.page-blood-management .workspace,
 .page-cannula-selection .workspace {
   grid-template-columns: 1fr;
 }
