@@ -59,18 +59,62 @@
           </div>
 
           <form id="cannulaSelectionForm" novalidate>
-            <div class="field-grid cannula-control-grid">
-              <label class="field">
-                <span>Manufacturer Family</span>
-                <div class="input-wrap">
-                  <select id="cannulaManufacturer" name="cannulaManufacturer"></select>
+            <div class="cannula-setup-grid">
+              <section class="curve-panel cannula-setup-panel" aria-labelledby="cannula-arterial-setup-title">
+                <div class="curve-header">
+                  <div>
+                    <h3 id="cannula-arterial-setup-title">Arterial Setup</h3>
+                    <p>Choose the arterial manufacturer, type, and size path before moving the shared target flow.</p>
+                  </div>
                 </div>
-                <small class="hint">Start with one published manufacturer family at a time so pressure-drop data stays traceable.</small>
-              </label>
-              <article class="result-card accent-card cannula-compare-note">
-                <p class="result-label">Paired Compare Mode</p>
-                <p class="cannula-compare-copy">Arterial and venous views stay locked to the same target flow so inflow and drainage can be reviewed together.</p>
-              </article>
+                <label class="field">
+                  <span>Arterial Manufacturer</span>
+                  <div class="input-wrap">
+                    <select id="cannulaArterialManufacturer" name="cannulaArterialManufacturer"></select>
+                  </div>
+                  <small class="hint">Use the arterial manufacturer and model family that match surgeon and institution preference.</small>
+                </label>
+                <label class="field">
+                  <span>Arterial Type</span>
+                  <div class="input-wrap">
+                    <select id="cannulaArterialFamily" name="cannulaArterialFamily"></select>
+                  </div>
+                  <small class="hint">Examples include DLP, Bio-Medicus NextGen, EOPA, HLS, or Optisite depending on manufacturer.</small>
+                </label>
+                <div class="field">
+                  <span>Arterial Size Override</span>
+                  <div id="cannulaArterialSizeButtons" class="quick-select-row" aria-label="Available arterial cannula sizes"></div>
+                  <small class="hint">The tool recommends the smallest arterial size that stays under the target threshold at the shared flow.</small>
+                </div>
+              </section>
+
+              <section class="curve-panel cannula-setup-panel" aria-labelledby="cannula-venous-setup-title">
+                <div class="curve-header">
+                  <div>
+                    <h3 id="cannula-venous-setup-title">Venous Setup</h3>
+                    <p>Choose the venous manufacturer, type, and size path independently for the drainage side.</p>
+                  </div>
+                </div>
+                <label class="field">
+                  <span>Venous Manufacturer</span>
+                  <div class="input-wrap">
+                    <select id="cannulaVenousManufacturer" name="cannulaVenousManufacturer"></select>
+                  </div>
+                  <small class="hint">Use the venous manufacturer and model family that match surgeon and institutional drainage preferences.</small>
+                </label>
+                <label class="field">
+                  <span>Venous Type</span>
+                  <div class="input-wrap">
+                    <select id="cannulaVenousFamily" name="cannulaVenousFamily"></select>
+                  </div>
+                  <small class="hint">Examples include DLP, MC2, metal-tip right-angle, plastic-tip right-angle, or HLS depending on manufacturer.</small>
+                </label>
+                <div class="field">
+                  <span>Venous Size Override</span>
+                  <div id="cannulaVenousSizeButtons" class="quick-select-row" aria-label="Available venous cannula sizes"></div>
+                  <small class="hint">The tool recommends the smallest venous size that stays under the target threshold at the shared flow.</small>
+                </div>
+              </section>
             </div>
 
             <div class="field">
@@ -90,17 +134,9 @@
                     <p id="cannulaArterialSummary">Compare arterial pressure-drop behavior at the shared target flow.</p>
                   </div>
                 </div>
-                <label class="field">
-                  <span>Arterial Family</span>
-                  <div class="input-wrap">
-                    <select id="cannulaArterialFamily" name="cannulaArterialFamily"></select>
-                  </div>
-                  <small class="hint">Use an arterial family from the current manufacturer to estimate forward perfusion resistance.</small>
-                </label>
-                <div class="field">
-                  <span>Arterial Size Override</span>
-                  <div id="cannulaArterialSizeButtons" class="quick-select-row" aria-label="Available arterial cannula sizes"></div>
-                  <small class="hint">The tool recommends the smallest arterial size that stays under the target threshold at the shared flow.</small>
+                <div class="curve-chart-wrap cannula-chart-wrap">
+                  <svg id="cannulaArterialChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-arterial-title cannulaArterialSummary"></svg>
+                  <div id="cannulaArterialChartTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
                 </div>
                 <div class="results-grid results-grid-compact cannula-side-results">
                   <article class="result-card">
@@ -119,10 +155,6 @@
                     <p id="cannulaArterialPressureStatus" class="result-status">Arterial pressure drop updates at the shared target flow.</p>
                   </article>
                 </div>
-                <div class="curve-chart-wrap cannula-chart-wrap">
-                  <svg id="cannulaArterialChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-arterial-title cannulaArterialSummary"></svg>
-                  <div id="cannulaArterialChartTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
-                </div>
               </section>
 
               <section class="curve-panel cannula-compare-panel" aria-labelledby="cannula-venous-title">
@@ -132,17 +164,9 @@
                     <p id="cannulaVenousSummary">Compare venous drainage resistance at the same target flow.</p>
                   </div>
                 </div>
-                <label class="field">
-                  <span>Venous Family</span>
-                  <div class="input-wrap">
-                    <select id="cannulaVenousFamily" name="cannulaVenousFamily"></select>
-                  </div>
-                  <small class="hint">Use a venous family from the current manufacturer to compare drainage performance in parallel.</small>
-                </label>
-                <div class="field">
-                  <span>Venous Size Override</span>
-                  <div id="cannulaVenousSizeButtons" class="quick-select-row" aria-label="Available venous cannula sizes"></div>
-                  <small class="hint">The tool recommends the smallest venous size that stays under the target threshold at the shared flow.</small>
+                <div class="curve-chart-wrap cannula-chart-wrap">
+                  <svg id="cannulaVenousChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-venous-title cannulaVenousSummary"></svg>
+                  <div id="cannulaVenousChartTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
                 </div>
                 <div class="results-grid results-grid-compact cannula-side-results">
                   <article class="result-card">
@@ -160,10 +184,6 @@
                     <output id="cannulaVenousPressureOutput" class="result-value">--</output>
                     <p id="cannulaVenousPressureStatus" class="result-status">Venous pressure drop updates at the shared target flow.</p>
                   </article>
-                </div>
-                <div class="curve-chart-wrap cannula-chart-wrap">
-                  <svg id="cannulaVenousChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-venous-title cannulaVenousSummary"></svg>
-                  <div id="cannulaVenousChartTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
                 </div>
               </section>
             </div>

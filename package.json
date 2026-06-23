@@ -1,0 +1,10 @@
+{
+  "name": "cpb-perfusion-tool",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:js": "node --check app.js",
+    "test:unit": "node --test tests/calculations.test.mjs tests/cannula-ui.test.mjs",
+    "verify": "npm run check:js && npm run test:unit"
+  }
+}

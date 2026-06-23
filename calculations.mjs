@@ -4,10 +4,13 @@ const PERFUSION_FIELD_CONFIG = {
   cardiacIndex: { label: "Cardiac index", min: 0.1, max: 6, allowZero: false },
   pumpFlow: { label: "Pump flow", min: 0.1, max: 12, allowZero: false },
   hgb: { label: "Hemoglobin", min: 1, max: 25, allowZero: false },
+  hct: { label: "Hematocrit", min: 5, max: 80, allowZero: false },
   saO2: { label: "SaO2", min: 0, max: 100, allowZero: true },
   paO2: { label: "PaO2", min: 0, max: 600, allowZero: true },
   do2iTarget: { label: "DO2i target", min: 100, max: 500, allowZero: false },
 };
+
+const PERFUSION_FLOW_INDEX_VALUES = [1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0];
 
 const PRIME_FIELD_CONFIG = {
   primeWeightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
@@ -79,8 +82,19 @@ export function calculateArterialOxygenContent(hgb, saO2Fraction, paO2) {
   return hgb * 1.34 * saO2Fraction + 0.003 * paO2;
 }
 
+export function calculateHemoglobinFromHematocrit(hctPercent) {
+  return hctPercent / 3;
+}
+
 export function calculateDo2i(cardiacIndex, hgb, saO2Percent, paO2) {
   return calculateArterialOxygenContent(hgb, saO2Percent / 100, paO2) * 10 * cardiacIndex;
+}
+
+export function buildPerfusionFlowMap(bsa) {
+  return PERFUSION_FLOW_INDEX_VALUES.map((cardiacIndex) => ({
+    cardiacIndex,
+    pumpFlow: calculatePumpFlow(cardiacIndex, bsa),
+  }));
 }
 
 export function calculateRequiredCardiacIndex(do2iTarget, arterialOxygenContent) {
@@ -176,8 +190,11 @@ export function evaluateCalculator(rawInputs) {
   const results = {
     bsa: null,
     flowRange: null,
+    flowMap: null,
     effectiveCi: null,
     currentFlow: null,
+    currentHgb: null,
+    hgbSource: null,
     do2i: null,
     do2iThresholdMet: null,
     do2iSource: null,
@@ -190,10 +207,19 @@ export function evaluateCalculator(rawInputs) {
 
   if (valid("heightCm") && valid("weightKg")) {
     results.bsa = calculateBsa(valueOf("heightCm"), valueOf("weightKg"));
+    results.flowMap = buildPerfusionFlowMap(results.bsa);
     results.flowRange = {
-      low: calculatePumpFlow(1.6, results.bsa),
-      high: calculatePumpFlow(2.6, results.bsa),
+      low: results.flowMap[0].pumpFlow,
+      high: results.flowMap[results.flowMap.length - 1].pumpFlow,
     };
+  }
+
+  if (valid("hgb")) {
+    results.currentHgb = valueOf("hgb");
+    results.hgbSource = "hemoglobin";
+  } else if (valid("hct")) {
+    results.currentHgb = calculateHemoglobinFromHematocrit(valueOf("hct"));
+    results.hgbSource = "hematocrit";
   }
 
   if (results.bsa !== null && valid("pumpFlow")) {
@@ -210,12 +236,12 @@ export function evaluateCalculator(rawInputs) {
     results.do2iTarget = valueOf("do2iTarget");
   }
 
-  if (valid("hgb") && valid("saO2") && valid("paO2")) {
-    results.arterialOxygenContent = calculateArterialOxygenContent(valueOf("hgb"), valueOf("saO2") / 100, valueOf("paO2"));
+  if (results.currentHgb !== null && valid("saO2") && valid("paO2")) {
+    results.arterialOxygenContent = calculateArterialOxygenContent(results.currentHgb, valueOf("saO2") / 100, valueOf("paO2"));
   }
 
   if (results.effectiveCi !== null && results.arterialOxygenContent !== null) {
-    results.do2i = calculateDo2i(results.effectiveCi, valueOf("hgb"), valueOf("saO2"), valueOf("paO2"));
+    results.do2i = calculateDo2i(results.effectiveCi, results.currentHgb, valueOf("saO2"), valueOf("paO2"));
     if (results.do2iTarget !== null) results.do2iThresholdMet = results.do2i >= results.do2iTarget;
   }
 

@@ -30,3 +30,8 @@ For anyone helping with this project, including AI collaborators:
 - Prime planning support
 - Anticoagulation support
 - Shared patient context across tabs where appropriate
+
+## Verification
+
+- Run `npm run verify` for a quick local health check before larger UI changes.
+- GitHub Actions now runs the same verification automatically on pushes and pull requests.

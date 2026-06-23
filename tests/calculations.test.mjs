@@ -7,6 +7,7 @@ import {
   calculateBsa,
   calculateDo2i,
   calculateEstimatedBloodVolume,
+  calculateHemoglobinFromHematocrit,
   calculateHctDrop,
   calculateHeparinLoadingDose,
   calculateHeparinResponseCurve,
@@ -18,6 +19,7 @@ import {
   calculateRequiredCardiacIndex,
   calculateRequiredHemoglobin,
   calculateRequiredPrbcVolume,
+  buildPerfusionFlowMap,
   evaluateAnticoagulationCalculator,
   evaluateCalculator,
   evaluatePrimeCalculator,
@@ -45,6 +47,18 @@ test("arterial oxygen content uses percent converted to fraction via DO2i helper
   assert.equal(Math.round(do2i), 389);
 });
 
+test("hematocrit can estimate hemoglobin for oxygen delivery math", () => {
+  assert.equal(roundTo(calculateHemoglobinFromHematocrit(36), 1), 12.0);
+});
+
+test("indexed flow map covers CI 1.6 through 3.0", () => {
+  const flowMap = buildPerfusionFlowMap(1.82);
+  assert.equal(flowMap[0].cardiacIndex, 1.6);
+  assert.equal(flowMap.at(-1).cardiacIndex, 3.0);
+  assert.equal(roundTo(flowMap[0].pumpFlow, 2), 2.91);
+  assert.equal(roundTo(flowMap.at(-1).pumpFlow, 2), 5.46);
+});
+
 test("calculator returns only the affected outputs when some inputs are missing", () => {
   const evaluated = evaluateCalculator({
     heightCm: "170",
@@ -58,7 +72,8 @@ test("calculator returns only the affected outputs when some inputs are missing"
 
   assert.equal(roundTo(evaluated.results.bsa, 2), 1.82);
   assert.equal(roundTo(evaluated.results.flowRange.low, 2), 2.91);
-  assert.equal(roundTo(evaluated.results.flowRange.high, 2), 4.73);
+  assert.equal(roundTo(evaluated.results.flowRange.high, 2), 5.45);
+  assert.equal(evaluated.results.flowMap.length, 8);
   assert.equal(evaluated.results.do2i, null);
 });
 
@@ -77,6 +92,24 @@ test("pump flow overrides cardiac index for DO2i when both are entered", () => {
   assert.equal(evaluated.results.do2iSource, "pump flow");
   assert.equal(roundTo(evaluated.results.effectiveCi, 2), 2.20);
   assert.equal(Math.round(evaluated.results.do2i), 357);
+});
+
+test("hematocrit can stand in for hemoglobin in DO2i calculations", () => {
+  const evaluated = evaluateCalculator({
+    heightCm: "170",
+    weightKg: "70",
+    cardiacIndex: "2.4",
+    pumpFlow: "",
+    hgb: "",
+    hct: "36",
+    saO2: "98",
+    paO2: "150",
+    do2iTarget: "275",
+  });
+
+  assert.equal(evaluated.results.hgbSource, "hematocrit");
+  assert.equal(roundTo(evaluated.results.currentHgb, 1), 12.0);
+  assert.equal(Math.round(evaluated.results.do2i), 389);
 });
 
 test("required CI and flow can be back-calculated from a DO2i target", () => {

@@ -64,7 +64,8 @@
               <label class="field"><span>DO<sub>2</sub>i Target</span><div class="input-wrap"><input id="do2iTarget" name="do2iTarget" type="number" inputmode="decimal" min="100" max="500" step="1" value="275" autocomplete="off" /><span class="unit">mL O2/min/m²</span></div><small class="hint">Default threshold target for reverse calculations</small></label>
               <label class="field"><span>Cardiac Index (optional)</span><div class="input-wrap"><input id="cardiacIndex" name="cardiacIndex" type="number" inputmode="decimal" min="0.1" max="6" step="0.01" autocomplete="off" /><span class="unit">L/min/m²</span></div><small class="hint">Use when you want DO2i from indexed flow</small></label>
               <label class="field"><span>Pump Flow (optional)</span><div class="input-wrap"><input id="pumpFlow" name="pumpFlow" type="number" inputmode="decimal" min="0.1" max="12" step="0.01" autocomplete="off" /><span class="unit">L/min</span></div><small class="hint">If entered, this overrides CI for DO2i</small></label>
-              <label class="field"><span>Hemoglobin</span><div class="input-wrap"><input id="hgb" name="hgb" type="number" inputmode="decimal" min="1" max="25" step="0.1" autocomplete="off" /><span class="unit">g/dL</span></div><small class="hint">Expected range: 1 to 25 g/dL</small></label>
+              <label class="field"><span>Hemoglobin (optional)</span><div class="input-wrap"><input id="hgb" name="hgb" type="number" inputmode="decimal" min="1" max="25" step="0.1" autocomplete="off" /><span class="unit">g/dL</span></div><small class="hint">Preferred direct input for DO<sub>2</sub>i when available</small></label>
+              <label class="field"><span>Hematocrit (optional)</span><div class="input-wrap"><input id="hct" name="hct" type="number" inputmode="decimal" min="5" max="80" step="0.1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">If Hgb is blank, DO<sub>2</sub>i uses the estimate Hgb = Hct / 3</small></label>
               <label class="field"><span>Arterial Oxygen Saturation (SaO2)</span><div class="input-wrap"><input id="saO2" name="saO2" type="number" inputmode="decimal" min="0" max="100" step="0.1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Entered as percent, converted internally</small></label>
               <label class="field"><span>Arterial Oxygen Tension (PaO2)</span><div class="input-wrap"><input id="paO2" name="paO2" type="number" inputmode="decimal" min="0" max="600" step="1" autocomplete="off" /><span class="unit">mmHg</span></div><small class="hint">Expected range: 0 to 600 mmHg</small></label>
             </div>
@@ -77,12 +78,20 @@
             <h2 id="results-title">Perfusion Results</h2>
             <p>Outputs update instantly. Incomplete inputs only affect related results.</p>
           </div>
+          <section class="formula-panel perfusion-flow-map-panel" aria-labelledby="flow-map-title">
+            <div class="panel-header">
+              <h3 id="flow-map-title">Indexed Flow Map</h3>
+              <p>See how each cardiac index from 1.6 to 3.0 translates into pump flow at the current BSA.</p>
+            </div>
+            <div id="flowMapOutput" class="flow-map-grid" aria-live="polite"></div>
+            <p id="flowMapStatus" class="formula-note">Enter height and weight to map each cardiac index to liters per minute.</p>
+          </section>
+
           <div class="results-grid">
             <article class="result-card"><p class="result-label">Body Surface Area</p><output id="bsaOutput" class="result-value">--</output><p id="bsaStatus" class="result-status">Enter height and weight.</p></article>
-            <article class="result-card"><p class="result-label">Recommended Flow Range</p><output id="flowOutput" class="result-value">--</output><p id="flowStatus" class="result-status">Enter height and weight to calculate 1.6 to 2.6 L/min/m².</p></article>
-            <article class="result-card accent-card"><p class="result-label">DO<sub>2</sub>i</p><output id="do2iOutput" class="result-value">--</output><p id="do2iStatus" class="result-status">Enter hemoglobin, SaO2, PaO2, and either CI or pump flow.</p></article>
-            <article class="result-card"><p class="result-label">Flow To Reach Target DO<sub>2</sub>i</p><output id="targetFlowOutput" class="result-value">--</output><p id="targetFlowStatus" class="result-status">Enter BSA, hemoglobin, SaO2, and PaO2.</p></article>
-            <article class="result-card"><p class="result-label">CI To Reach Target DO<sub>2</sub>i</p><output id="targetCiOutput" class="result-value">--</output><p id="targetCiStatus" class="result-status">Enter hemoglobin, SaO2, and PaO2.</p></article>
+            <article class="result-card accent-card"><p class="result-label">Current DO<sub>2</sub>i</p><output id="do2iOutput" class="result-value">--</output><p id="do2iStatus" class="result-status">Enter hemoglobin or hematocrit, SaO2, PaO2, and either CI or pump flow.</p></article>
+            <article class="result-card"><p class="result-label">Flow To Reach Target DO<sub>2</sub>i</p><output id="targetFlowOutput" class="result-value">--</output><p id="targetFlowStatus" class="result-status">Enter BSA, hemoglobin or hematocrit, SaO2, and PaO2.</p></article>
+            <article class="result-card"><p class="result-label">CI To Reach Target DO<sub>2</sub>i</p><output id="targetCiOutput" class="result-value">--</output><p id="targetCiStatus" class="result-status">Enter hemoglobin or hematocrit, SaO2, and PaO2.</p></article>
             <article class="result-card"><p class="result-label">Hgb To Reach Target DO<sub>2</sub>i</p><output id="targetHgbOutput" class="result-value">--</output><p id="targetHgbStatus" class="result-status">Enter current flow or CI, plus oxygenation values.</p></article>
           </div>
 
@@ -97,11 +106,11 @@
             <section class="formula-panel tab-panel is-active" id="tab-panel-perfusion-calculations" role="tabpanel" aria-labelledby="tab-button-perfusion-calculations" data-tab-group="perfusion-support" data-tab-panel="calculations">
               <dl class="formula-list">
                 <div><dt>BSA</dt><dd>&radic;((height cm &times; weight kg) / 3600)</dd></div>
-                <div><dt>Recommended Flow Range</dt><dd>1.6 to 2.6 L/min/m² &times; BSA</dd></div>
+                <div><dt>Flow Window</dt><dd>1.6 to 3.0 L/min/m² &times; BSA, with an indexed flow map shown in L/min</dd></div>
                 <div><dt>DO<sub>2</sub>i</dt><dd>((Hgb &times; 1.34 &times; SaO2 fraction) + (0.003 &times; PaO2)) &times; 10 &times; effective cardiac index</dd></div>
                 <div><dt>Required CI / Flow / Hgb</dt><dd>Rearranged from the DO<sub>2</sub>i equation using the selected target and current oxygenation inputs</dd></div>
               </dl>
-              <p class="formula-note">Variable definitions: Hgb = hemoglobin, SaO2 = arterial oxygen saturation, PaO2 = arterial oxygen tension, CI = cardiac index. If pump flow is entered, effective CI = pump flow / BSA.</p>
+              <p class="formula-note">Variable definitions: Hgb = hemoglobin, Hct = hematocrit, SaO2 = arterial oxygen saturation, PaO2 = arterial oxygen tension, CI = cardiac index. If pump flow is entered, effective CI = pump flow / BSA. If Hgb is not entered, the tool estimates Hgb as Hct / 3.</p>
               <p class="disclaimer">Decision-support calculator for simulation use. Confirm protocol-specific targets and rounding requirements before clinical use. Aim to maintain DO<sub>2</sub>i above the selected target when clinically appropriate.</p>
             </section>
             <section class="formula-panel references-panel tab-panel" id="tab-panel-perfusion-references" role="tabpanel" aria-labelledby="tab-button-perfusion-references" data-tab-group="perfusion-support" data-tab-panel="references" hidden>

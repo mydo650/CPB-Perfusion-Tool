@@ -517,6 +517,11 @@ input[aria-invalid="true"] {
   color: #f8fffd;
 }
 
+.quick-select-button.is-disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
 .range-header {
   display: flex;
   align-items: center;
@@ -532,6 +537,16 @@ input[aria-invalid="true"] {
 .cannula-flow-slider {
   width: 100%;
   accent-color: var(--accent-strong);
+}
+
+.cannula-setup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cannula-setup-panel {
+  margin-top: 0;
 }
 
 .validation-summary {
@@ -716,6 +731,40 @@ input[aria-invalid="true"] {
   line-height: 1.4;
 }
 
+.perfusion-flow-map-panel {
+  margin-top: 1rem;
+}
+
+.flow-map-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.flow-map-chip {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 0.95rem;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(239, 247, 244, 0.88));
+}
+
+.flow-map-chip-ci {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.flow-map-chip-flow {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
 .clinical-warning {
   margin-top: 1rem;
   padding: 0.95rem 1rem;
@@ -737,6 +786,30 @@ input[aria-invalid="true"] {
   border-radius: 20px;
   border: 1px solid rgba(22, 33, 38, 0.08);
   background: rgba(255, 255, 255, 0.66);
+}
+
+.cannula-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cannula-compare-panel {
+  margin-top: 0;
+}
+
+.cannula-side-results {
+  margin: 1rem 0;
+  grid-template-columns: 1fr;
+}
+
+.cannula-shared-results {
+  margin-top: 1rem;
+}
+
+.cannula-compare-caveat {
+  margin: 1rem 0 0;
 }
 
 .curve-header {
@@ -1174,6 +1247,18 @@ input[aria-invalid="true"] {
 
   .results-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cannula-compare-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cannula-setup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-map-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tabs-header {
