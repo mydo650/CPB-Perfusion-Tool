@@ -535,6 +535,10 @@ function calculatePrimeToBloodRatio(primeVolumeMl, bloodVolumeMl) {
   return primeVolumeMl / bloodVolumeMl;
 }
 
+function calculateCrystalloidPrimeBicarb(primeVolumeMl) {
+  return 0.025 * primeVolumeMl;
+}
+
 function calculateRedCellDeficitToTarget(targetHctPercent, baselineHctPercent, bloodVolumeMl, primeVolumeMl) {
   const targetRedCellVolumeMl = (targetHctPercent / 100) * (bloodVolumeMl + primeVolumeMl);
   const currentRedCellVolumeMl = (baselineHctPercent / 100) * bloodVolumeMl;
@@ -660,6 +664,7 @@ function evaluatePrimeCalculator(rawInputs) {
     predictedHct: null,
     hctDrop: null,
     primeToBloodRatio: null,
+    crystalloidPrimeBicarbMeq: null,
     targetHct: valid("primeTargetHct") ? valueOf("primeTargetHct") : null,
     redCellDeficitMl: null,
     prbcVolumeMl: null,
@@ -676,6 +681,10 @@ function evaluatePrimeCalculator(rawInputs) {
     results.predictedHct = calculatePredictedPrimeHct(results.bloodVolumeMl, valueOf("primeBaselineHct"), valueOf("primeVolumeMl"));
     results.hctDrop = calculateHctDrop(valueOf("primeBaselineHct"), results.predictedHct);
     results.primeToBloodRatio = calculatePrimeToBloodRatio(valueOf("primeVolumeMl"), results.bloodVolumeMl);
+  }
+
+  if (valid("primeVolumeMl")) {
+    results.crystalloidPrimeBicarbMeq = calculateCrystalloidPrimeBicarb(valueOf("primeVolumeMl"));
   }
 
   if (results.bloodVolumeMl !== null && valid("primeBaselineHct") && valid("primeVolumeMl") && valid("primeTargetHct") && valid("primePrbcHct")) {
@@ -912,6 +921,12 @@ const primeOutputs = primeForm
         status: document.querySelector("#primeRatioStatus"),
         format: (value) => `${roundTo(value, 2).toFixed(2)} : 1`,
         empty: "Shows how large the clear prime is relative to estimated blood volume.",
+      },
+      crystalloidPrimeBicarbMeq: {
+        value: document.querySelector("#primeBicarbOutput"),
+        status: document.querySelector("#primeBicarbStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} mEq`,
+        empty: "Enter prime volume to calculate sodium bicarbonate.",
       },
       prbcVolumeMl: {
         value: document.querySelector("#primePrbcNeededOutput"),
@@ -2152,6 +2167,14 @@ function renderPrime() {
   } else {
     primeOutputs.primeToBloodRatio.value.textContent = "--";
     primeOutputs.primeToBloodRatio.status.textContent = primeOutputs.primeToBloodRatio.empty;
+  }
+
+  if (evaluation.results.crystalloidPrimeBicarbMeq !== null) {
+    primeOutputs.crystalloidPrimeBicarbMeq.value.textContent = primeOutputs.crystalloidPrimeBicarbMeq.format(evaluation.results.crystalloidPrimeBicarbMeq);
+    primeOutputs.crystalloidPrimeBicarbMeq.status.textContent = "Formula: x = 0.025V, using the entered prime volume as V.";
+  } else {
+    primeOutputs.crystalloidPrimeBicarbMeq.value.textContent = "--";
+    primeOutputs.crystalloidPrimeBicarbMeq.status.textContent = primeOutputs.crystalloidPrimeBicarbMeq.empty;
   }
 
   if (evaluation.results.prbcVolumeMl !== null) {
