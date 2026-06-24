@@ -539,6 +539,10 @@ function calculateCrystalloidPrimeBicarb(primeVolumeMl) {
   return 0.025 * primeVolumeMl;
 }
 
+function calculatePrimeMannitol(weightKg) {
+  return 0.25 * weightKg;
+}
+
 function calculateRedCellDeficitToTarget(targetHctPercent, baselineHctPercent, bloodVolumeMl, primeVolumeMl) {
   const targetRedCellVolumeMl = (targetHctPercent / 100) * (bloodVolumeMl + primeVolumeMl);
   const currentRedCellVolumeMl = (baselineHctPercent / 100) * bloodVolumeMl;
@@ -665,6 +669,7 @@ function evaluatePrimeCalculator(rawInputs) {
     hctDrop: null,
     primeToBloodRatio: null,
     crystalloidPrimeBicarbMeq: null,
+    primeMannitolG: null,
     targetHct: valid("primeTargetHct") ? valueOf("primeTargetHct") : null,
     redCellDeficitMl: null,
     prbcVolumeMl: null,
@@ -675,6 +680,10 @@ function evaluatePrimeCalculator(rawInputs) {
 
   if (valid("primeWeightKg") && valid("primeEbvFactor")) {
     results.bloodVolumeMl = calculateEstimatedBloodVolume(valueOf("primeWeightKg"), valueOf("primeEbvFactor"));
+  }
+
+  if (valid("primeWeightKg")) {
+    results.primeMannitolG = calculatePrimeMannitol(valueOf("primeWeightKg"));
   }
 
   if (results.bloodVolumeMl !== null && valid("primeBaselineHct") && valid("primeVolumeMl")) {
@@ -927,6 +936,12 @@ const primeOutputs = primeForm
         status: document.querySelector("#primeBicarbStatus"),
         format: (value) => `${roundTo(value, 1).toFixed(1)} mEq`,
         empty: "Enter prime volume to calculate sodium bicarbonate.",
+      },
+      primeMannitolG: {
+        value: document.querySelector("#primeMannitolOutput"),
+        status: document.querySelector("#primeMannitolStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} g`,
+        empty: "Enter weight to calculate mannitol.",
       },
       prbcVolumeMl: {
         value: document.querySelector("#primePrbcNeededOutput"),
@@ -2175,6 +2190,14 @@ function renderPrime() {
   } else {
     primeOutputs.crystalloidPrimeBicarbMeq.value.textContent = "--";
     primeOutputs.crystalloidPrimeBicarbMeq.status.textContent = primeOutputs.crystalloidPrimeBicarbMeq.empty;
+  }
+
+  if (evaluation.results.primeMannitolG !== null) {
+    primeOutputs.primeMannitolG.value.textContent = primeOutputs.primeMannitolG.format(evaluation.results.primeMannitolG);
+    primeOutputs.primeMannitolG.status.textContent = "Formula: 0.25 g/kg, using the entered weight.";
+  } else {
+    primeOutputs.primeMannitolG.value.textContent = "--";
+    primeOutputs.primeMannitolG.status.textContent = primeOutputs.primeMannitolG.empty;
   }
 
   if (evaluation.results.prbcVolumeMl !== null) {

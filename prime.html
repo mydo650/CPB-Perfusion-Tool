@@ -93,6 +93,7 @@
             <article class="result-card"><p class="result-label">Hct Drop From Baseline</p><output id="primeHctDropOutput" class="result-value">--</output><p id="primeHctDropStatus" class="result-status">Calculated once pre-CPB Hct and prime volume are entered.</p></article>
             <article class="result-card"><p class="result-label">Prime To Blood Volume Ratio</p><output id="primeRatioOutput" class="result-value">--</output><p id="primeRatioStatus" class="result-status">Shows how large the clear prime is relative to estimated blood volume.</p></article>
             <article class="result-card"><p class="result-label">Sodium Bicarb For Crystalloid Prime</p><output id="primeBicarbOutput" class="result-value">--</output><p id="primeBicarbStatus" class="result-status">Calculated from prime volume using x = 0.025V.</p></article>
+            <article class="result-card"><p class="result-label">Mannitol For Prime</p><output id="primeMannitolOutput" class="result-value">--</output><p id="primeMannitolStatus" class="result-status">Calculated from weight using 0.25 g/kg.</p></article>
             <article class="result-card"><p class="result-label">PRBC Volume To Reach Target</p><output id="primePrbcNeededOutput" class="result-value">--</output><p id="primePrbcNeededStatus" class="result-status">Enter target Hct and PRBC Hct assumptions.</p></article>
             <article class="result-card"><p class="result-label">Projected Hct After Added PRBC</p><output id="primeProjectedHctOutput" class="result-value">--</output><p id="primeProjectedHctStatus" class="result-status">Calculated from the estimated PRBC volume.</p></article>
             <article class="result-card"><p class="result-label">Red Cell Deficit To Target</p><output id="primeRedCellDeficitOutput" class="result-value">--</output><p id="primeRedCellDeficitStatus" class="result-status">Expressed as the red-cell volume missing before any PRBC is added.</p></article>
@@ -113,6 +114,7 @@
                 <div><dt>Hct Drop</dt><dd>pre-CPB Hct - predicted post-prime Hct</dd></div>
                 <div><dt>Prime : Blood Ratio</dt><dd>prime volume / estimated blood volume</dd></div>
                 <div><dt>Sodium Bicarb for Crystalloid Prime</dt><dd>x = 0.025V, where x is mEq of bicarbonate and V is the mL of crystalloid fluid</dd></div>
+                <div><dt>Mannitol for Prime</dt><dd>mannitol (g) = 0.25 &times; weight (kg)</dd></div>
                 <div><dt>PRBC Volume Needed</dt><dd>Exact mass-balance solution using target Hct, current red-cell mass, total diluted volume, and assumed PRBC hematocrit</dd></div>
                 <div><dt>Red Cell Deficit</dt><dd>Target red-cell volume after dilution - current red-cell volume before added PRBC</dd></div>
               </dl>
