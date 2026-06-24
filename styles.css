@@ -81,6 +81,14 @@ body.page-cannula-selection {
   padding: 2.5rem 0 3rem;
 }
 
+.page-cannula-selection.has-bicaval .app-shell {
+  width: min(1540px, calc(100% - 2rem));
+}
+
+.page-drug-library .app-shell {
+  width: min(1440px, calc(100% - 2rem));
+}
+
 .hero {
   margin-bottom: 1.75rem;
 }
@@ -535,6 +543,82 @@ input[aria-invalid="true"] {
   color: var(--accent-strong);
 }
 
+.cannula-toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.4rem;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.cannula-toggle-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.cannula-toggle-title {
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+.cannula-toggle-text {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.cannula-toggle-switch {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+
+.cannula-toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cannula-toggle-slider {
+  width: 3.4rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(78, 94, 102, 0.28);
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  position: relative;
+  transition: background-color 140ms ease;
+}
+
+.cannula-toggle-slider::after {
+  content: "";
+  position: absolute;
+  top: 0.18rem;
+  left: 0.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: #fffdf8;
+  box-shadow: 0 8px 16px rgba(22, 33, 38, 0.16);
+  transition: transform 140ms ease;
+}
+
+.cannula-toggle-switch input:checked + .cannula-toggle-slider {
+  background: rgba(185, 28, 28, 0.78);
+}
+
+.cannula-toggle-switch input:checked + .cannula-toggle-slider::after {
+  transform: translateX(1.35rem);
+}
+
+.cannula-toggle-switch input:focus-visible + .cannula-toggle-slider {
+  outline: 2px solid rgba(185, 28, 28, 0.32);
+  outline-offset: 3px;
+}
+
 .cannula-flow-slider {
   width: 100%;
   accent-color: var(--accent-strong);
@@ -544,6 +628,10 @@ input[aria-invalid="true"] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+}
+
+.page-cannula-selection.has-bicaval .cannula-setup-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .cannula-setup-panel {
@@ -830,6 +918,10 @@ input[aria-invalid="true"] {
   margin-top: 1rem;
 }
 
+.page-cannula-selection.has-bicaval .cannula-compare-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .cannula-compare-panel {
   margin-top: 0;
 }
@@ -883,6 +975,13 @@ input[aria-invalid="true"] {
   min-height: 380px;
 }
 
+@media (max-width: 1320px) {
+  .page-cannula-selection.has-bicaval .cannula-compare-grid,
+  .page-cannula-selection.has-bicaval .cannula-setup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .curve-chart {
   display: block;
   width: 100%;
@@ -913,6 +1012,13 @@ input[aria-invalid="true"] {
   fill: #991b1b;
   font-family: var(--font-body);
   font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.cannula-role-label {
+  fill: var(--accent-strong);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   font-weight: 800;
 }
 
