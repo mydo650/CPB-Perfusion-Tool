@@ -74,6 +74,10 @@ export function calculateBsa(heightCm, weightKg) {
   return Math.sqrt((heightCm * weightKg) / 3600);
 }
 
+export function calculateWeightOnlyBsa(weightKg) {
+  return (4 * weightKg + 7) / (weightKg + 90);
+}
+
 export function calculatePumpFlow(cardiacIndex, bsa) {
   return cardiacIndex * bsa;
 }
@@ -189,6 +193,7 @@ export function evaluateCalculator(rawInputs) {
   const valueOf = (name) => fields[name].value;
   const results = {
     bsa: null,
+    bsaFormula: null,
     flowRange: null,
     flowMap: null,
     effectiveCi: null,
@@ -205,8 +210,14 @@ export function evaluateCalculator(rawInputs) {
     requiredHgb: null,
   };
 
-  if (valid("heightCm") && valid("weightKg")) {
-    results.bsa = calculateBsa(valueOf("heightCm"), valueOf("weightKg"));
+  if (valid("weightKg")) {
+    if (valid("heightCm")) {
+      results.bsa = calculateBsa(valueOf("heightCm"), valueOf("weightKg"));
+      results.bsaFormula = "Mosteller";
+    } else {
+      results.bsa = calculateWeightOnlyBsa(valueOf("weightKg"));
+      results.bsaFormula = "Costeff";
+    }
     results.flowMap = buildPerfusionFlowMap(results.bsa);
     results.flowRange = {
       low: results.flowMap[0].pumpFlow,

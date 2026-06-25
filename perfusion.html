@@ -85,13 +85,13 @@
               <p>See how each cardiac index from 1.6 to 3.0 translates into pump flow at the current BSA.</p>
             </div>
             <div id="flowMapOutput" class="flow-map-grid" aria-live="polite"></div>
-            <p id="flowMapStatus" class="formula-note">Enter height and weight to map each cardiac index to liters per minute.</p>
+            <p id="flowMapStatus" class="formula-note">Enter weight to map each cardiac index to liters per minute. Add height for Mosteller BSA.</p>
           </section>
 
           <div class="results-grid">
-            <article class="result-card"><p class="result-label">Body Surface Area</p><output id="bsaOutput" class="result-value">--</output><p id="bsaStatus" class="result-status">Enter height and weight.</p></article>
+            <article class="result-card"><p class="result-label">Body Surface Area</p><output id="bsaOutput" class="result-value">--</output><p id="bsaStatus" class="result-status">Enter weight. Add height for the Mosteller BSA.</p></article>
             <article class="result-card accent-card"><p class="result-label">Current DO<sub>2</sub>i</p><output id="do2iOutput" class="result-value">--</output><p id="do2iStatus" class="result-status">Enter hemoglobin or hematocrit, SaO2, PaO2, and either CI or pump flow.</p></article>
-            <article class="result-card"><p class="result-label">Flow To Reach Target DO<sub>2</sub>i</p><output id="targetFlowOutput" class="result-value">--</output><p id="targetFlowStatus" class="result-status">Enter BSA, hemoglobin or hematocrit, SaO2, and PaO2.</p></article>
+            <article class="result-card"><p class="result-label">Flow To Reach Target DO<sub>2</sub>i</p><output id="targetFlowOutput" class="result-value">--</output><p id="targetFlowStatus" class="result-status">Enter weight, hemoglobin or hematocrit, SaO2, and PaO2.</p></article>
             <article class="result-card"><p class="result-label">CI To Reach Target DO<sub>2</sub>i</p><output id="targetCiOutput" class="result-value">--</output><p id="targetCiStatus" class="result-status">Enter hemoglobin or hematocrit, SaO2, and PaO2.</p></article>
             <article class="result-card"><p class="result-label">Hgb To Reach Target DO<sub>2</sub>i</p><output id="targetHgbOutput" class="result-value">--</output><p id="targetHgbStatus" class="result-status">Enter current flow or CI, plus oxygenation values.</p></article>
           </div>
@@ -106,7 +106,7 @@
             </div>
             <section class="formula-panel tab-panel is-active" id="tab-panel-perfusion-calculations" role="tabpanel" aria-labelledby="tab-button-perfusion-calculations" data-tab-group="perfusion-support" data-tab-panel="calculations">
               <dl class="formula-list">
-                <div><dt>BSA</dt><dd>&radic;((height cm &times; weight kg) / 3600)</dd></div>
+                <div><dt>BSA</dt><dd>Mosteller: &radic;((height cm &times; weight kg) / 3600). If height is missing, Costeff: ((4 &times; weight kg) + 7) / (weight kg + 90).</dd></div>
                 <div><dt>Flow Window</dt><dd>1.6 to 3.0 L/min/m² &times; BSA, with an indexed flow map shown in L/min</dd></div>
                 <div><dt>DO<sub>2</sub>i</dt><dd>((Hgb &times; 1.34 &times; SaO2 fraction) + (0.003 &times; PaO2)) &times; 10 &times; effective cardiac index</dd></div>
                 <div><dt>Required CI / Flow / Hgb</dt><dd>Rearranged from the DO<sub>2</sub>i equation using the selected target and current oxygenation inputs</dd></div>

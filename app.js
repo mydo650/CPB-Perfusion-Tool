@@ -468,6 +468,10 @@ function calculateBsa(heightCm, weightKg) {
   return Math.sqrt((heightCm * weightKg) / 3600);
 }
 
+function calculateWeightOnlyBsa(weightKg) {
+  return (4 * weightKg + 7) / (weightKg + 90);
+}
+
 function calculatePumpFlow(cardiacIndex, bsa) {
   return cardiacIndex * bsa;
 }
@@ -591,6 +595,7 @@ function evaluateCalculator(rawInputs) {
   const valueOf = (name) => fields[name].value;
   const results = {
     bsa: null,
+    bsaFormula: null,
     flowRange: null,
     flowMap: null,
     effectiveCi: null,
@@ -607,8 +612,14 @@ function evaluateCalculator(rawInputs) {
     requiredHgb: null,
   };
 
-  if (valid("heightCm") && valid("weightKg")) {
-    results.bsa = calculateBsa(valueOf("heightCm"), valueOf("weightKg"));
+  if (valid("weightKg")) {
+    if (valid("heightCm")) {
+      results.bsa = calculateBsa(valueOf("heightCm"), valueOf("weightKg"));
+      results.bsaFormula = "Mosteller";
+    } else {
+      results.bsa = calculateWeightOnlyBsa(valueOf("weightKg"));
+      results.bsaFormula = "Costeff";
+    }
     results.flowMap = buildPerfusionFlowMap(results.bsa);
     results.flowRange = {
       low: results.flowMap[0].pumpFlow,
@@ -872,7 +883,7 @@ const perfusionOutputs = perfusionForm
         value: document.querySelector("#bsaOutput"),
         status: document.querySelector("#bsaStatus"),
         format: (value) => `${roundTo(value, 2).toFixed(2)} m²`,
-        empty: "Enter height and weight.",
+        empty: "Enter weight. Add height for the Mosteller BSA.",
       },
       flowMap: {
         value: document.querySelector("#flowMapOutput"),
@@ -888,7 +899,7 @@ const perfusionOutputs = perfusionForm
         value: document.querySelector("#targetFlowOutput"),
         status: document.querySelector("#targetFlowStatus"),
         format: (value) => `${roundTo(value, 2).toFixed(2)} L/min`,
-        empty: "Enter BSA, hemoglobin or hematocrit, SaO2, and PaO2.",
+        empty: "Enter weight, hemoglobin or hematocrit, SaO2, and PaO2.",
       },
       requiredCi: {
         value: document.querySelector("#targetCiOutput"),
@@ -1358,7 +1369,18 @@ function getSharedPerfusionContext() {
   const weightKg = getValidSharedNumber("patientWeightKg", PERFUSION_FIELD_CONFIG.weightKg);
   const cardiacIndex = getValidSharedNumber("patientCardiacIndex", PERFUSION_FIELD_CONFIG.cardiacIndex);
   const pumpFlow = getValidSharedNumber("patientPumpFlow", PERFUSION_FIELD_CONFIG.pumpFlow);
-  const bsa = heightCm !== null && weightKg !== null ? calculateBsa(heightCm, weightKg) : null;
+  let bsa = null;
+  let bsaFormula = null;
+
+  if (weightKg !== null) {
+    if (heightCm !== null) {
+      bsa = calculateBsa(heightCm, weightKg);
+      bsaFormula = "Mosteller";
+    } else {
+      bsa = calculateWeightOnlyBsa(weightKg);
+      bsaFormula = "Costeff";
+    }
+  }
 
   return {
     heightCm,
@@ -1366,6 +1388,7 @@ function getSharedPerfusionContext() {
     cardiacIndex,
     pumpFlow,
     bsa,
+    bsaFormula,
   };
 }
 
@@ -1382,17 +1405,17 @@ function syncCannulaFlowFromPerfusion(force = false) {
   if (perfusionContext.pumpFlow !== null) {
     nextFlow = perfusionContext.pumpFlow;
     flowSourceLabel = "Perfusion pump flow";
-    flowSourceDetail = `Using entered pump flow from the perfusion tab${perfusionContext.bsa !== null ? ` with BSA ${roundTo(perfusionContext.bsa, 2).toFixed(2)} m² in context.` : "."}`;
+    flowSourceDetail = `Using entered pump flow from the perfusion tab${perfusionContext.bsa !== null ? ` with ${perfusionContext.bsaFormula} BSA ${roundTo(perfusionContext.bsa, 2).toFixed(2)} m² in context.` : "."}`;
     linkedToPerfusion = true;
   } else if (perfusionContext.cardiacIndex !== null && perfusionContext.bsa !== null) {
     nextFlow = calculatePumpFlow(perfusionContext.cardiacIndex, perfusionContext.bsa);
     flowSourceLabel = "Perfusion cardiac index";
-    flowSourceDetail = `Using entered cardiac index ${roundTo(perfusionContext.cardiacIndex, 2).toFixed(2)} L/min/m² × BSA ${roundTo(perfusionContext.bsa, 2).toFixed(2)} m².`;
+    flowSourceDetail = `Using entered cardiac index ${roundTo(perfusionContext.cardiacIndex, 2).toFixed(2)} L/min/m² × ${perfusionContext.bsaFormula} BSA ${roundTo(perfusionContext.bsa, 2).toFixed(2)} m².`;
     linkedToPerfusion = true;
   } else if (perfusionContext.bsa !== null) {
     nextFlow = calculatePumpFlow(DEFAULT_CANNULA_CARDIAC_INDEX, perfusionContext.bsa);
     flowSourceLabel = `Default CI ${DEFAULT_CANNULA_CARDIAC_INDEX.toFixed(1)}`;
-    flowSourceDetail = `No perfusion flow entered, so target flow defaults to ${DEFAULT_CANNULA_CARDIAC_INDEX.toFixed(1)} L/min/m² × BSA ${roundTo(perfusionContext.bsa, 2).toFixed(2)} m².`;
+    flowSourceDetail = `No perfusion flow entered, so target flow defaults to ${DEFAULT_CANNULA_CARDIAC_INDEX.toFixed(1)} L/min/m² × ${perfusionContext.bsaFormula} BSA ${roundTo(perfusionContext.bsa, 2).toFixed(2)} m².`;
     linkedToPerfusion = true;
   }
 
@@ -1639,7 +1662,7 @@ function renderCannulaSharedOutputs() {
   if (cannulaCiOutput && cannulaCiStatus) {
     cannulaCiOutput.textContent = targetCardiacIndex !== null ? `${roundTo(targetCardiacIndex, 2).toFixed(2)} L/min/m²` : "--";
     if (targetCardiacIndex === null) {
-      cannulaCiStatus.textContent = "Enter height and weight in the Perfusion tab to link liters per minute back to cardiac index.";
+      cannulaCiStatus.textContent = "Enter weight in the Perfusion tab to link liters per minute back to cardiac index.";
     } else if (cannulaState.flowLinkedToPerfusion && perfusionContext.pumpFlow === null && perfusionContext.cardiacIndex === null) {
       cannulaCiStatus.textContent = `This default target flow reflects the ${DEFAULT_CANNULA_CARDIAC_INDEX.toFixed(1)} L/min/m² assumption.`;
     } else if (cannulaState.flowLinkedToPerfusion && perfusionContext.pumpFlow === null && perfusionContext.cardiacIndex !== null) {
@@ -1653,8 +1676,10 @@ function renderCannulaSharedOutputs() {
   if (cannulaBsaOutput && cannulaBsaStatus) {
     cannulaBsaOutput.textContent = perfusionContext.bsa !== null ? `${roundTo(perfusionContext.bsa, 2).toFixed(2)} m²` : "--";
     cannulaBsaStatus.textContent = perfusionContext.bsa !== null
-      ? `Derived from height ${roundTo(perfusionContext.heightCm, 1).toFixed(1)} cm and weight ${roundTo(perfusionContext.weightKg, 1).toFixed(1)} kg from the Perfusion tab.`
-      : "Enter height and weight in the Perfusion tab to calculate BSA and target cardiac index.";
+      ? perfusionContext.bsaFormula === "Mosteller"
+        ? `Derived from height ${roundTo(perfusionContext.heightCm, 1).toFixed(1)} cm and weight ${roundTo(perfusionContext.weightKg, 1).toFixed(1)} kg from the Perfusion tab.`
+        : `Estimated from weight ${roundTo(perfusionContext.weightKg, 1).toFixed(1)} kg using the Costeff weight-only formula.`
+      : "Enter weight in the Perfusion tab to calculate BSA and target cardiac index.";
   }
   const sourceLabels = [
     arterialManufacturer ? `Arterial: ${arterialManufacturer.sourceLabel}` : null,
@@ -2045,7 +2070,7 @@ function renderPerfusionFlowMap(flowMap) {
 
   if (!flowMap?.length) {
     perfusionOutputs.flowMap.value.innerHTML = "";
-    perfusionOutputs.flowMap.status.textContent = "Enter height and weight to map each cardiac index to liters per minute.";
+    perfusionOutputs.flowMap.status.textContent = "Enter weight to map each cardiac index to liters per minute. Add height for Mosteller BSA.";
     return;
   }
 
@@ -2066,7 +2091,9 @@ function renderPerfusion() {
 
   if (evaluation.results.bsa !== null) {
     perfusionOutputs.bsa.value.textContent = perfusionOutputs.bsa.format(evaluation.results.bsa);
-    perfusionOutputs.bsa.status.textContent = "Calculation ready.";
+    perfusionOutputs.bsa.status.textContent = evaluation.results.bsaFormula === "Mosteller"
+      ? "Mosteller calculation ready."
+      : "Estimated from weight only using the Costeff formula.";
   } else {
     perfusionOutputs.bsa.value.textContent = "--";
     perfusionOutputs.bsa.status.textContent = perfusionOutputs.bsa.empty;
@@ -2085,7 +2112,7 @@ function renderPerfusion() {
     perfusionOutputs.do2i.value.textContent = "--";
 
     if (!evaluation.results.bsa && evaluation.fields.pumpFlow.valid) {
-      perfusionOutputs.do2i.status.textContent = "Height and weight are needed to use pump flow for DO2i.";
+      perfusionOutputs.do2i.status.textContent = "Weight is needed to use pump flow for DO2i.";
     } else if (!evaluation.fields.cardiacIndex.valid && !evaluation.fields.pumpFlow.valid) {
       perfusionOutputs.do2i.status.textContent = "Enter either cardiac index or pump flow.";
     } else if (!evaluation.fields.hgb.valid && !evaluation.fields.hct.valid) {

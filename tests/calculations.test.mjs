@@ -19,6 +19,7 @@ import {
   calculateRequiredCardiacIndex,
   calculateRequiredHemoglobin,
   calculateRequiredPrbcVolume,
+  calculateWeightOnlyBsa,
   buildPerfusionFlowMap,
   evaluateAnticoagulationCalculator,
   evaluateCalculator,
@@ -32,6 +33,11 @@ import {
 test("Mosteller BSA matches expected fixture", () => {
   const bsa = calculateBsa(170, 70);
   assert.equal(roundTo(bsa, 2), 1.82);
+});
+
+test("Costeff BSA estimates from weight only", () => {
+  const bsa = calculateWeightOnlyBsa(70);
+  assert.equal(roundTo(bsa, 2), 1.79);
 });
 
 test("pump flow uses target cardiac index and BSA", () => {
@@ -75,6 +81,24 @@ test("calculator returns only the affected outputs when some inputs are missing"
   assert.equal(roundTo(evaluated.results.flowRange.high, 2), 5.45);
   assert.equal(evaluated.results.flowMap.length, 8);
   assert.equal(evaluated.results.do2i, null);
+});
+
+test("calculator falls back to Costeff BSA when height is missing", () => {
+  const evaluated = evaluateCalculator({
+    heightCm: "",
+    weightKg: "70",
+    cardiacIndex: "2.4",
+    pumpFlow: "",
+    hgb: "12",
+    saO2: "98",
+    paO2: "150",
+    do2iTarget: "275",
+  });
+
+  assert.equal(evaluated.results.bsaFormula, "Costeff");
+  assert.equal(roundTo(evaluated.results.bsa, 2), 1.79);
+  assert.equal(roundTo(evaluated.results.currentFlow, 2), 4.31);
+  assert.equal(Math.round(evaluated.results.do2i), 389);
 });
 
 test("pump flow overrides cardiac index for DO2i when both are entered", () => {
