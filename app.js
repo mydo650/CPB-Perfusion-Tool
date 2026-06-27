@@ -1881,14 +1881,14 @@ function renderCannulaChart(side) {
     `).join("")}
     <line class="curve-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
     <line class="curve-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"></line>
-    <line class="cannula-threshold-line" x1="${margin.left}" y1="${thresholdY}" x2="${width - margin.right}" y2="${thresholdY}"></line>
-    <text class="cannula-threshold-label" x="${margin.left + 8}" y="${thresholdY - 8}" text-anchor="start">${thresholdLabel}</text>
+    <line class="cannula-threshold-line cannula-threshold-line-${side}" x1="${margin.left}" y1="${thresholdY}" x2="${width - margin.right}" y2="${thresholdY}"></line>
+    <text class="cannula-threshold-label cannula-threshold-label-${side}" x="${margin.left + 8}" y="${thresholdY - 8}" text-anchor="start">${thresholdLabel}</text>
     ${showGraphRoleLabel ? `
-      <text class="cannula-role-label" x="${width - margin.right - 4}" y="${margin.top + 18}" text-anchor="end">${roleMetadata.graphLabel}</text>
+      <text class="cannula-role-label cannula-role-label-${side}" x="${width - margin.right - 4}" y="${margin.top + 18}" text-anchor="end">${roleMetadata.graphLabel}</text>
     ` : ""}
     <line class="cannula-guide-line" x1="${guideX}" y1="${margin.top}" x2="${guideX}" y2="${height - margin.bottom}"></line>
-    <path class="cannula-curve-line" d="${buildCurvePath(curvePoints, x, y)}"></path>
-    <g class="cannula-selected-point">
+    <path class="cannula-curve-line cannula-curve-line-${side}" d="${buildCurvePath(curvePoints, x, y)}"></path>
+    <g class="cannula-selected-point cannula-selected-point-${side}">
       <circle cx="${x(cannulaState.flow)}" cy="${y(selectedPressure)}" r="7"></circle>
       <text x="${x(cannulaState.flow)}" y="${y(selectedPressure) - 14}" text-anchor="middle">${selectedSize.label}: ${Math.round(selectedPressure)} mmHg</text>
     </g>
