@@ -531,8 +531,7 @@ input[aria-invalid="true"] {
   opacity: 0.72;
 }
 
-.cannula-theme-blue .result-label,
-.cannula-theme-blue .result-value {
+.cannula-theme-blue .result-label {
   color: #1d4ed8;
 }
 
