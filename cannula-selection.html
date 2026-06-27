@@ -94,11 +94,11 @@
                   </div>
                   <small class="hint">Examples include DLP, Bio-Medicus NextGen, EOPA, HLS, or Optisite depending on manufacturer.</small>
                 </label>
-                <div class="field">
-                  <span>Arterial Size Override</span>
-                  <div id="cannulaArterialSizeButtons" class="quick-select-row" aria-label="Available arterial cannula sizes"></div>
-                  <small class="hint">The tool recommends the smallest arterial size that stays under the target threshold at the shared flow.</small>
-                </div>
+                <article class="result-card">
+                  <p class="result-label">Recommended Size</p>
+                  <output id="cannulaArterialRecommendedOutput" class="result-value">--</output>
+                  <p id="cannulaArterialRecommendedStatus" class="result-status">Set a target flow to generate an arterial recommendation.</p>
+                </article>
               </section>
 
               <section class="curve-panel cannula-setup-panel" aria-labelledby="cannula-venous-setup-title">
@@ -122,11 +122,11 @@
                   </div>
                   <small id="cannulaVenousRoleHint" class="hint">Examples include DLP, MC2, metal-tip right-angle, plastic-tip right-angle, or HLS depending on manufacturer.</small>
                 </label>
-                <div class="field">
-                  <span>Venous Size Override</span>
-                  <div id="cannulaVenousSizeButtons" class="quick-select-row" aria-label="Available venous cannula sizes"></div>
-                  <small class="hint">The tool recommends the smallest venous size that stays under the target threshold at the shared flow.</small>
-                </div>
+                <article class="result-card">
+                  <p class="result-label">Recommended Size</p>
+                  <output id="cannulaVenousRecommendedOutput" class="result-value">--</output>
+                  <p id="cannulaVenousRecommendedStatus" class="result-status">Set a target flow to generate a venous recommendation.</p>
+                </article>
               </section>
 
               <section id="cannulaBicavalSetupPanel" class="curve-panel cannula-setup-panel" aria-labelledby="cannula-bicaval-setup-title" hidden>
@@ -150,11 +150,11 @@
                   </div>
                   <small id="cannulaBicavalRoleHint" class="hint">This lane favors two-stage, multi-stage, or bicaval-style venous families when available.</small>
                 </label>
-                <div class="field">
-                  <span>Bicaval Size Override</span>
-                  <div id="cannulaBicavalSizeButtons" class="quick-select-row" aria-label="Available bicaval cannula sizes"></div>
-                  <small class="hint">Use this third panel to compare a separate intracardiac drainage option at the same target flow.</small>
-                </div>
+                <article class="result-card">
+                  <p class="result-label">Recommended Size</p>
+                  <output id="cannulaBicavalRecommendedOutput" class="result-value">--</output>
+                  <p id="cannulaBicavalRecommendedStatus" class="result-status">Set a target flow to generate a bicaval recommendation.</p>
+                </article>
               </section>
             </div>
 
@@ -181,9 +181,9 @@
                 </div>
                 <div class="results-grid results-grid-compact cannula-side-results">
                   <article class="result-card">
-                    <p class="result-label">Recommended Size</p>
-                    <output id="cannulaArterialRecommendedOutput" class="result-value">--</output>
-                    <p id="cannulaArterialRecommendedStatus" class="result-status">Set a target flow to generate an arterial recommendation.</p>
+                    <p class="result-label">Arterial Size Override</p>
+                    <div id="cannulaArterialSizeButtons" class="quick-select-row" aria-label="Available arterial cannula sizes"></div>
+                    <p class="result-status">The tool recommends the smallest arterial size that stays under the target threshold at the shared flow.</p>
                   </article>
                   <article class="result-card">
                     <p class="result-label">Displayed Cannula</p>
@@ -211,9 +211,9 @@
                 </div>
                 <div class="results-grid results-grid-compact cannula-side-results">
                   <article class="result-card">
-                    <p class="result-label">Recommended Size</p>
-                    <output id="cannulaVenousRecommendedOutput" class="result-value">--</output>
-                    <p id="cannulaVenousRecommendedStatus" class="result-status">Set a target flow to generate a venous recommendation.</p>
+                    <p class="result-label">Venous Size Override</p>
+                    <div id="cannulaVenousSizeButtons" class="quick-select-row" aria-label="Available venous cannula sizes"></div>
+                    <p class="result-status">The tool recommends the smallest venous size that stays under the target threshold at the shared flow.</p>
                   </article>
                   <article class="result-card">
                     <p class="result-label">Displayed Cannula</p>
@@ -241,9 +241,9 @@
                 </div>
                 <div class="results-grid results-grid-compact cannula-side-results">
                   <article class="result-card">
-                    <p class="result-label">Recommended Size</p>
-                    <output id="cannulaBicavalRecommendedOutput" class="result-value">--</output>
-                    <p id="cannulaBicavalRecommendedStatus" class="result-status">Set a target flow to generate a bicaval recommendation.</p>
+                    <p class="result-label">Bicaval Size Override</p>
+                    <div id="cannulaBicavalSizeButtons" class="quick-select-row" aria-label="Available bicaval cannula sizes"></div>
+                    <p class="result-status">Use this panel to compare a separate intracardiac drainage option at the same target flow.</p>
                   </article>
                   <article class="result-card">
                     <p class="result-label">Displayed Cannula</p>
