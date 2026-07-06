@@ -7,6 +7,7 @@ import {
   calculateBsa,
   calculateDo2i,
   calculateEstimatedBloodVolume,
+  calculateHeparinAdministrationTotal,
   calculateHemoglobinFromHematocrit,
   calculateHctDrop,
   calculateHeparinLoadingDose,
@@ -24,6 +25,7 @@ import {
   evaluateAnticoagulationCalculator,
   evaluateCalculator,
   evaluatePrimeCalculator,
+  resolveProtamineHeparinSource,
   roundTo,
   validateAnticoagField,
   validatePerfusionField,
@@ -250,6 +252,36 @@ test("anticoagulation calculations estimate heparin loading and protamine revers
 
   assert.equal(evaluated.results.heparinLoadingUnits, 21000);
   assert.equal(evaluated.results.protamineDoseMg, 210);
+});
+
+test("heparin administration tally sums valid logged doses", () => {
+  const total = calculateHeparinAdministrationTotal([
+    { time: "08:00", units: 21000 },
+    { time: "08:45", units: 5000 },
+    { time: "09:20", amountUnits: 3000 },
+    { time: "09:50", units: -2000 },
+  ]);
+
+  assert.equal(total, 29000);
+});
+
+test("protamine source can follow the tally with loading fallback when needed", () => {
+  const preferredTally = resolveProtamineHeparinSource(
+    21000,
+    [
+      { time: "08:00", units: 21000 },
+      { time: "08:45", units: 5000 },
+    ],
+    "tally",
+  );
+  assert.equal(preferredTally.source, "tally");
+  assert.equal(preferredTally.heparinUnits, 26000);
+  assert.equal(preferredTally.fellBack, false);
+
+  const fallbackToLoading = resolveProtamineHeparinSource(21000, [], "tally");
+  assert.equal(fallbackToLoading.source, "loading");
+  assert.equal(fallbackToLoading.heparinUnits, 21000);
+  assert.equal(fallbackToLoading.fellBack, true);
 });
 
 test("heparin dose response curve projects target dose and additional heparin", () => {

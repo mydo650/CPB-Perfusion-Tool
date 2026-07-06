@@ -162,3 +162,100 @@ The working platform plan is:
 - add any new ideas, pending tasks, or reminders here before ending a work session
 - continue building the front-end workflow tool first
 - revisit backend support only later if the project clearly outgrows the static/front-end model
+
+## Mentor Follow-Up Checklist
+
+This section captures the current build priorities that came out of mentor feedback so both project members can work from the same list.
+
+### Highest Priority
+
+- [ ] Add a `Pediatric Mode` workflow to make the tool more useful for all perfusionists, not just adult cases
+- [ ] Decide and document the pediatric trigger logic
+  - Recommendation: do not force pediatric mode automatically
+  - Recommendation: if entered `weight`, `height`, and/or `BSA` suggest a pediatric profile, then let the user toggle `Pediatric Mode` on
+- [ ] Define what changes when pediatric mode is active
+  - pediatric-facing flow planning emphasis
+  - pediatric prime support
+  - pediatric cannula defaults/families
+  - pediatric drug support surfaced first where appropriate
+
+### Anticoagulation Updates
+
+- [ ] Add a heparin tally system so total heparin given through the case can be tracked
+- [ ] Use the heparin tally to calculate final protamine dose from `total heparin administered`
+- [ ] If a full tally is not entered, keep fallback guidance:
+  - `Protamine dose based off initial heparin dose`
+- [ ] Add a clear UI choice for protamine calculation source
+  - initial heparin dose only
+  - total heparin given during case
+- [ ] Add `AT3 / antithrombin III` support to the anticoagulation section
+- [ ] Expand heparin-resistance support notes where relevant
+- [ ] Add `Bivalirudin` dosing support
+- [ ] Add `Argatroban` dosing support
+
+### Prime / Pediatric Prime Updates
+
+- [ ] Reassess whether `bicard` should remain in the current prime workflow
+- [ ] Reassess whether `mannitol` should remain in the current prime workflow
+- [ ] Add pediatric prime drugs/additives section
+- [ ] Separate adult prime assumptions from pediatric prime assumptions where needed
+
+### Drug Library Expansion
+
+- [ ] Add `Argatroban`
+- [ ] Add `DDAVP`
+- [ ] Add `Insulin`
+- [ ] Add a `paralysis / neuromuscular blockade` drug section
+- [ ] Add `diuretics`
+- [ ] Add `Cyanokit`
+- [ ] Add `Methylene Blue`
+- [ ] Add `AT3 / Antithrombin III`
+- [ ] Recheck `Bivalirudin` entries so loading dose, bypass dosing, and reversal/bleeding management are all complete
+
+### Suggested Build Order
+
+- [ ] Step 1: finalize the pediatric-mode scope before adding multiple pediatric-specific features
+- [ ] Step 2: build the heparin tally + final protamine workflow
+- [ ] Step 3: expand pediatric prime support
+- [ ] Step 4: finish missing anticoagulation drugs and rescue agents
+- [ ] Step 5: finish the drug library additions
+
+### Recommended Team Split
+
+- [ ] Project Member A
+  - pediatric mode logic
+  - perfusion/prime/cannula behavior changes
+  - heparin tally + protamine workflow
+- [ ] Project Member B
+  - drug library expansion
+  - anticoagulation reference/dosing writeups
+  - pediatric prime content review
+  - reference cleanup and documentation updates
+
+### Notes On The Heparin Tally Idea
+
+The heparin tally idea is strong and should improve the anticoagulation section a lot.
+
+- It is more clinically realistic than calculating protamine from the initial bolus only
+- It lets the user account for repeat boluses during the case
+- It can still remain simple if built as a running list:
+  - initial bolus
+  - added bolus 1
+  - added bolus 2
+  - added bolus 3
+  - optional pump-prime heparin if you want to include that later
+- The output should show both:
+  - `Initial heparin dose`
+  - `Total heparin dose tallied`
+  - `Protamine dose source used`
+
+### Open Decision To Make Before Building
+
+- [ ] Decide whether pediatric mode should be triggered mainly by:
+  - weight
+  - BSA
+  - an institution-defined pediatric cutoff
+- [ ] Decide whether the first version of the heparin tally should include:
+  - bolus doses only
+  - bolus doses plus pump-prime heparin
+  - bolus doses plus infusion dosing if applicable

@@ -159,6 +159,53 @@ export function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
 
+export function calculateHeparinAdministrationTotal(entries = []) {
+  return entries.reduce((total, entry) => {
+    const units = Number(entry?.units ?? entry?.amountUnits ?? 0);
+    return Number.isFinite(units) && units > 0 ? total + units : total;
+  }, 0);
+}
+
+export function resolveProtamineHeparinSource(estimatedHeparinUnits, entries = [], preferredSource = "loading") {
+  const tallyUnits = calculateHeparinAdministrationTotal(entries);
+  const hasEstimated = Number.isFinite(estimatedHeparinUnits) && estimatedHeparinUnits > 0;
+  const wantsTally = preferredSource === "tally";
+
+  if (wantsTally && tallyUnits > 0) {
+    return {
+      source: "tally",
+      heparinUnits: tallyUnits,
+      tallyUnits,
+      fellBack: false,
+    };
+  }
+
+  if (hasEstimated) {
+    return {
+      source: "loading",
+      heparinUnits: estimatedHeparinUnits,
+      tallyUnits,
+      fellBack: wantsTally,
+    };
+  }
+
+  if (tallyUnits > 0) {
+    return {
+      source: "tally",
+      heparinUnits: tallyUnits,
+      tallyUnits,
+      fellBack: preferredSource === "loading",
+    };
+  }
+
+  return {
+    source: wantsTally ? "tally" : "loading",
+    heparinUnits: null,
+    tallyUnits: 0,
+    fellBack: false,
+  };
+}
+
 export function calculateHeparinResponseCurve(baselineActSeconds, postHeparinActSeconds, heparinDosePerKg, targetActSeconds, weightKg) {
   const actDelta = postHeparinActSeconds - baselineActSeconds;
   if (actDelta <= 0 || heparinDosePerKg <= 0) return null;

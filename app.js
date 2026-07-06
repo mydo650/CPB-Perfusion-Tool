@@ -38,6 +38,7 @@ const SHARED_FIELD_GROUPS = {
 };
 
 const SHARED_FIELD_STORAGE_KEY = "cpbSupportSharedFields";
+const ANTICOAG_LOG_STORAGE_KEY = "cpbSupportAnticoagHeparinLog";
 const DEFAULT_CANNULA_CARDIAC_INDEX = 2.6;
 const CANNULA_SIDES = ["arterial", "venous", "bicaval"];
 const BASE_CANNULA_SIDES = ["arterial", "venous"];
@@ -401,6 +402,61 @@ function writeSharedFieldState(nextState) {
   }
 }
 
+function createHeparinLogEntryId() {
+  return `heparin-log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function readHeparinLogState() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(ANTICOAG_LOG_STORAGE_KEY) ?? "{}");
+    const entries = Array.isArray(stored.entries)
+      ? stored.entries
+        .map((entry) => ({
+          id: typeof entry?.id === "string" ? entry.id : createHeparinLogEntryId(),
+          time: typeof entry?.time === "string" ? entry.time.slice(0, 5) : "",
+          units: Number(entry?.units),
+        }))
+        .filter((entry) => entry.time && Number.isFinite(entry.units) && entry.units > 0)
+      : [];
+
+    return {
+      entries,
+      protamineSource: stored.protamineSource === "tally" ? "tally" : "loading",
+    };
+  } catch {
+    return { entries: [], protamineSource: "loading" };
+  }
+}
+
+function writeHeparinLogState(nextState) {
+  try {
+    const entries = Array.isArray(nextState.entries)
+      ? nextState.entries
+        .filter((entry) => entry.time && Number.isFinite(entry.units) && entry.units > 0)
+        .map((entry) => ({
+          id: typeof entry.id === "string" ? entry.id : createHeparinLogEntryId(),
+          time: entry.time.slice(0, 5),
+          units: Number(entry.units),
+        }))
+      : [];
+
+    window.localStorage.setItem(
+      ANTICOAG_LOG_STORAGE_KEY,
+      JSON.stringify({
+        entries,
+        protamineSource: nextState.protamineSource === "tally" ? "tally" : "loading",
+      }),
+    );
+  } catch {
+    // Ignore storage failures so calculators still work in restrictive browsers.
+  }
+}
+
+function getCurrentClockTime() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
 function findSharedGroupForField(fieldName) {
   return Object.entries(SHARED_FIELD_GROUPS).find(([, fieldNames]) => fieldNames.includes(fieldName)) ?? null;
 }
@@ -559,6 +615,53 @@ function calculateHeparinLoadingDose(weightKg, heparinDosePerKg) {
 
 function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
+}
+
+function calculateHeparinAdministrationTotal(entries = []) {
+  return entries.reduce((total, entry) => {
+    const units = Number(entry?.units ?? 0);
+    return Number.isFinite(units) && units > 0 ? total + units : total;
+  }, 0);
+}
+
+function resolveProtamineHeparinSource(estimatedHeparinUnits, entries = [], preferredSource = "loading") {
+  const tallyUnits = calculateHeparinAdministrationTotal(entries);
+  const hasEstimated = Number.isFinite(estimatedHeparinUnits) && estimatedHeparinUnits > 0;
+  const wantsTally = preferredSource === "tally";
+
+  if (wantsTally && tallyUnits > 0) {
+    return {
+      source: "tally",
+      heparinUnits: tallyUnits,
+      tallyUnits,
+      fellBack: false,
+    };
+  }
+
+  if (hasEstimated) {
+    return {
+      source: "loading",
+      heparinUnits: estimatedHeparinUnits,
+      tallyUnits,
+      fellBack: wantsTally,
+    };
+  }
+
+  if (tallyUnits > 0) {
+    return {
+      source: "tally",
+      heparinUnits: tallyUnits,
+      tallyUnits,
+      fellBack: preferredSource === "loading",
+    };
+  }
+
+  return {
+    source: wantsTally ? "tally" : "loading",
+    heparinUnits: null,
+    tallyUnits: 0,
+    fellBack: false,
+  };
 }
 
 function calculateHeparinResponseCurve(baselineActSeconds, postHeparinActSeconds, heparinDosePerKg, targetActSeconds, weightKg) {
@@ -995,6 +1098,23 @@ const anticoagOutputs = anticoagForm
         format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
         empty: "Calculated from the estimated heparin loading dose.",
       },
+      heparinTallyUnits: {
+        value: document.querySelector("#heparinTallyOutput"),
+        status: document.querySelector("#heparinTallyStatus"),
+        format: (value) => `${Math.round(value).toLocaleString()} units`,
+      },
+      protamineSource: {
+        value: document.querySelector("#protamineSourceOutput"),
+        status: document.querySelector("#protamineSourceStatus"),
+      },
+      heparinLogTimeInput: document.querySelector("#heparinAdminTime"),
+      heparinLogUnitsInput: document.querySelector("#heparinAdminUnits"),
+      heparinLogValidation: document.querySelector("#heparinLogValidation"),
+      heparinLogList: document.querySelector("#heparinLogList"),
+      heparinLogEmpty: document.querySelector("#heparinLogEmpty"),
+      protamineDoseSourceSelect: document.querySelector("#protamineDoseSource"),
+      useLoadingDoseForLogButton: document.querySelector("#useLoadingDoseForLog"),
+      addHeparinLogEntryButton: document.querySelector("#addHeparinLogEntry"),
       curveChart: document.querySelector("#heparinCurveChart"),
       curveSummary: document.querySelector("#heparinCurveSummary"),
       curveTooltip: document.querySelector("#heparinCurveTooltip"),
@@ -1005,6 +1125,8 @@ const anticoagOutputs = anticoagForm
       curveModalTooltip: document.querySelector("#heparinCurveModalTooltip"),
     }
   : null;
+
+let heparinLogState = anticoagForm ? readHeparinLogState() : { entries: [], protamineSource: "loading" };
 
 const tabButtons = Array.from(document.querySelectorAll("[data-tab-target]"));
 const tabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
@@ -1017,6 +1139,81 @@ function formatPrimeUnits(prbcVolumeMl) {
   if (prbcVolumeMl === null) return "--";
   if (prbcVolumeMl === 0) return "0 units";
   return `${roundTo(prbcVolumeMl / 300, 1).toFixed(1)} units`;
+}
+
+function setHeparinLogValidation(message = "") {
+  if (!anticoagOutputs?.heparinLogValidation) return;
+  anticoagOutputs.heparinLogValidation.textContent = message;
+}
+
+function renderHeparinAdministrationLog(evaluation) {
+  if (!anticoagOutputs) return;
+
+  const entries = heparinLogState.entries;
+  const tallyUnits = calculateHeparinAdministrationTotal(entries);
+  const protamineResolution = resolveProtamineHeparinSource(
+    evaluation.results.heparinLoadingUnits,
+    entries,
+    heparinLogState.protamineSource,
+  );
+
+  if (anticoagOutputs.heparinTallyUnits.value) {
+    anticoagOutputs.heparinTallyUnits.value.textContent = tallyUnits > 0
+      ? anticoagOutputs.heparinTallyUnits.format(tallyUnits)
+      : "--";
+  }
+  if (anticoagOutputs.heparinTallyUnits.status) {
+    anticoagOutputs.heparinTallyUnits.status.textContent = entries.length > 0
+      ? `${entries.length} heparin entr${entries.length === 1 ? "y" : "ies"} recorded.`
+      : "No heparin entries recorded yet.";
+  }
+
+  if (anticoagOutputs.protamineSource.value) {
+    anticoagOutputs.protamineSource.value.textContent = protamineResolution.source === "tally"
+      ? "Heparin tally"
+      : "Loading estimate";
+  }
+  if (anticoagOutputs.protamineSource.status) {
+    anticoagOutputs.protamineSource.status.textContent = protamineResolution.source === "tally"
+      ? "Protamine is following the running case total from the heparin log."
+      : protamineResolution.fellBack
+        ? "Tally was selected, but no heparin entries are recorded yet, so the loading estimate is being used."
+        : "Protamine is following the estimated loading dose.";
+  }
+
+  if (evaluation.fields.protamineRatioMgPer100U?.valid && protamineResolution.heparinUnits !== null) {
+    anticoagOutputs.protamineDoseMg.value.textContent = anticoagOutputs.protamineDoseMg.format(
+      calculateProtamineDose(protamineResolution.heparinUnits, evaluation.fields.protamineRatioMgPer100U.value),
+    );
+    anticoagOutputs.protamineDoseMg.status.textContent = protamineResolution.source === "tally"
+      ? "Based on the total tallied heparin administered and selected protamine ratio."
+      : protamineResolution.fellBack
+        ? "Tally was selected, but no entries are logged yet, so this is based on the estimated loading dose."
+        : "Based on the estimated heparin loading dose and selected protamine ratio.";
+  } else {
+    anticoagOutputs.protamineDoseMg.value.textContent = "--";
+    anticoagOutputs.protamineDoseMg.status.textContent = evaluation.fields.protamineRatioMgPer100U?.valid
+      ? anticoagOutputs.protamineDoseMg.empty
+      : "Enter a valid protamine ratio to calculate the reversal dose.";
+  }
+
+  if (anticoagOutputs.heparinLogEmpty) {
+    anticoagOutputs.heparinLogEmpty.hidden = entries.length > 0;
+  }
+
+  if (anticoagOutputs.heparinLogList) {
+    anticoagOutputs.heparinLogList.innerHTML = entries
+      .map((entry) => `
+        <li class="heparin-log-entry">
+          <div class="heparin-log-entry-copy">
+            <span class="heparin-log-entry-time">${entry.time}</span>
+            <span class="heparin-log-entry-dose">${Math.round(entry.units).toLocaleString()} units heparin</span>
+          </div>
+          <button type="button" class="heparin-log-remove" data-heparin-log-remove="${entry.id}">Remove</button>
+        </li>
+      `)
+      .join("");
+  }
 }
 
 function setPrimePlan(state, headline, body) {
@@ -2499,13 +2696,7 @@ function renderAnticoagulation() {
     }
   }
 
-  if (evaluation.results.protamineDoseMg !== null) {
-    anticoagOutputs.protamineDoseMg.value.textContent = anticoagOutputs.protamineDoseMg.format(evaluation.results.protamineDoseMg);
-    anticoagOutputs.protamineDoseMg.status.textContent = "Based on the estimated heparin loading dose and selected protamine ratio.";
-  } else {
-    anticoagOutputs.protamineDoseMg.value.textContent = "--";
-    anticoagOutputs.protamineDoseMg.status.textContent = anticoagOutputs.protamineDoseMg.empty;
-  }
+  renderHeparinAdministrationLog(evaluation);
 
   renderHeparinCurve(evaluation.results.heparinResponseCurve);
   if (isHeparinCurveExpanded) {
@@ -2552,6 +2743,69 @@ if (anticoagForm) {
   anticoagForm.addEventListener("change", renderAnticoagulation);
   anticoagForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
   anticoagForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
+  if (anticoagOutputs.protamineDoseSourceSelect) {
+    anticoagOutputs.protamineDoseSourceSelect.value = heparinLogState.protamineSource;
+    anticoagOutputs.protamineDoseSourceSelect.addEventListener("change", () => {
+      heparinLogState.protamineSource = anticoagOutputs.protamineDoseSourceSelect.value === "tally" ? "tally" : "loading";
+      writeHeparinLogState(heparinLogState);
+      renderAnticoagulation();
+    });
+  }
+  if (anticoagOutputs.heparinLogTimeInput && anticoagOutputs.heparinLogTimeInput.value === "") {
+    anticoagOutputs.heparinLogTimeInput.value = getCurrentClockTime();
+  }
+  anticoagOutputs.useLoadingDoseForLogButton?.addEventListener("click", () => {
+    const evaluation = evaluateAnticoagulationCalculator(collectInputs(anticoagForm));
+    if (evaluation.results.heparinLoadingUnits === null) {
+      setHeparinLogValidation("Enter weight and the heparin loading dose assumption first so the initial dose can be copied into the log.");
+      return;
+    }
+
+    if (anticoagOutputs.heparinLogUnitsInput) {
+      anticoagOutputs.heparinLogUnitsInput.value = String(Math.round(evaluation.results.heparinLoadingUnits));
+    }
+    if (anticoagOutputs.heparinLogTimeInput && anticoagOutputs.heparinLogTimeInput.value === "") {
+      anticoagOutputs.heparinLogTimeInput.value = getCurrentClockTime();
+    }
+    setHeparinLogValidation("Estimated loading dose copied into the heparin amount field.");
+  });
+  anticoagOutputs.addHeparinLogEntryButton?.addEventListener("click", () => {
+    const timeValue = anticoagOutputs.heparinLogTimeInput?.value?.trim() ?? "";
+    const unitsValue = Number(anticoagOutputs.heparinLogUnitsInput?.value ?? "");
+
+    if (!timeValue) {
+      setHeparinLogValidation("Enter the administration time for this heparin dose.");
+      return;
+    }
+    if (!Number.isFinite(unitsValue) || unitsValue <= 0) {
+      setHeparinLogValidation("Enter a heparin amount greater than 0 units.");
+      return;
+    }
+
+    heparinLogState.entries = [
+      ...heparinLogState.entries,
+      {
+        id: createHeparinLogEntryId(),
+        time: timeValue.slice(0, 5),
+        units: Math.round(unitsValue),
+      },
+    ];
+    writeHeparinLogState(heparinLogState);
+    if (anticoagOutputs.heparinLogUnitsInput) {
+      anticoagOutputs.heparinLogUnitsInput.value = "";
+    }
+    setHeparinLogValidation("");
+    renderAnticoagulation();
+  });
+  anticoagOutputs.heparinLogList?.addEventListener("click", (event) => {
+    const removeButton = event.target instanceof Element ? event.target.closest("[data-heparin-log-remove]") : null;
+    if (!(removeButton instanceof HTMLButtonElement)) return;
+
+    heparinLogState.entries = heparinLogState.entries.filter((entry) => entry.id !== removeButton.dataset.heparinLogRemove);
+    writeHeparinLogState(heparinLogState);
+    setHeparinLogValidation("");
+    renderAnticoagulation();
+  });
   bindCurveTooltip(anticoagOutputs.curveChart);
   bindCurveTooltip(anticoagOutputs.curveModalChart);
   targetActButtons.forEach((button) => {

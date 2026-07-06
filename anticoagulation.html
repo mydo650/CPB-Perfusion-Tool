@@ -84,6 +84,59 @@
           </div>
           <div id="heparinResistanceWarning" class="clinical-warning" role="status" aria-live="polite" hidden></div>
 
+          <section class="heparin-log-panel" aria-labelledby="heparin-log-title">
+            <div class="panel-header">
+              <h3 id="heparin-log-title">Heparin Administration Log</h3>
+              <p>Track when heparin was given and the amount so total case heparin can be reviewed before reversal.</p>
+            </div>
+            <div class="field-grid heparin-log-grid">
+              <label class="field">
+                <span>Administration Time</span>
+                <div class="input-wrap">
+                  <input id="heparinAdminTime" name="heparinAdminTime" type="time" step="60" autocomplete="off" />
+                </div>
+                <small class="hint">Record the case time for each heparin dose</small>
+              </label>
+              <label class="field">
+                <span>Heparin Amount</span>
+                <div class="input-wrap">
+                  <input id="heparinAdminUnits" name="heparinAdminUnits" type="number" inputmode="decimal" min="1" max="100000" step="1" autocomplete="off" />
+                  <span class="unit">units</span>
+                </div>
+                <div class="quick-select-row" aria-label="Heparin log actions">
+                  <button type="button" class="quick-select-button" id="useLoadingDoseForLog">Use loading dose</button>
+                  <button type="button" class="quick-select-button" id="addHeparinLogEntry">Add entry</button>
+                </div>
+                <small class="hint">Use for the initial dose, boluses, or additional doses during bypass</small>
+              </label>
+              <label class="field">
+                <span>Protamine Calculation Source</span>
+                <div class="input-wrap">
+                  <select id="protamineDoseSource" name="protamineDoseSource">
+                    <option value="loading">Estimated loading dose</option>
+                    <option value="tally">Heparin administration tally</option>
+                  </select>
+                </div>
+                <small class="hint">Choose whether reversal follows the loading estimate or the running case tally</small>
+              </label>
+            </div>
+            <div id="heparinLogValidation" class="validation-summary" role="status" aria-live="polite"></div>
+            <div class="results-grid results-grid-compact heparin-log-results">
+              <article class="result-card">
+                <p class="result-label">Total Tallied Heparin</p>
+                <output id="heparinTallyOutput" class="result-value">--</output>
+                <p id="heparinTallyStatus" class="result-status">No heparin entries recorded yet.</p>
+              </article>
+              <article class="result-card">
+                <p class="result-label">Protamine Source</p>
+                <output id="protamineSourceOutput" class="result-value">--</output>
+                <p id="protamineSourceStatus" class="result-status">Using the estimated loading dose unless the tally is selected.</p>
+              </article>
+            </div>
+            <p id="heparinLogEmpty" class="heparin-log-empty">No heparin entries recorded yet.</p>
+            <ol id="heparinLogList" class="heparin-log-list" aria-label="Heparin administration entries"></ol>
+          </section>
+
           <section class="curve-panel" aria-labelledby="heparin-curve-title">
             <div class="curve-header">
               <div>
