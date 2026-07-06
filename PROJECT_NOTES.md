@@ -72,6 +72,12 @@ The tool is meant to support a typical perfusion workflow and reduce repeated me
 
 ## Roadmap
 
+### Capstone Study Preparation
+
+- submit an IRB determination/review request before using the tool with students in the Califia heart-lung simulator or collecting NASA-TLX/workload, usability, timing, error-rate, or performance data
+- prepare a short protocol describing the simulation scenario, participant group, voluntary consent process, NASA-TLX data collection, de-identification plan, data storage, and how participation will be separated from grading or course evaluation
+- confirm with faculty/IRB whether the project qualifies as exempt or not-human-subjects research before beginning any student data collection
+
 ### Phase 1: Front-End Foundation
 
 - refine calculation formulas and assumptions with reliable references
