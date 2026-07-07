@@ -77,6 +77,10 @@ The tool is meant to support a typical perfusion workflow and reduce repeated me
 - submit an IRB determination/review request before using the tool with students in the Califia heart-lung simulator or collecting NASA-TLX/workload, usability, timing, error-rate, or performance data
 - prepare a short protocol describing the simulation scenario, participant group, voluntary consent process, NASA-TLX data collection, de-identification plan, data storage, and how participation will be separated from grading or course evaluation
 - confirm with faculty/IRB whether the project qualifies as exempt or not-human-subjects research before beginning any student data collection
+- current capstone build plan:
+  - finish the web tool during the current build phase
+  - plan a pilot test during Fall 2026 with incoming students during simulation runs
+  - if the Fall 2026 pilot includes systematic data collection, usability assessment, workload measures, performance comparison, or dissemination beyond internal course improvement, prepare for human-subjects IRB review rather than assuming NHSR
 
 ### Phase 1: Front-End Foundation
 
@@ -162,6 +166,69 @@ The working platform plan is:
 - add any new ideas, pending tasks, or reminders here before ending a work session
 - continue building the front-end workflow tool first
 - revisit backend support only later if the project clearly outgrows the static/front-end model
+- planned next research milestone:
+  - align the Summer 2026 IRB assignment deliverable with the longer-term Fall 2026 pilot-testing plan
+  - clarify whether the July 12, 2026 submission is only an NHSR determination for the build phase or whether faculty want the pilot-testing protocol submitted now as well
+
+## IRB Operational Guardrails
+
+This section is meant to function as a practical research operations checklist during the Fall 2026 pilot phase. It does not replace Emory IRB approval, protocol language, or PI judgment. It is here so we can quickly sanity-check whether a proposed research step still matches the approved plan.
+
+### Core Rule
+
+- do not begin pilot testing with students until the study has the correct Emory IRB determination or approval in place for the pilot phase
+
+### What Counts As Human-Subjects Activity For This Project
+
+- pilot testing the web tool with incoming perfusion students during simulation runs
+- collecting usability data
+- collecting NASA-TLX or other workload data
+- collecting timing, accuracy, task completion, or performance data tied to student participation
+- analyzing those data as part of a systematic capstone or educational research project
+
+### Platform And Data Rules
+
+- preferred rule: the CPB support web tool should function as the intervention, not the storage location for identifiable participant research data
+- preferred rule: do not store names, emails, student IDs, grades, or other identifiers inside the web tool unless the IRB submission and data-security review explicitly allow it
+- if identifiable research data will be collected, shared, or stored using any platform hosted outside Emory, VA, or Children's:
+  - stop and confirm whether OIT security review is required before use
+  - examples include Netlify, GitHub Pages, Google Forms, SurveyMonkey, outside transcription vendors, or other third-party hosted tools
+- if the tool is only being used during simulation and identifiable data are collected separately in an Emory-approved system, the external-platform question may remain `No`
+- use Emory-approved systems such as REDCap, Qualtrics, or secure institutional storage for research data whenever possible
+- avoid removable media such as USB drives or external hard drives unless specifically needed and appropriately secured
+- do not transmit confidential data through non-institutional email
+
+### Educational Records Rule
+
+- answer `Yes` to educational-records questions only if the study will access official student records maintained by the school or program
+- examples include grades, formal evaluations, academic standing, or institutional performance records
+- answer `No` if the study only uses research data created during the pilot itself, such as simulation timing, study surveys, NASA-TLX responses, or study-specific observations
+
+### Recruitment And Consent Rules
+
+- recruitment should make clear that participation in the research portion is voluntary
+- participation or non-participation must not affect grades, evaluations, standing, or access to required educational content
+- if the simulation exercise is part of the curriculum, only data from students who consent to the research should be included in the analysis
+- avoid coercive recruitment, especially when faculty are recruiting their own students
+
+### When To Pause And Re-check IRB Before Proceeding
+
+- if we add minors
+- if we add patient data, PHI, or electronic medical record information
+- if we add identifiable student records
+- if we change from local or Emory-approved tools to third-party tools
+- if we add AI or machine-learning components to the research intervention or data analysis workflow
+- if we add text-message communication, social-media data collection, or outside vendors
+- if we expand from a pilot to a broader comparative or publishable study beyond the approved scope
+
+### Practical Session Check Before Each Pilot Run
+
+- confirm the approved IRB pathway still matches the planned activity
+- confirm the platform being used is the same platform described in the submission
+- confirm no new identifiers are being collected unexpectedly
+- confirm participation is voluntary and separated from grading
+- confirm research data are stored only in the approved location
+- confirm no one is exporting data to personal devices, personal email, or unapproved apps
 
 ## Mentor Follow-Up Checklist
 
