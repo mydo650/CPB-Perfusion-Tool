@@ -1,5 +1,9 @@
 # CPB Perfusion Tool Project Notes
 
+## Official Capstone Project Title
+
+Development and Evaluation of a Web-Based Cardiopulmonary Bypass Perfusion Support Tool for Education and Simulation
+
 ## Project Purpose
 
 Build a clear, mobile-friendly web tool for perfusion education, simulation, and planning support around common cardiopulmonary bypass calculations.
@@ -18,7 +22,7 @@ This PICOT should remain a central reference point for the project and should be
 
 Working PICOT question:
 
-In perfusionists or perfusion students performing simulated CPB or perfusion tasks, does use of a CPB support tool, workflow calculator, or decision-support cognitive aid, compared with usual practice, manual calculation, or no tool, reduce cognitive workload, reduce calculation errors, and improve workflow during simulation-based CPB activities?
+In perfusion students participating in CPB education or simulation, does use of a web-based CPB Perfusion Tool improve calculation accuracy, workflow efficiency, and student confidence compared with traditional manual calculation methods?
 
 ## Preferred Evidence Sources
 
@@ -269,7 +273,8 @@ This section captures the current build priorities that came out of mentor feedb
 
 ### Drug Library Expansion
 
-- [ ] Add `Argatroban`
+- [x] Add `Argatroban`
+- [x] Add first-pass anticoagulant dose/concentration safety checker
 - [ ] Add `DDAVP`
 - [ ] Add `Insulin`
 - [ ] Add a `paralysis / neuromuscular blockade` drug section
@@ -279,13 +284,22 @@ This section captures the current build priorities that came out of mentor feedb
 - [ ] Add `AT3 / Antithrombin III`
 - [ ] Recheck `Bivalirudin` entries so loading dose, bypass dosing, and reversal/bleeding management are all complete
 
+### Reference Page Optimization
+
+- [x] Optimize and filter the `References` tab so sources are easier to scan
+- [x] Group references by project module, such as perfusion, prime, anticoagulation, cannulas, drugs, IRB/pilot testing, and general standards
+- [x] Add filtering or tagging so formulas, clinical guidance, manufacturer data, and research-methodology sources can be found quickly
+- [x] Add mentor-provided PubMed literature from the Melissa Deuber meeting on simulation, cognitive load, cardiac surgery workflow, and perfusionist simulation training
+- [ ] Keep every source tied back to the page or calculation it supports where possible
+
 ### Suggested Build Order
 
 - [ ] Step 1: finalize the pediatric-mode scope before adding multiple pediatric-specific features
 - [ ] Step 2: build the heparin tally + final protamine workflow
 - [ ] Step 3: expand pediatric prime support
 - [ ] Step 4: finish missing anticoagulation drugs and rescue agents
-- [ ] Step 5: finish the drug library additions
+- [x] Step 5: optimize and filter the references page
+- [ ] Step 6: finish the drug library additions
 
 ### Recommended Team Split
 

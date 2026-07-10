@@ -159,6 +159,35 @@ export function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
 
+export function calculateDrugDoseSafetyCheck({ weightKg, dose, concentration, routeType, doseUnit, concentrationUnit, referenceLow, referenceHigh }) {
+  const numericWeight = Number(weightKg);
+  const numericDose = Number(dose);
+  const numericConcentration = Number(concentration);
+  const numericLow = Number(referenceLow);
+  const numericHigh = Number(referenceHigh);
+
+  if (!Number.isFinite(numericWeight) || numericWeight <= 0) return null;
+  if (!Number.isFinite(numericDose) || numericDose <= 0) return null;
+  if (!Number.isFinite(numericConcentration) || numericConcentration <= 0) return null;
+
+  const totalDose = numericWeight * numericDose;
+  const volumeMl = totalDose / numericConcentration;
+  const doseStatus = Number.isFinite(numericLow) && numericDose < numericLow
+    ? "below"
+    : Number.isFinite(numericHigh) && numericDose > numericHigh
+      ? "above"
+      : "within";
+
+  return {
+    totalDose,
+    volumeMl,
+    routeType: routeType === "infusion" ? "infusion" : "bolus",
+    doseUnit,
+    concentrationUnit,
+    doseStatus,
+  };
+}
+
 export function calculateHeparinAdministrationTotal(entries = []) {
   return entries.reduce((total, entry) => {
     const units = Number(entry?.units ?? entry?.amountUnits ?? 0);

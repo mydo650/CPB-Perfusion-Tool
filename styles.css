@@ -854,6 +854,103 @@ input[aria-invalid="true"] {
   gap: 0.75rem;
 }
 
+.drug-check-panel {
+  padding: 0 1rem 1rem;
+}
+
+.drug-check-dropdown {
+  margin-top: 0.85rem;
+  border-color: rgba(180, 83, 9, 0.28);
+  background: rgba(255, 246, 232, 0.72);
+}
+
+.drug-check-summary {
+  color: #92400e;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(255, 255, 255, 0.72));
+}
+
+.drug-check-summary::after {
+  color: #92400e;
+}
+
+.drug-check-header {
+  margin-bottom: 0.85rem;
+  padding-top: 0.1rem;
+}
+
+.drug-check-header h3 {
+  font-size: 1rem;
+}
+
+.drug-check-header p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.drug-check-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.drug-check-results {
+  margin-top: 0.35rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.drug-check-output {
+  padding: 0.8rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(22, 33, 38, 0.08);
+}
+
+.drug-check-output-primary {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(255, 255, 255, 0.92));
+  border-color: rgba(15, 118, 110, 0.22);
+}
+
+.drug-check-output[data-check-state="below"],
+.drug-check-output[data-check-state="above"] {
+  background: linear-gradient(135deg, rgba(166, 27, 27, 0.16), rgba(255, 255, 255, 0.94));
+  border-color: rgba(166, 27, 27, 0.42);
+  box-shadow: 0 0 0 3px rgba(166, 27, 27, 0.08);
+}
+
+.drug-check-output[data-check-state="below"] .result-label,
+.drug-check-output[data-check-state="below"] .result-value,
+.drug-check-output[data-check-state="above"] .result-label,
+.drug-check-output[data-check-state="above"] .result-value {
+  color: var(--danger);
+}
+
+.drug-check-output[data-check-state="below"] .result-status,
+.drug-check-output[data-check-state="above"] .result-status {
+  color: #7f1d1d;
+  font-weight: 750;
+}
+
+.drug-check-results .result-value {
+  font-size: clamp(1.35rem, 2vw, 2rem);
+}
+
+.drug-check-results .result-label {
+  font-size: 0.76rem;
+}
+
+.drug-check-caution {
+  margin: 0.8rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 83, 9, 0.24);
+  background: rgba(255, 246, 232, 0.88);
+  color: #7c2d12;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .nested-drug-accordion {
   padding: 0 1rem 1rem;
 }
@@ -1532,6 +1629,61 @@ input[aria-invalid="true"] {
   margin-top: 0;
 }
 
+.reference-filter-panel {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.reference-filter-panel p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.reference-filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.reference-filter-button {
+  min-height: 2.15rem;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--accent-strong);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+
+.reference-filter-button.is-active {
+  background: var(--accent-strong);
+  border-color: transparent;
+  color: #f8fffd;
+}
+
+.reference-filter-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.reference-group-note {
+  margin: 0.35rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .references-list {
   margin: 1rem 0 0;
   padding-left: 1.2rem;
@@ -1544,6 +1696,52 @@ input[aria-invalid="true"] {
 .references-list a {
   color: var(--accent-strong);
   font-weight: 700;
+}
+
+.reference-source-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.45rem;
+  margin-left: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(78, 94, 102, 0.12);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.reference-source-peer-reviewed {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.reference-source-guideline {
+  background: rgba(15, 118, 110, 0.12);
+  color: #0a4f4a;
+}
+
+.reference-source-drug-label {
+  background: rgba(180, 83, 9, 0.14);
+  color: #92400e;
+}
+
+.reference-source-ncbi {
+  background: rgba(79, 70, 229, 0.12);
+  color: #4338ca;
+}
+
+.reference-source-manufacturer {
+  background: rgba(100, 116, 139, 0.14);
+  color: #334155;
+}
+
+.reference-source-other {
+  background: rgba(166, 27, 27, 0.12);
+  color: var(--danger);
 }
 
 .reference-group + .reference-group {
@@ -1586,6 +1784,10 @@ input[aria-invalid="true"] {
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .drug-check-grid {
     grid-template-columns: 1fr;
   }
 

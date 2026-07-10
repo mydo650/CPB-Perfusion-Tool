@@ -132,7 +132,114 @@
                     </div>
                   </dl>
                 </details>
+                <details class="drug-item">
+                  <summary class="drug-summary">Argatroban</summary>
+                  <dl class="drug-detail-list">
+                    <div>
+                      <dt>MOA:</dt>
+                      <dd>Direct thrombin inhibitor that reversibly binds thrombin and inhibits fibrin formation, platelet activation, and clot propagation.</dd>
+                    </div>
+                    <div>
+                      <dt>Dose for HIT:</dt>
+                      <dd>Common adult initial infusion is 2 mcg/kg/min IV in patients without hepatic impairment, titrated to aPTT per protocol. Lower initial doses are used with hepatic impairment or critical illness.</dd>
+                    </div>
+                    <div>
+                      <dt>Dose for PCI:</dt>
+                      <dd>Labeled PCI regimen includes 350 mcg/kg IV bolus over 3 to 5 minutes plus 25 mcg/kg/min infusion, with ACT checked 5 to 10 minutes after bolus completion.</dd>
+                    </div>
+                    <div>
+                      <dt>Metabolism:</dt>
+                      <dd>Primarily hepatic metabolism. Dose reduction and close monitoring are important with hepatic impairment.</dd>
+                    </div>
+                    <div>
+                      <dt>T1/2:</dt>
+                      <dd>Approximately 39 to 51 minutes in patients without hepatic impairment; may be prolonged with hepatic dysfunction.</dd>
+                    </div>
+                    <div>
+                      <dt>Adverse Drug Reactions:</dt>
+                      <dd>Bleeding, hypotension, fever, diarrhea, sepsis, cardiac arrest, and hypersensitivity reactions have been reported.</dd>
+                    </div>
+                    <div>
+                      <dt>Contraindications:</dt>
+                      <dd>Major bleeding or history of hypersensitivity to argatroban or formulation components.</dd>
+                    </div>
+                    <div>
+                      <dt>Cardiac Considerations:</dt>
+                      <dd>No specific reversal agent exists; monitor ACT/aPTT per use case and use caution when hepatic dysfunction may prolong anticoagulant effect.</dd>
+                    </div>
+                  </dl>
+                </details>
               </div>
+              <details class="drug-item drug-check-dropdown">
+                <summary class="drug-summary drug-check-summary">Dose / Concentration Check</summary>
+                <section class="drug-check-panel" aria-labelledby="drug-check-title">
+                  <div class="drug-check-header">
+                    <h3 id="drug-check-title">Anticoagulant Dose Safety Check</h3>
+                    <p>Cross-check an anticoagulant dose against weight and available concentration.</p>
+                  </div>
+                  <form id="drug-dose-check-form" novalidate>
+                    <div class="field-grid drug-check-grid">
+                      <label class="field">
+                        <span>Weight</span>
+                        <div class="input-wrap">
+                          <input id="drugCheckWeightKg" name="drugCheckWeightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" />
+                          <span class="unit">kg</span>
+                        </div>
+                        <small class="hint">Shared patient weight can be entered here.</small>
+                      </label>
+                      <label class="field">
+                        <span>Anticoagulant Scenario</span>
+                        <div class="input-wrap">
+                          <select id="drugCheckScenario" name="drugCheckScenario">
+                            <option value="heparin-cpb-bolus">Heparin CPB loading bolus</option>
+                            <option value="bivalirudin-cpb-bolus">Bivalirudin CPB loading bolus</option>
+                            <option value="bivalirudin-cpb-infusion">Bivalirudin CPB infusion</option>
+                            <option value="argatroban-hit-infusion">Argatroban HIT infusion</option>
+                            <option value="argatroban-pci-bolus">Argatroban PCI bolus</option>
+                            <option value="argatroban-pci-infusion">Argatroban PCI infusion</option>
+                          </select>
+                        </div>
+                        <small id="drugCheckScenarioHint" class="hint">Reference range and unit labels update with the selected scenario.</small>
+                      </label>
+                      <label class="field">
+                        <span>Dose</span>
+                        <div class="input-wrap">
+                          <input id="drugCheckDose" name="drugCheckDose" type="number" inputmode="decimal" min="0" max="10000" step="0.01" autocomplete="off" />
+                          <span class="unit" id="drugCheckDoseUnit">units/kg</span>
+                        </div>
+                        <small id="drugCheckDoseHint" class="hint">Enter the intended protocol dose.</small>
+                      </label>
+                      <label class="field">
+                        <span>Available Concentration</span>
+                        <div class="input-wrap">
+                          <input id="drugCheckConcentration" name="drugCheckConcentration" type="number" inputmode="decimal" min="0" max="100000" step="0.01" autocomplete="off" />
+                          <span class="unit" id="drugCheckConcentrationUnit">units/mL</span>
+                        </div>
+                        <small id="drugCheckConcentrationHint" class="hint">Use the concentration on the vial, syringe, or infusion.</small>
+                      </label>
+                    </div>
+                  </form>
+                  <div id="drugCheckValidation" class="validation-summary" role="status" aria-live="polite"></div>
+                  <div class="results-grid results-grid-compact drug-check-results">
+                    <article class="drug-check-output drug-check-output-primary">
+                      <p class="result-label">Calculated Dose</p>
+                      <output id="drugCheckTotalDoseOutput" class="result-value">--</output>
+                      <p id="drugCheckTotalDoseStatus" class="result-status">Enter weight, dose, and concentration.</p>
+                    </article>
+                    <article class="drug-check-output">
+                      <p class="result-label">Volume / Rate</p>
+                      <output id="drugCheckVolumeOutput" class="result-value">--</output>
+                      <p id="drugCheckVolumeStatus" class="result-status">Calculated from the entered concentration.</p>
+                    </article>
+                    <article class="drug-check-output">
+                      <p class="result-label">Range Check</p>
+                      <output id="drugCheckRangeOutput" class="result-value">--</output>
+                      <p id="drugCheckRangeStatus" class="result-status">Compares the entered dose with the selected reference range.</p>
+                    </article>
+                  </div>
+                  <p id="drugCheckCaution" class="drug-check-caution">Educational cross-check only. Verify medication, concentration, route, timing, monitoring target, and institutional protocol before administration.</p>
+                </section>
+              </details>
             </article>
             <article class="result-card" id="reversals-anticoagulants">
               <p class="result-label">Reversals for Anticoagulants</p>
@@ -783,5 +890,6 @@
         </section>
       </section>
     </main>
+    <script src="./app.js"></script>
   </body>
 </html>

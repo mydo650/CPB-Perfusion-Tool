@@ -7,6 +7,7 @@ import {
   calculateBsa,
   calculateDo2i,
   calculateEstimatedBloodVolume,
+  calculateDrugDoseSafetyCheck,
   calculateHeparinAdministrationTotal,
   calculateHemoglobinFromHematocrit,
   calculateHctDrop,
@@ -252,6 +253,40 @@ test("anticoagulation calculations estimate heparin loading and protamine revers
 
   assert.equal(evaluated.results.heparinLoadingUnits, 21000);
   assert.equal(evaluated.results.protamineDoseMg, 210);
+});
+
+test("drug dose safety check calculates total dose and bolus volume", () => {
+  const checked = calculateDrugDoseSafetyCheck({
+    weightKg: 70,
+    dose: 300,
+    concentration: 1000,
+    routeType: "bolus",
+    doseUnit: "units/kg",
+    concentrationUnit: "units/mL",
+    referenceLow: 150,
+    referenceHigh: 400,
+  });
+
+  assert.equal(checked.totalDose, 21000);
+  assert.equal(checked.volumeMl, 21);
+  assert.equal(checked.doseStatus, "within");
+});
+
+test("drug dose safety check flags above-range infusion doses", () => {
+  const checked = calculateDrugDoseSafetyCheck({
+    weightKg: 80,
+    dose: 3,
+    concentration: 1,
+    routeType: "infusion",
+    doseUnit: "mcg/kg/min",
+    concentrationUnit: "mcg/mL",
+    referenceLow: 0.5,
+    referenceHigh: 2,
+  });
+
+  assert.equal(checked.totalDose, 240);
+  assert.equal(checked.volumeMl, 240);
+  assert.equal(checked.doseStatus, "above");
 });
 
 test("heparin administration tally sums valid logged doses", () => {

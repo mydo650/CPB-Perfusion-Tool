@@ -33,46 +33,69 @@
         <section class="panel output-panel" aria-labelledby="master-references-title">
           <div class="panel-header">
             <h2 id="master-references-title">Project Reference List</h2>
-            <p>Whenever a new source is used for project content, add it here so the site keeps one master bibliography.</p>
+            <p>Capstone bibliography for formulas, clinical guidance, medication content, source charts, and pilot-study methods.</p>
           </div>
 
-          <section class="reference-group" aria-labelledby="reference-workflow-title">
+          <section class="reference-filter-panel" aria-labelledby="reference-filter-title">
+            <div>
+              <h3 id="reference-filter-title">Evidence Standard</h3>
+              <p>
+                Prioritize peer-reviewed literature from PubMed/PMC, professional society guidelines, FDA/DailyMed labels,
+                NCBI Bookshelf support summaries, and manufacturer materials only when device-specific chart data are needed.
+              </p>
+            </div>
+            <div class="reference-filter-controls" aria-label="Reference source filters">
+              <button type="button" class="reference-filter-button is-active" data-reference-filter="all">All</button>
+              <button type="button" class="reference-filter-button" data-reference-filter="peer-reviewed">Peer-reviewed</button>
+              <button type="button" class="reference-filter-button" data-reference-filter="guideline">Guidelines</button>
+              <button type="button" class="reference-filter-button" data-reference-filter="drug-label">Drug labels</button>
+              <button type="button" class="reference-filter-button" data-reference-filter="ncbi">NCBI</button>
+              <button type="button" class="reference-filter-button" data-reference-filter="manufacturer">Manufacturer</button>
+            </div>
+            <p id="referenceFilterCount" class="reference-filter-count" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="reference-group reference-workflow-group" aria-labelledby="reference-workflow-title">
             <h3 id="reference-workflow-title">Reference Workflow</h3>
             <ul class="references-list">
-              <li>Add every new clinical, pharmacology, formula, or protocol source used in the project to this page.</li>
-              <li>Keep section-specific references on individual pages when helpful, but also copy them into this master list.</li>
-              <li>Use primary or high-quality clinical sources whenever possible.</li>
+              <li>Add every new clinical, pharmacology, formula, manufacturer, or research-methods source used in the project to this page.</li>
+              <li>Use PubMed/PMC indexed research, AmSECT/STS/SCA/AABB guidance, FDA/DailyMed labels, and NCBI Bookshelf support summaries before general web pages.</li>
+              <li>Use manufacturer sources for cannula charts, source curves, device specifications, and product-specific flow/pressure data.</li>
             </ul>
           </section>
 
           <section class="reference-group" aria-labelledby="reference-perfusion-title">
             <h3 id="reference-perfusion-title">Perfusion Calculator</h3>
+            <p class="reference-group-note">Supports BSA, cardiac index flow targets, indexed oxygen delivery, and goal-directed perfusion rationale.</p>
             <ol class="references-list">
-              <li>Mosteller RD. Simplified calculation of body-surface area. <em>N Engl J Med.</em> 1987;317(17):1098. <a href="https://pubmed.ncbi.nlm.nih.gov/3657876/" target="_blank" rel="noreferrer">PubMed</a></li>
-              <li>Newland RF, Baker RA. Low Oxygen Delivery as a Predictor of Acute Kidney Injury during Cardiopulmonary Bypass. <em>J Extra Corpor Technol.</em> 2017;49(4):224-230. <a href="https://pubmed.ncbi.nlm.nih.gov/29302112/" target="_blank" rel="noreferrer">PubMed</a></li>
-              <li>Ranucci M, Johnson I, Willcox T, et al. Goal-directed perfusion to reduce acute kidney injury: A randomized trial. <em>J Thorac Cardiovasc Surg.</em> 2018;156(5):1918-1927.e2. <a href="https://pubmed.ncbi.nlm.nih.gov/29778331/" target="_blank" rel="noreferrer">PubMed</a></li>
-              <li>Gao P, Liu J, Zhang P, et al. Goal-directed perfusion for reducing acute kidney injury in cardiac surgery: A systematic review and meta-analysis. <em>Perfusion.</em> 2023;38(3):591-599. <a href="https://pubmed.ncbi.nlm.nih.gov/35125028/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Mosteller RD. Simplified calculation of body-surface area. <em>N Engl J Med.</em> 1987;317(17):1098. DOI: <a href="https://doi.org/10.1056/NEJM198710223171717" target="_blank" rel="noreferrer">10.1056/NEJM198710223171717</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/3657876/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Newland RF, Baker RA. Low Oxygen Delivery as a Predictor of Acute Kidney Injury during Cardiopulmonary Bypass. <em>J Extra Corpor Technol.</em> 2017;49(4):224-230. DOI: <a href="https://doi.org/10.1051/ject/201749224" target="_blank" rel="noreferrer">10.1051/ject/201749224</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/29302112/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Ranucci M, Johnson I, Willcox T, et al. Goal-directed perfusion to reduce acute kidney injury: A randomized trial. <em>J Thorac Cardiovasc Surg.</em> 2018;156(5):1918-1927.e2. DOI: <a href="https://doi.org/10.1016/j.jtcvs.2018.04.045" target="_blank" rel="noreferrer">10.1016/j.jtcvs.2018.04.045</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/29778331/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Gao P, Liu J, Zhang P, et al. Goal-directed perfusion for reducing acute kidney injury in cardiac surgery: A systematic review and meta-analysis. <em>Perfusion.</em> 2023;38(3):591-599. DOI: <a href="https://doi.org/10.1177/02676591211073783" target="_blank" rel="noreferrer">10.1177/02676591211073783</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/35125028/" target="_blank" rel="noreferrer">PubMed</a></li>
             </ol>
           </section>
 
           <section class="reference-group" aria-labelledby="reference-prime-title">
             <h3 id="reference-prime-title">Prime Planner</h3>
+            <p class="reference-group-note">Supports hemodilution concepts, estimated hematocrit change, and prime-related perfusion safety context.</p>
             <ol class="references-list">
-              <li>Asopa S, Elahi M. Hemodilution during cardiopulmonary bypass: optimal hematocrit for safe outcome. <em>Acute Card Care.</em> 2007;9(1):63-64. <a href="https://pubmed.ncbi.nlm.nih.gov/17453543/" target="_blank" rel="noreferrer">PubMed</a></li>
-              <li>Ranucci M, Carboni G, Cotza M, et al. Hemodilution on cardiopulmonary bypass as a determinant of early postoperative hyperlactatemia. <em>PLoS One.</em> 2015;10(5):e0126939. <a href="https://pubmed.ncbi.nlm.nih.gov/25992896/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Asopa S, Elahi M. Hemodilution during cardiopulmonary bypass: optimal hematocrit for safe outcome. <em>Acute Card Care.</em> 2007;9(1):63-64. DOI: <a href="https://doi.org/10.1080/17482940601064767" target="_blank" rel="noreferrer">10.1080/17482940601064767</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/17453543/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Ranucci M, Carboni G, Cotza M, et al. Hemodilution on cardiopulmonary bypass as a determinant of early postoperative hyperlactatemia. <em>PLoS One.</em> 2015;10(5):e0126939. DOI: <a href="https://doi.org/10.1371/journal.pone.0126939" target="_blank" rel="noreferrer">10.1371/journal.pone.0126939</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/25992896/" target="_blank" rel="noreferrer">PubMed</a></li>
             </ol>
           </section>
 
           <section class="reference-group" aria-labelledby="reference-anticoag-title">
             <h3 id="reference-anticoag-title">Anticoagulation</h3>
+            <p class="reference-group-note">Supports heparinization, ACT targets, anticoagulation standards, and CPB anticoagulation safety checks.</p>
             <ol class="references-list">
               <li>American Society of ExtraCorporeal Technology. AmSECT standards and guidelines for perfusion practice. <a href="https://amsect.org/Policy-Practice/AmSECTs-Standards-and-Guidelines" target="_blank" rel="noreferrer">AmSECT</a></li>
-              <li>Shore-Lesserson L, Baker RA, Ferraris VA, et al. STS/SCA/AmSECT Clinical Practice Guidelines: Anticoagulation During Cardiopulmonary Bypass. <em>Ann Thorac Surg.</em> 2018;105(2):650-662. <a href="https://pubmed.ncbi.nlm.nih.gov/29559750/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Shore-Lesserson L, Baker RA, Ferraris VA, et al. The Society of Thoracic Surgeons, The Society of Cardiovascular Anesthesiologists, and The American Society of ExtraCorporeal Technology: Clinical Practice Guidelines-Anticoagulation During Cardiopulmonary Bypass. <em>Ann Thorac Surg.</em> 2018;105(2):650-662. DOI: <a href="https://doi.org/10.1016/j.athoracsur.2017.09.061" target="_blank" rel="noreferrer">10.1016/j.athoracsur.2017.09.061</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/29362176/" target="_blank" rel="noreferrer">PubMed</a></li>
             </ol>
           </section>
 
           <section class="reference-group" aria-labelledby="reference-cannula-title">
             <h3 id="reference-cannula-title">Cannula Selection</h3>
+            <p class="reference-group-note">Supports manufacturer-specific cannula families, source charts, pressure-drop curves, and device selection context.</p>
             <ol class="references-list">
               <li>Medtronic. Cannula catalog. <a href="https://www.medtronic.com/content/dam/medtronic-wide/public/united-states/products/cardiac-vascular/cardiovascular/cannulae/cannulae-us-product-catalog.pdf" target="_blank" rel="noreferrer">Medtronic PDF</a></li>
               <li>Medtronic. Bio-Medicus NextGen cannula. <a href="https://www.medtronic.com/en-us/healthcare-professionals/products/cardiovascular/cannulae/femoral-cannulae/bio-medicus-nextgen-cannula.html" target="_blank" rel="noreferrer">Medtronic product page</a></li>
@@ -84,11 +107,14 @@
 
           <section class="reference-group" aria-labelledby="reference-drug-title">
             <h3 id="reference-drug-title">Drug Library</h3>
+            <p class="reference-group-note">Supports medication indications, contraindications, dosing ranges, concentration checks, and prescribing-label safety language.</p>
             <ol class="references-list">
               <li>Heparin. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK538247/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Heparin sodium injection prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=56dc3074-f1c5-45a3-b923-f1d14858e06d" target="_blank" rel="noreferrer">DailyMed</a></li>
-              <li>Shore-Lesserson L, Baker RA, Ferraris VA, et al. STS/SCA/AmSECT Clinical Practice Guidelines: Anticoagulation During Cardiopulmonary Bypass. <em>Ann Thorac Surg.</em> 2018;105(2):650-662. <a href="https://pubmed.ncbi.nlm.nih.gov/29559750/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Shore-Lesserson L, Baker RA, Ferraris VA, et al. The Society of Thoracic Surgeons, The Society of Cardiovascular Anesthesiologists, and The American Society of ExtraCorporeal Technology: Clinical Practice Guidelines-Anticoagulation During Cardiopulmonary Bypass. <em>Ann Thorac Surg.</em> 2018;105(2):650-662. DOI: <a href="https://doi.org/10.1016/j.athoracsur.2017.09.061" target="_blank" rel="noreferrer">10.1016/j.athoracsur.2017.09.061</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/29362176/" target="_blank" rel="noreferrer">PubMed</a></li>
               <li>Bivalirudin injection prescribing information. U.S. Food and Drug Administration. <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2021/208374s002lbl.pdf" target="_blank" rel="noreferrer">FDA label</a></li>
+              <li>Argatroban injection prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=dfa5d325-f609-4c9a-aaae-1a17df47da1e" target="_blank" rel="noreferrer">DailyMed</a></li>
+              <li>Institute for Safe Medication Practices. Targeted Medication Safety Best Practices for Hospitals. <a href="https://online.ecri.org/hubfs/ISMP/Resources/ISMP_TargetedMedicationSafetyBestPractices_Hospitals.pdf" target="_blank" rel="noreferrer">ISMP PDF</a></li>
               <li>Protamine. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK547753/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Protamine sulfate injection prescribing information. U.S. Food and Drug Administration. <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2019/018609s054lbl.pdf" target="_blank" rel="noreferrer">FDA label</a></li>
               <li>Milrinone lactate injection prescribing information. U.S. Food and Drug Administration. <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2007/019436s021s022lbl.pdf" target="_blank" rel="noreferrer">FDA label</a></li>
@@ -112,23 +138,43 @@
               <li>Nicardipine hydrochloride injection prescribing information. U.S. Food and Drug Administration. <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/022276Orig1s025lbl.pdf" target="_blank" rel="noreferrer">FDA label</a></li>
               <li>FORANE (isoflurane) prescribing information. U.S. Food and Drug Administration. <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/017624s043lbl.pdf" target="_blank" rel="noreferrer">FDA label</a></li>
               <li>SUPRANE (desflurane) prescribing information. U.S. Food and Drug Administration. <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2013/020118s018lbl.pdf" target="_blank" rel="noreferrer">FDA label</a></li>
-              <li>Sevoflurane prescribing information. Drugs.com. <a href="https://www.drugs.com/pro/sevoflurane.html" target="_blank" rel="noreferrer">Prescribing information</a></li>
-              <li>Inhaled Anesthetic Agents: Pharmacodynamics. OpenAnesthesia. <a href="https://www.openanesthesia.org/keywords/inhaled-anesthetic-agents-pharmacodynamics/" target="_blank" rel="noreferrer">OpenAnesthesia</a></li>
-              <li>Tranexamic acid injection prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=tranexamic%20acid%20injection" target="_blank" rel="noreferrer">DailyMed</a></li>
-              <li>Aminocaproic acid injection prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=aminocaproic%20acid%20injection" target="_blank" rel="noreferrer">DailyMed</a></li>
-              <li>STS/SCA/AmSECT/SABM Update to the Clinical Practice Guidelines on Patient Blood Management. <a href="https://pubmed.ncbi.nlm.nih.gov/35752550/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Sevoflurane liquid prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=22700993-851a-48aa-941e-1d2b6b04081f" target="_blank" rel="noreferrer">DailyMed</a></li>
+              <li>Hines R, Marschall K. Inhalational Anesthetic. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK554540/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
+              <li>Tranexamic acid injection prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6f033f1e-8c78-4c87-b870-6493944315ff" target="_blank" rel="noreferrer">DailyMed</a></li>
+              <li>Aminocaproic acid injection prescribing information. DailyMed. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1c5bc1dd-e9ec-44c1-9281-67ad482315d9" target="_blank" rel="noreferrer">DailyMed</a></li>
+              <li>Tibi P, McClure RS, Huang J, et al. STS/SCA/AmSECT/SABM Update to the Clinical Practice Guidelines on Patient Blood Management. <em>Ann Thorac Surg.</em> 2021;112(3):981-1004. DOI: <a href="https://doi.org/10.1016/j.athoracsur.2021.03.033" target="_blank" rel="noreferrer">10.1016/j.athoracsur.2021.03.033</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/34217505/" target="_blank" rel="noreferrer">PubMed</a></li>
+            </ol>
+          </section>
+
+          <section class="reference-group" aria-labelledby="reference-methods-title">
+            <h3 id="reference-methods-title">Capstone Methods / Simulation Evaluation</h3>
+            <p class="reference-group-note">Supports the project literature review, simulation/pilot testing rationale, usability evaluation, cognitive workload framing, and reporting standards.</p>
+            <ol class="references-list">
+              <li>Searles BE, Riley JB, Darling EM, Wiles JR. Simulated cardiopulmonary bypass: a high fidelity model for developing and accessing clinical perfusion skills. <em>Adv Simul (Lond).</em> 2024;9:1. DOI: <a href="https://doi.org/10.1186/s41077-023-00269-w" target="_blank" rel="noreferrer">10.1186/s41077-023-00269-w</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/38167152/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Sistino JJ, Michaud NM, Sievert AN, Shackelford AG. Incorporating high fidelity simulation into perfusion education. <em>Perfusion.</em> 2011;26(5):390-394. DOI: <a href="https://doi.org/10.1177/0267659111410901" target="_blank" rel="noreferrer">10.1177/0267659111410901</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/21613331/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Babar ZUD, Max SA, Martina BG, et al. Virtual reality simulation as a training tool for perfusionists in extracorporeal circulation: Establishing face and content validity. <em>JTCVS Tech.</em> 2023;21:135-148. DOI: <a href="https://doi.org/10.1016/j.xjtc.2023.06.004" target="_blank" rel="noreferrer">10.1016/j.xjtc.2023.06.004</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/37854847/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Hyzy M, Bond R, Mulvenna M, Bai L, Dix A, Leigh S, Hunt S. System Usability Scale benchmarking for digital health apps: meta-analysis. <em>JMIR Mhealth Uhealth.</em> 2022;10(8):e37290. DOI: <a href="https://doi.org/10.2196/37290" target="_blank" rel="noreferrer">10.2196/37290</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/35980732/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Page MJ, McKenzie JE, Bossuyt PM, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. <em>BMJ.</em> 2021;372:n71. DOI: <a href="https://doi.org/10.1136/bmj.n71" target="_blank" rel="noreferrer">10.1136/bmj.n71</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/33782057/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Avrunin GS, Clarke LA, Conboy HM, et al. Toward improving surgical outcomes by incorporating cognitive load measurement into process-driven guidance. <em>Softw Eng Healthc Syst SEHS IEEE ACM Int Workshop.</em> 2018:2-9. DOI: <a href="https://doi.org/10.1145/3194696.3194705" target="_blank" rel="noreferrer">10.1145/3194696.3194705</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/30140792/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Kennedy-Metz LR, Dias RD, Stevens RH, Yule SJ, Zenati MA. Analysis of mirrored psychophysiological change of cardiac surgery team members during open surgery. <em>J Surg Educ.</em> 2021;78(2):622-629. DOI: <a href="https://doi.org/10.1016/j.jsurg.2020.08.012" target="_blank" rel="noreferrer">10.1016/j.jsurg.2020.08.012</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/32863172/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Dias RD, Zenati MA, Conboy HM, et al. Dissecting cardiac surgery: a video-based recall protocol to elucidate team cognitive processes in the operating room. <em>Ann Surg.</em> 2021;274(2):e181-e186. DOI: <a href="https://doi.org/10.1097/SLA.0000000000003489" target="_blank" rel="noreferrer">10.1097/SLA.0000000000003489</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/31348036/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Dias RD, Conboy HM, Gabany JM, et al. Intelligent interruption management system to enhance safety and performance in complex surgical and robotic procedures. <em>OR 2.0 Context-Aware Operating Theaters, Computer Assisted Robotic Endoscopy, Clinical Image-Based Procedures, and Skin Image Analysis.</em> 2018:62-68. DOI: <a href="https://doi.org/10.1007/978-3-030-01201-4_8" target="_blank" rel="noreferrer">10.1007/978-3-030-01201-4_8</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/30506066/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Dias RD, Conboy HM, Gabany JM, et al. Development of an interactive dashboard to analyze cognitive workload of surgical teams during complex procedural care. <em>IEEE Int Interdiscip Conf Cogn Methods Situat Aware Decis Support.</em> 2018:77-82. DOI: <a href="https://doi.org/10.1109/COGSIMA.2018.8423995" target="_blank" rel="noreferrer">10.1109/COGSIMA.2018.8423995</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/30547096/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Kennedy-Metz LR, Wolfe HL, Dias RD, Yule SJ, Zenati MA. Surgery task load index in cardiac surgery: measuring cognitive load among teams. <em>Surg Innov.</em> 2020;27(6):602-607. DOI: <a href="https://doi.org/10.1177/1553350620934931" target="_blank" rel="noreferrer">10.1177/1553350620934931</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/32938323/" target="_blank" rel="noreferrer">PubMed</a></li>
+              <li>Kennedy-Metz LR, Conboy HM, Liu A, et al. A novel multimodal, intraoperative cognitive workload assessment of cardiac surgery team members. <em>J Thorac Cardiovasc Surg.</em> 2025;170(1):287-296. DOI: <a href="https://doi.org/10.1016/j.jtcvs.2024.07.050" target="_blank" rel="noreferrer">10.1016/j.jtcvs.2024.07.050</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/39084333/" target="_blank" rel="noreferrer">PubMed</a></li>
             </ol>
           </section>
 
           <section class="reference-group" aria-labelledby="reference-future-title">
             <h3 id="reference-future-title">Electrolytes/Blood Gas Ranges</h3>
+            <p class="reference-group-note">Supports normal/abnormal electrolyte interpretation, arterial blood gas concepts, acid-base interpretation, and calcium-related CPB context.</p>
             <ol class="references-list">
-              <li>Arterial Blood Gas (ABG) Test. MedlinePlus. <a href="https://medlineplus.gov/lab-tests/arterial-blood-gas-abg-test/" target="_blank" rel="noreferrer">MedlinePlus</a></li>
+              <li>Patel S, Sharma S. Arterial Blood Gas. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK536919/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Reference Values for Common Laboratory Tests. American College of Clinical Pharmacy. <a href="https://www.accp.com/docs/sap/Lab_Values_Table_PSAP.pdf" target="_blank" rel="noreferrer">ACCP</a></li>
               <li>Castro D, Sharma S. Hypokalemia. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK482465/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Simon LV, Hashmi MF, Farrell MW. Hyperkalemia. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK470284/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Goyal A, Anastasopoulou C, Ngu M, Singh S. Hypocalcemia. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK430912/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
-              <li>Puis L, et al. Calcium Administration In patients undergoing CardiAc suRgery under cardiopulmonary bypass: ICARUS trial rationale and design. <em>Trials.</em> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8406154/" target="_blank" rel="noreferrer">PubMed Central</a></li>
+              <li>Puis L, et al. Calcium Administration In patients undergoing CardiAc suRgery under cardiopulmonary bypass: ICARUS trial rationale and design. <em>Contemp Clin Trials Commun.</em> 2021;23:100835. DOI: <a href="https://doi.org/10.1016/j.conctc.2021.100835" target="_blank" rel="noreferrer">10.1016/j.conctc.2021.100835</a>. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8406154/" target="_blank" rel="noreferrer">PubMed Central</a></li>
               <li>Sadiq NM, Anastasopoulou C, Patel G, Badireddy M. Hypercalcemia. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK430714/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Gragossian A, Bashir K, Bhutta BS, Friede R. Hypomagnesemia. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK500003/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
               <li>Cascella M, Vaqar S. Hypermagnesemia. <em>StatPearls.</em> NCBI Bookshelf. <a href="https://www.ncbi.nlm.nih.gov/books/NBK549811/" target="_blank" rel="noreferrer">NCBI Bookshelf</a></li>
@@ -142,17 +188,19 @@
 
           <section class="reference-group" aria-labelledby="reference-blood-management-title">
             <h3 id="reference-blood-management-title">Blood Products/Blood Management</h3>
+            <p class="reference-group-note">Supports blood product descriptions, transfusion/blood management guidance, and hemostatic rescue medication references.</p>
             <ol class="references-list">
-              <li>AABB. Circular of Information for the Use of Human Blood and Blood Components. <a href="https://www.aabb.org/docs/default-source/default-document-library/resources/circular-of-information-watermark.pdf" target="_blank" rel="noreferrer">AABB Circular</a></li>
+              <li>AABB. Circular of Information for the Use of Human Blood and Blood Components. <a href="https://www.aabb.org/news-resources/resources/circular-of-information" target="_blank" rel="noreferrer">AABB Circular</a></li>
               <li>Canadian Blood Services. Blood components. <a href="https://professionaleducation.blood.ca/en/transfusion/clinical-guide/blood-components" target="_blank" rel="noreferrer">Clinical guide</a></li>
               <li>University of Texas Medical Branch Blood Bank. Red Blood Cells. <a href="https://www.utmb.edu/bloodbank/red-blood-cells" target="_blank" rel="noreferrer">UTMB Blood Bank</a></li>
               <li>KCENTRA (Prothrombin Complex Concentrate [Human]) prescribing information. U.S. Food and Drug Administration. <a href="https://www.fda.gov/media/85512/download" target="_blank" rel="noreferrer">FDA label</a></li>
               <li>NovoSeven RT (Coagulation Factor VIIa [Recombinant]) prescribing information. U.S. Food and Drug Administration. <a href="https://www.fda.gov/media/70442/download" target="_blank" rel="noreferrer">FDA label</a></li>
-              <li>Warren O, Mandal K, Hadjianastassiou V, et al. Recombinant activated factor VII in cardiac surgery: a systematic review. <em>Ann Thorac Surg.</em> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3484551/" target="_blank" rel="noreferrer">PubMed Central</a></li>
+              <li>Warren O, Mandal K, Hadjianastassiou V, et al. Recombinant activated factor VII in cardiac surgery: a systematic review. <em>Ann Thorac Surg.</em> 2007;83(2):707-714. DOI: <a href="https://doi.org/10.1016/j.athoracsur.2006.10.033" target="_blank" rel="noreferrer">10.1016/j.athoracsur.2006.10.033</a>. <a href="https://pubmed.ncbi.nlm.nih.gov/17258029/" target="_blank" rel="noreferrer">PubMed</a></li>
             </ol>
           </section>
         </section>
       </section>
     </main>
+    <script src="./app.js"></script>
   </body>
 </html>

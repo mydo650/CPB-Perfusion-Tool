@@ -31,7 +31,7 @@ const ANTICOAG_FIELD_CONFIG = {
 };
 
 const SHARED_FIELD_GROUPS = {
-  patientWeightKg: ["weightKg", "primeWeightKg", "anticoagWeightKg"],
+  patientWeightKg: ["weightKg", "primeWeightKg", "anticoagWeightKg", "drugCheckWeightKg"],
   patientHeightCm: ["heightCm"],
   patientCardiacIndex: ["cardiacIndex"],
   patientPumpFlow: ["pumpFlow"],
@@ -42,6 +42,86 @@ const ANTICOAG_LOG_STORAGE_KEY = "cpbSupportAnticoagHeparinLog";
 const DEFAULT_CANNULA_CARDIAC_INDEX = 2.6;
 const CANNULA_SIDES = ["arterial", "venous", "bicaval"];
 const BASE_CANNULA_SIDES = ["arterial", "venous"];
+const DRUG_DOSE_CHECKS = {
+  "heparin-cpb-bolus": {
+    label: "Heparin CPB loading bolus",
+    routeType: "bolus",
+    doseUnit: "units/kg",
+    concentrationUnit: "units/mL",
+    resultUnit: "units",
+    referenceLow: 150,
+    referenceHigh: 400,
+    suggestedDose: 300,
+    suggestedConcentration: 1000,
+    rangeLabel: "reference CPB loading range: 150 to 400 units/kg",
+    caution: "Confirm ACT response and institutional anticoagulation protocol. Common CPB loading doses are often 300 to 400 units/kg, but monitoring drives additional dosing.",
+  },
+  "bivalirudin-cpb-bolus": {
+    label: "Bivalirudin CPB loading bolus",
+    routeType: "bolus",
+    doseUnit: "mg/kg",
+    concentrationUnit: "mg/mL",
+    resultUnit: "mg",
+    referenceLow: 0.75,
+    referenceHigh: 1,
+    suggestedDose: 1,
+    suggestedConcentration: 5,
+    rangeLabel: "reference loading range: 0.75 to 1 mg/kg",
+    caution: "No direct reversal agent exists. Renal impairment can prolong effect; verify local bivalirudin CPB protocol and ACT target.",
+  },
+  "bivalirudin-cpb-infusion": {
+    label: "Bivalirudin CPB infusion",
+    routeType: "infusion",
+    doseUnit: "mg/kg/hr",
+    concentrationUnit: "mg/mL",
+    resultUnit: "mg/hr",
+    referenceLow: 1.75,
+    referenceHigh: 2.5,
+    suggestedDose: 2.5,
+    suggestedConcentration: 5,
+    rangeLabel: "reference infusion range: 1.75 to 2.5 mg/kg/hr",
+    caution: "Use ACT or institutional monitoring targets. Stagnant blood can clot with bivalirudin; follow local circuit-management practice.",
+  },
+  "argatroban-hit-infusion": {
+    label: "Argatroban HIT infusion",
+    routeType: "infusion",
+    doseUnit: "mcg/kg/min",
+    concentrationUnit: "mcg/mL",
+    resultUnit: "mcg/min",
+    referenceLow: 0.5,
+    referenceHigh: 2,
+    suggestedDose: 2,
+    suggestedConcentration: 1000,
+    rangeLabel: "reference HIT initial range: 0.5 to 2 mcg/kg/min",
+    caution: "Hepatic impairment or critical illness may require lower initial dosing. Monitor aPTT per protocol and watch for bleeding.",
+  },
+  "argatroban-pci-bolus": {
+    label: "Argatroban PCI bolus",
+    routeType: "bolus",
+    doseUnit: "mcg/kg",
+    concentrationUnit: "mcg/mL",
+    resultUnit: "mcg",
+    referenceLow: 350,
+    referenceHigh: 350,
+    suggestedDose: 350,
+    suggestedConcentration: 1000,
+    rangeLabel: "labeled PCI bolus: 350 mcg/kg",
+    caution: "PCI dosing is ACT-guided. This is not a routine CPB anticoagulation substitute; verify indication and protocol.",
+  },
+  "argatroban-pci-infusion": {
+    label: "Argatroban PCI infusion",
+    routeType: "infusion",
+    doseUnit: "mcg/kg/min",
+    concentrationUnit: "mcg/mL",
+    resultUnit: "mcg/min",
+    referenceLow: 25,
+    referenceHigh: 25,
+    suggestedDose: 25,
+    suggestedConcentration: 1000,
+    rangeLabel: "labeled PCI infusion: 25 mcg/kg/min",
+    caution: "Check ACT 5 to 10 minutes after bolus completion and adjust per protocol. Use caution with hepatic impairment.",
+  },
+};
 
 function buildCannulaRangeSizes(startFr, endFr, stepFr = 2) {
   return Array.from({ length: Math.floor((endFr - startFr) / stepFr) + 1 }, (_, index) => {
@@ -617,6 +697,35 @@ function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
 
+function calculateDrugDoseSafetyCheck({ weightKg, dose, concentration, routeType, doseUnit, concentrationUnit, referenceLow, referenceHigh }) {
+  const numericWeight = Number(weightKg);
+  const numericDose = Number(dose);
+  const numericConcentration = Number(concentration);
+  const numericLow = Number(referenceLow);
+  const numericHigh = Number(referenceHigh);
+
+  if (!Number.isFinite(numericWeight) || numericWeight <= 0) return null;
+  if (!Number.isFinite(numericDose) || numericDose <= 0) return null;
+  if (!Number.isFinite(numericConcentration) || numericConcentration <= 0) return null;
+
+  const totalDose = numericWeight * numericDose;
+  const volumeMl = totalDose / numericConcentration;
+  const doseStatus = Number.isFinite(numericLow) && numericDose < numericLow
+    ? "below"
+    : Number.isFinite(numericHigh) && numericDose > numericHigh
+      ? "above"
+      : "within";
+
+  return {
+    totalDose,
+    volumeMl,
+    routeType: routeType === "infusion" ? "infusion" : "bolus",
+    doseUnit,
+    concentrationUnit,
+    doseStatus,
+  };
+}
+
 function calculateHeparinAdministrationTotal(entries = []) {
   return entries.reduce((total, entry) => {
     const units = Number(entry?.units ?? 0);
@@ -1128,8 +1237,35 @@ const anticoagOutputs = anticoagForm
 
 let heparinLogState = anticoagForm ? readHeparinLogState() : { entries: [], protamineSource: "loading" };
 
+const drugDoseCheckForm = document.querySelector("#drug-dose-check-form");
+const drugDoseCheckOutputs = drugDoseCheckForm
+  ? {
+      weightInput: document.querySelector("#drugCheckWeightKg"),
+      scenarioSelect: document.querySelector("#drugCheckScenario"),
+      scenarioHint: document.querySelector("#drugCheckScenarioHint"),
+      doseInput: document.querySelector("#drugCheckDose"),
+      doseUnit: document.querySelector("#drugCheckDoseUnit"),
+      doseHint: document.querySelector("#drugCheckDoseHint"),
+      concentrationInput: document.querySelector("#drugCheckConcentration"),
+      concentrationUnit: document.querySelector("#drugCheckConcentrationUnit"),
+      concentrationHint: document.querySelector("#drugCheckConcentrationHint"),
+      validation: document.querySelector("#drugCheckValidation"),
+      totalDoseOutput: document.querySelector("#drugCheckTotalDoseOutput"),
+      totalDoseStatus: document.querySelector("#drugCheckTotalDoseStatus"),
+      volumeOutput: document.querySelector("#drugCheckVolumeOutput"),
+      volumeStatus: document.querySelector("#drugCheckVolumeStatus"),
+      rangeOutput: document.querySelector("#drugCheckRangeOutput"),
+      rangeStatus: document.querySelector("#drugCheckRangeStatus"),
+      caution: document.querySelector("#drugCheckCaution"),
+    }
+  : null;
+
 const tabButtons = Array.from(document.querySelectorAll("[data-tab-target]"));
 const tabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
+const referenceFilterButtons = Array.from(document.querySelectorAll("[data-reference-filter]"));
+const referenceFilterCount = document.querySelector("#referenceFilterCount");
+const referenceGroups = Array.from(document.querySelectorAll(".reference-group:not(.reference-workflow-group)"));
+const referenceItems = referenceGroups.flatMap((group) => Array.from(group.querySelectorAll(".references-list li")));
 
 function collectInputs(form) {
   return Object.fromEntries(new FormData(form).entries());
@@ -1141,9 +1277,155 @@ function formatPrimeUnits(prbcVolumeMl) {
   return `${roundTo(prbcVolumeMl / 300, 1).toFixed(1)} units`;
 }
 
+function classifyReferenceSource(item) {
+  const text = item.textContent.toLowerCase();
+
+  if (/(medtronic|getinge|livanova)/.test(text)) return { key: "manufacturer", label: "Manufacturer" };
+  if (/(dailymed|fda label|u\.s\. food and drug administration|pfizer label)/.test(text)) return { key: "drug-label", label: "FDA/DailyMed" };
+  if (/(ncbi bookshelf|statpearls)/.test(text)) return { key: "ncbi", label: "NCBI" };
+  if (/(amsect|sts\/sca|aabb|ismp|guideline|clinical guide|accp|blood bank|vumc)/.test(text)) return { key: "guideline", label: "Guideline" };
+  if (/(pubmed|pubmed central|pmc)/.test(text)) return { key: "peer-reviewed", label: "Peer-reviewed" };
+  return { key: "other", label: "Needs Review" };
+}
+
+function initializeReferenceFilters() {
+  if (referenceFilterButtons.length === 0 || referenceItems.length === 0) return;
+
+  referenceItems.forEach((item) => {
+    const source = classifyReferenceSource(item);
+    item.dataset.referenceSource = source.key;
+
+    if (!item.querySelector(".reference-source-badge")) {
+      const badge = document.createElement("span");
+      badge.className = `reference-source-badge reference-source-${source.key}`;
+      badge.textContent = source.label;
+      item.append(" ", badge);
+    }
+  });
+
+  const applyFilter = (filterName) => {
+    let visibleCount = 0;
+
+    referenceItems.forEach((item) => {
+      const shouldShow = filterName === "all" || item.dataset.referenceSource === filterName;
+      item.hidden = !shouldShow;
+      if (shouldShow) visibleCount += 1;
+    });
+
+    referenceGroups.forEach((group) => {
+      const groupItems = Array.from(group.querySelectorAll(".references-list li"));
+      group.hidden = groupItems.every((item) => item.hidden);
+    });
+
+    referenceFilterButtons.forEach((button) => {
+      const isActive = button.dataset.referenceFilter === filterName;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+
+    if (referenceFilterCount) {
+      referenceFilterCount.textContent = filterName === "all"
+        ? `${visibleCount} references shown.`
+        : `${visibleCount} references match this source filter.`;
+    }
+  };
+
+  referenceFilterButtons.forEach((button) => {
+    button.addEventListener("click", () => applyFilter(button.dataset.referenceFilter ?? "all"));
+    button.setAttribute("aria-pressed", String(button.classList.contains("is-active")));
+  });
+
+  applyFilter("all");
+}
+
 function setHeparinLogValidation(message = "") {
   if (!anticoagOutputs?.heparinLogValidation) return;
   anticoagOutputs.heparinLogValidation.textContent = message;
+}
+
+function formatDrugCheckNumber(value, decimals = 1) {
+  if (!Number.isFinite(value)) return "--";
+  if (Math.abs(value) >= 1000) return Math.round(value).toLocaleString();
+  return roundTo(value, decimals).toFixed(decimals);
+}
+
+function getDrugDoseCheckScenario() {
+  const scenarioId = drugDoseCheckOutputs?.scenarioSelect?.value ?? "heparin-cpb-bolus";
+  return DRUG_DOSE_CHECKS[scenarioId] ?? DRUG_DOSE_CHECKS["heparin-cpb-bolus"];
+}
+
+function syncDrugDoseCheckScenarioFields() {
+  if (!drugDoseCheckOutputs) return;
+  const scenario = getDrugDoseCheckScenario();
+
+  drugDoseCheckOutputs.doseUnit.textContent = scenario.doseUnit;
+  drugDoseCheckOutputs.concentrationUnit.textContent = scenario.concentrationUnit;
+  drugDoseCheckOutputs.scenarioHint.textContent = `${scenario.rangeLabel}.`;
+  drugDoseCheckOutputs.doseHint.textContent = `Reference: ${scenario.rangeLabel}.`;
+  drugDoseCheckOutputs.concentrationHint.textContent = `Enter concentration as ${scenario.concentrationUnit}.`;
+}
+
+function applyDrugDoseCheckScenarioDefaults() {
+  if (!drugDoseCheckOutputs) return;
+  const scenario = getDrugDoseCheckScenario();
+  drugDoseCheckOutputs.doseInput.value = String(scenario.suggestedDose);
+  drugDoseCheckOutputs.concentrationInput.value = String(scenario.suggestedConcentration);
+}
+
+function renderDrugDoseSafetyCheck() {
+  if (!drugDoseCheckForm || !drugDoseCheckOutputs) return;
+
+  const scenario = getDrugDoseCheckScenario();
+  syncDrugDoseCheckScenarioFields();
+
+  const checked = calculateDrugDoseSafetyCheck({
+    weightKg: drugDoseCheckOutputs.weightInput?.value,
+    dose: drugDoseCheckOutputs.doseInput?.value,
+    concentration: drugDoseCheckOutputs.concentrationInput?.value,
+    routeType: scenario.routeType,
+    doseUnit: scenario.doseUnit,
+    concentrationUnit: scenario.concentrationUnit,
+    referenceLow: scenario.referenceLow,
+    referenceHigh: scenario.referenceHigh,
+  });
+  const rangeCard = drugDoseCheckOutputs.rangeOutput?.closest(".drug-check-output");
+
+  if (!checked) {
+    rangeCard?.removeAttribute("data-check-state");
+    drugDoseCheckOutputs.validation.textContent = "Enter a valid weight, dose, and concentration to run the cross-check.";
+    drugDoseCheckOutputs.totalDoseOutput.textContent = "--";
+    drugDoseCheckOutputs.totalDoseStatus.textContent = "Enter weight, dose, and concentration.";
+    drugDoseCheckOutputs.volumeOutput.textContent = "--";
+    drugDoseCheckOutputs.volumeStatus.textContent = "Calculated from the entered concentration.";
+    drugDoseCheckOutputs.rangeOutput.textContent = "--";
+    drugDoseCheckOutputs.rangeStatus.textContent = `Compares the entered dose with ${scenario.rangeLabel}.`;
+    drugDoseCheckOutputs.caution.textContent = `Educational cross-check only. ${scenario.caution}`;
+    return;
+  }
+
+  const totalDoseLabel = `${formatDrugCheckNumber(checked.totalDose)} ${scenario.resultUnit}`;
+  const volumeLabel = checked.routeType === "infusion"
+    ? `${formatDrugCheckNumber(checked.volumeMl)} mL/hr`
+    : `${formatDrugCheckNumber(checked.volumeMl)} mL`;
+  const rangeLabel = checked.doseStatus === "within"
+    ? "Within range"
+    : checked.doseStatus === "below"
+      ? "Review low"
+      : "Review high";
+
+  drugDoseCheckOutputs.validation.textContent = "";
+  rangeCard?.setAttribute("data-check-state", checked.doseStatus);
+  drugDoseCheckOutputs.totalDoseOutput.textContent = totalDoseLabel;
+  drugDoseCheckOutputs.totalDoseStatus.textContent = `${scenario.label}: ${drugDoseCheckOutputs.doseInput.value} ${scenario.doseUnit} x ${drugDoseCheckOutputs.weightInput.value} kg.`;
+  drugDoseCheckOutputs.volumeOutput.textContent = volumeLabel;
+  drugDoseCheckOutputs.volumeStatus.textContent = checked.routeType === "infusion"
+    ? `Pump rate from ${formatDrugCheckNumber(checked.totalDose)} ${scenario.resultUnit} using ${drugDoseCheckOutputs.concentrationInput.value} ${scenario.concentrationUnit}.`
+    : `Draw-up volume from ${formatDrugCheckNumber(checked.totalDose)} ${scenario.resultUnit} using ${drugDoseCheckOutputs.concentrationInput.value} ${scenario.concentrationUnit}.`;
+  drugDoseCheckOutputs.rangeOutput.textContent = rangeLabel;
+  drugDoseCheckOutputs.rangeStatus.textContent = checked.doseStatus === "within"
+    ? `Entered dose falls within ${scenario.rangeLabel}.`
+    : `Entered dose is ${checked.doseStatus} ${scenario.rangeLabel}; verify indication, concentration, and local protocol.`;
+  drugDoseCheckOutputs.caution.textContent = `Educational cross-check only. ${scenario.caution}`;
 }
 
 function renderHeparinAdministrationLog(evaluation) {
@@ -2713,6 +2995,8 @@ tabButtons.forEach((button) => {
   button.addEventListener("keydown", handleTabKeydown);
 });
 
+initializeReferenceFilters();
+
 if (perfusionForm) {
   hydrateSharedFields(perfusionForm);
   perfusionForm.addEventListener("input", renderPerfusion);
@@ -2735,6 +3019,21 @@ if (primeForm) {
     });
   });
   renderPrime();
+}
+
+if (drugDoseCheckForm) {
+  hydrateSharedFields(drugDoseCheckForm);
+  drugDoseCheckForm.addEventListener("input", renderDrugDoseSafetyCheck);
+  drugDoseCheckForm.addEventListener("change", renderDrugDoseSafetyCheck);
+  drugDoseCheckForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
+  drugDoseCheckForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
+  drugDoseCheckOutputs.scenarioSelect?.addEventListener("change", () => {
+    applyDrugDoseCheckScenarioDefaults();
+    renderDrugDoseSafetyCheck();
+  });
+  applyDrugDoseCheckScenarioDefaults();
+  syncDrugDoseCheckScenarioFields();
+  renderDrugDoseSafetyCheck();
 }
 
 if (anticoagForm) {
