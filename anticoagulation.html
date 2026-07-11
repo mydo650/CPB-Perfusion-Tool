@@ -67,6 +67,8 @@
               <label class="field"><span>Post-Heparin ACT</span><div class="input-wrap"><input id="postHeparinActSeconds" name="postHeparinActSeconds" type="number" inputmode="decimal" min="50" max="1200" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT after the test dose has circulated</small></label>
               <label class="field"><span>Target ACT</span><div class="input-wrap"><input id="targetActSeconds" name="targetActSeconds" type="number" inputmode="decimal" min="200" max="1200" step="1" value="480" autocomplete="off" /><span class="unit">sec</span></div><div class="quick-select-row" aria-label="Quick target ACT values"><button type="button" class="quick-select-button" data-target-act="500">500</button><button type="button" class="quick-select-button" data-target-act="550">550</button><button type="button" class="quick-select-button" data-target-act="600">600</button></div><small class="hint">Editable protocol target for initiating bypass</small></label>
               <label class="field"><span>Protamine Reversal Ratio</span><div class="input-wrap"><input id="protamineRatioMgPer100U" name="protamineRatioMgPer100U" type="number" inputmode="decimal" min="0.1" max="5" step="0.1" value="1" autocomplete="off" /><span class="unit">mg / 100 units</span></div><small class="hint">Default 1 mg protamine per 100 units heparin</small></label>
+              <label class="field"><span>Desired AT3</span><div class="input-wrap"><input id="desiredAt3Percent" name="desiredAt3Percent" type="number" inputmode="decimal" min="0" max="200" step="1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Target antithrombin activity</small></label>
+              <label class="field"><span>Current AT3</span><div class="input-wrap"><input id="currentAt3Percent" name="currentAt3Percent" type="number" inputmode="decimal" min="0" max="200" step="1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Measured antithrombin activity</small></label>
             </div>
           </form>
           <div id="anticoagValidationSummary" class="validation-summary" role="status" aria-live="polite"></div>
@@ -82,6 +84,7 @@
             <article class="result-card accent-card"><p class="result-label">Bivalirudin Loading Dose</p><output id="bivalirudinLoadingOutput" class="result-value">--</output><p id="bivalirudinLoadingStatus" class="result-status">Enter weight to calculate 1 mg/kg.</p></article>
             <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
             <article class="result-card"><p class="result-label">Protamine Reversal Dose</p><output id="protamineDoseOutput" class="result-value">--</output><p id="protamineDoseStatus" class="result-status">Calculated from the estimated heparin loading dose.</p></article>
+            <article class="result-card"><p class="result-label">AT3 Dose</p><output id="at3DoseOutput" class="result-value">--</output><p id="at3DoseStatus" class="result-status">Enter weight, desired AT3, and current AT3.</p></article>
           </div>
           <div id="heparinResistanceWarning" class="clinical-warning" role="status" aria-live="polite" hidden></div>
 
@@ -172,6 +175,7 @@
               <dl class="formula-list">
                 <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
                 <div><dt>Bivalirudin Loading Dose</dt><dd>weight (kg) × 1 mg/kg</dd></div>
+                <div><dt>AT3 Dose</dt><dd>(desired AT3 - current AT3) × weight (kg) / 1.4</dd></div>
                 <div><dt>Dose Response Slope</dt><dd>(post-heparin ACT - baseline ACT) / heparin dose (units/kg)</dd></div>
                 <div><dt>Projected Dose to Target</dt><dd>(target ACT - baseline ACT) / dose response slope</dd></div>
                 <div><dt>Protamine Reversal Dose</dt><dd>(estimated heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>

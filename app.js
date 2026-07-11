@@ -28,6 +28,8 @@ const ANTICOAG_FIELD_CONFIG = {
   postHeparinActSeconds: { label: "Post-heparin ACT", min: 50, max: 1200, allowZero: false },
   targetActSeconds: { label: "Target ACT", min: 200, max: 1200, allowZero: false },
   protamineRatioMgPer100U: { label: "Protamine ratio", min: 0.1, max: 5, allowZero: false },
+  desiredAt3Percent: { label: "Desired AT3", min: 0, max: 200, allowZero: true },
+  currentAt3Percent: { label: "Current AT3", min: 0, max: 200, allowZero: true },
 };
 
 const SHARED_FIELD_GROUPS = {
@@ -697,6 +699,10 @@ function calculateBivalirudinLoadingDose(weightKg) {
   return weightKg;
 }
 
+function calculateAt3DoseUnits(desiredAt3Percent, currentAt3Percent, weightKg) {
+  return Math.max(0, ((desiredAt3Percent - currentAt3Percent) * weightKg) / 1.4);
+}
+
 function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
@@ -947,12 +953,17 @@ function evaluateAnticoagulationCalculator(rawInputs) {
   const results = {
     heparinLoadingUnits: null,
     bivalirudinLoadingMg: null,
+    at3DoseUnits: null,
     protamineDoseMg: null,
     heparinResponseCurve: null,
   };
 
   if (valid("anticoagWeightKg")) {
     results.bivalirudinLoadingMg = calculateBivalirudinLoadingDose(valueOf("anticoagWeightKg"));
+  }
+
+  if (valid("anticoagWeightKg") && valid("desiredAt3Percent") && valid("currentAt3Percent")) {
+    results.at3DoseUnits = calculateAt3DoseUnits(valueOf("desiredAt3Percent"), valueOf("currentAt3Percent"), valueOf("anticoagWeightKg"));
   }
 
   if (valid("anticoagWeightKg") && valid("heparinDosePerKg")) {
@@ -1209,6 +1220,12 @@ const anticoagOutputs = anticoagForm
         status: document.querySelector("#bivalirudinLoadingStatus"),
         format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
         empty: "Enter weight to calculate 1 mg/kg.",
+      },
+      at3DoseUnits: {
+        value: document.querySelector("#at3DoseOutput"),
+        status: document.querySelector("#at3DoseStatus"),
+        format: (value) => `${Math.round(value).toLocaleString()} units`,
+        empty: "Enter weight, desired AT3, and current AT3.",
       },
       additionalHeparin: {
         value: document.querySelector("#additionalHeparinOutput"),
@@ -2975,6 +2992,16 @@ function renderAnticoagulation() {
   } else {
     anticoagOutputs.bivalirudinLoadingMg.value.textContent = "--";
     anticoagOutputs.bivalirudinLoadingMg.status.textContent = anticoagOutputs.bivalirudinLoadingMg.empty;
+  }
+
+  if (evaluation.results.at3DoseUnits !== null) {
+    anticoagOutputs.at3DoseUnits.value.textContent = anticoagOutputs.at3DoseUnits.format(evaluation.results.at3DoseUnits);
+    anticoagOutputs.at3DoseUnits.status.textContent = evaluation.results.at3DoseUnits > 0
+      ? "Formula: (desired AT3 - current AT3) × kg / 1.4."
+      : "Current AT3 meets or exceeds desired AT3.";
+  } else {
+    anticoagOutputs.at3DoseUnits.value.textContent = "--";
+    anticoagOutputs.at3DoseUnits.status.textContent = anticoagOutputs.at3DoseUnits.empty;
   }
 
   if (evaluation.results.heparinResponseCurve !== null) {
