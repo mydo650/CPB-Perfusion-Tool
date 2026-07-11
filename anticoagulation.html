@@ -79,6 +79,7 @@
           </div>
           <div class="results-grid results-grid-compact">
             <article class="result-card accent-card"><p class="result-label">Heparin Loading Dose</p><output id="heparinLoadingOutput" class="result-value">--</output><p id="heparinLoadingStatus" class="result-status">Enter weight and a heparin units/kg assumption.</p></article>
+            <article class="result-card accent-card"><p class="result-label">Bivalirudin Loading Dose</p><output id="bivalirudinLoadingOutput" class="result-value">--</output><p id="bivalirudinLoadingStatus" class="result-status">Enter weight to calculate 1 mg/kg.</p></article>
             <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
             <article class="result-card"><p class="result-label">Protamine Reversal Dose</p><output id="protamineDoseOutput" class="result-value">--</output><p id="protamineDoseStatus" class="result-status">Calculated from the estimated heparin loading dose.</p></article>
           </div>
@@ -170,6 +171,7 @@
             <section class="formula-panel tab-panel is-active" id="tab-panel-anticoag-calculations" role="tabpanel" aria-labelledby="tab-button-anticoag-calculations" data-tab-group="anticoag-support" data-tab-panel="calculations">
               <dl class="formula-list">
                 <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
+                <div><dt>Bivalirudin Loading Dose</dt><dd>weight (kg) × 1 mg/kg</dd></div>
                 <div><dt>Dose Response Slope</dt><dd>(post-heparin ACT - baseline ACT) / heparin dose (units/kg)</dd></div>
                 <div><dt>Projected Dose to Target</dt><dd>(target ACT - baseline ACT) / dose response slope</dd></div>
                 <div><dt>Protamine Reversal Dose</dt><dd>(estimated heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>

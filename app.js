@@ -693,6 +693,10 @@ function calculateHeparinLoadingDose(weightKg, heparinDosePerKg) {
   return weightKg * heparinDosePerKg;
 }
 
+function calculateBivalirudinLoadingDose(weightKg) {
+  return weightKg;
+}
+
 function calculateProtamineDose(heparinUnits, protamineRatioMgPer100U) {
   return (heparinUnits / 100) * protamineRatioMgPer100U;
 }
@@ -942,9 +946,14 @@ function evaluateAnticoagulationCalculator(rawInputs) {
   const valueOf = (name) => fields[name].value;
   const results = {
     heparinLoadingUnits: null,
+    bivalirudinLoadingMg: null,
     protamineDoseMg: null,
     heparinResponseCurve: null,
   };
+
+  if (valid("anticoagWeightKg")) {
+    results.bivalirudinLoadingMg = calculateBivalirudinLoadingDose(valueOf("anticoagWeightKg"));
+  }
 
   if (valid("anticoagWeightKg") && valid("heparinDosePerKg")) {
     results.heparinLoadingUnits = calculateHeparinLoadingDose(valueOf("anticoagWeightKg"), valueOf("heparinDosePerKg"));
@@ -1194,6 +1203,12 @@ const anticoagOutputs = anticoagForm
         status: document.querySelector("#heparinLoadingStatus"),
         format: (value) => `${Math.round(value).toLocaleString()} units`,
         empty: "Enter weight and a heparin units/kg assumption.",
+      },
+      bivalirudinLoadingMg: {
+        value: document.querySelector("#bivalirudinLoadingOutput"),
+        status: document.querySelector("#bivalirudinLoadingStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
+        empty: "Enter weight to calculate 1 mg/kg.",
       },
       additionalHeparin: {
         value: document.querySelector("#additionalHeparinOutput"),
@@ -2952,6 +2967,14 @@ function renderAnticoagulation() {
   } else {
     anticoagOutputs.heparinLoadingUnits.value.textContent = "--";
     anticoagOutputs.heparinLoadingUnits.status.textContent = anticoagOutputs.heparinLoadingUnits.empty;
+  }
+
+  if (evaluation.results.bivalirudinLoadingMg !== null) {
+    anticoagOutputs.bivalirudinLoadingMg.value.textContent = anticoagOutputs.bivalirudinLoadingMg.format(evaluation.results.bivalirudinLoadingMg);
+    anticoagOutputs.bivalirudinLoadingMg.status.textContent = "Weight × 1 mg/kg loading dose.";
+  } else {
+    anticoagOutputs.bivalirudinLoadingMg.value.textContent = "--";
+    anticoagOutputs.bivalirudinLoadingMg.status.textContent = anticoagOutputs.bivalirudinLoadingMg.empty;
   }
 
   if (evaluation.results.heparinResponseCurve !== null) {
