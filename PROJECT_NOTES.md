@@ -238,6 +238,17 @@ This section is meant to function as a practical research operations checklist d
 
 This section captures the current build priorities that came out of mentor feedback so both project members can work from the same list.
 
+### Ben Feedback Notes
+
+- Build demo profiles or demo centers so the tool can split between limited-exposure students and more seasoned users
+- For the first student pilot, prioritize BSA, cardiac index calculations, a pump-building checklist, and simple timer-based workflow support
+- Keep the application mobile-friendly for quick use during simulation
+- Consider ways to make the learning workflow more interactive or lightly gamified
+- Track how long it takes students to build each section of the cardiopulmonary bypass pump
+- Revisit whether the study design should include a small early-semester group, such as 5 students using the tool near the beginning of the semester
+- Add a height/weight toggle or clearer unit-switching behavior if needed for usability
+- Implement heparin concentration rise/run after the current heparin tally and dose-response workflow is stable
+
 ### Highest Priority
 
 - [ ] Add a `Pediatric Mode` workflow to make the tool more useful for all perfusionists, not just adult cases
@@ -252,17 +263,16 @@ This section captures the current build priorities that came out of mentor feedb
 
 ### Anticoagulation Updates
 
-- [ ] Add a heparin tally system so total heparin given through the case can be tracked
-- [ ] Use the heparin tally to calculate final protamine dose from `total heparin administered`
-- [ ] If a full tally is not entered, keep fallback guidance:
-  - `Protamine dose based off initial heparin dose`
-- [ ] Add a clear UI choice for protamine calculation source
-  - initial heparin dose only
-  - total heparin given during case
-- [ ] Add `AT3 / antithrombin III` support to the anticoagulation section
+- [x] Add a heparin tally system so total heparin given through the case can be tracked
+- [x] Use the heparin tally to calculate final protamine dose from `total heparin administered`
+- [x] Remove the separate protamine source choice so reversal follows the heparin tally only
+- [x] If no heparin is tallied, prompt the user to log the initial heparin dose before protamine is calculated
+- [x] Add heparin concentration rise/run using EBV + prime volume as the distribution volume
+- [x] Add the editable EBV factor guide: ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, adult default 75
+- [x] Add `AT3 / antithrombin III` support to the anticoagulation section
 - [ ] Expand heparin-resistance support notes where relevant
-- [ ] Add `Bivalirudin` dosing support
-- [ ] Add `Argatroban` dosing support
+- [x] Add `Bivalirudin` dosing support
+- [x] Add `Argatroban` dosing support
 
 ### Prime / Pediatric Prime Updates
 
@@ -328,7 +338,7 @@ The heparin tally idea is strong and should improve the anticoagulation section 
 - The output should show both:
   - `Initial heparin dose`
   - `Total heparin dose tallied`
-  - `Protamine dose source used`
+  - `Protamine dose from total logged heparin`
 
 ### Open Decision To Make Before Building
 
