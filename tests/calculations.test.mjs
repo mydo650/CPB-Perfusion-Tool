@@ -23,10 +23,10 @@ import {
   calculateRequiredPrbcVolume,
   calculateWeightOnlyBsa,
   buildPerfusionFlowMap,
+  suggestEstimatedBloodVolumeFactor,
   evaluateAnticoagulationCalculator,
   evaluateCalculator,
   evaluatePrimeCalculator,
-  resolveProtamineHeparinSource,
   roundTo,
   validateAnticoagField,
   validatePerfusionField,
@@ -244,6 +244,8 @@ test("anticoagulation calculations estimate heparin loading and protamine revers
 
   const evaluated = evaluateAnticoagulationCalculator({
     anticoagWeightKg: "70",
+    anticoagEbvFactor: "75",
+    anticoagPrimeVolumeMl: "0",
     heparinDosePerKg: "300",
     baselineActSeconds: "130",
     postHeparinActSeconds: "430",
@@ -300,48 +302,73 @@ test("heparin administration tally sums valid logged doses", () => {
   assert.equal(total, 29000);
 });
 
-test("protamine source can follow the tally with loading fallback when needed", () => {
-  const preferredTally = resolveProtamineHeparinSource(
-    21000,
-    [
-      { time: "08:00", units: 21000 },
-      { time: "08:45", units: 5000 },
-    ],
-    "tally",
-  );
-  assert.equal(preferredTally.source, "tally");
-  assert.equal(preferredTally.heparinUnits, 26000);
-  assert.equal(preferredTally.fellBack, false);
+test("protamine reversal can be calculated from the heparin tally", () => {
+  const tallyUnits = calculateHeparinAdministrationTotal([
+    { time: "08:00", units: 21000 },
+    { time: "08:45", units: 5000 },
+  ]);
 
-  const fallbackToLoading = resolveProtamineHeparinSource(21000, [], "tally");
-  assert.equal(fallbackToLoading.source, "loading");
-  assert.equal(fallbackToLoading.heparinUnits, 21000);
-  assert.equal(fallbackToLoading.fellBack, true);
+  assert.equal(tallyUnits, 26000);
+  assert.equal(calculateProtamineDose(tallyUnits, 1), 260);
 });
 
-test("heparin dose response curve projects target dose and additional heparin", () => {
-  const curve = calculateHeparinResponseCurve(130, 430, 300, 480, 70);
-  assert.equal(roundTo(curve.slopeActPerUnitKg, 2), 1);
-  assert.equal(Math.round(curve.requiredHeparinDosePerKg), 350);
-  assert.equal(Math.round(curve.requiredHeparinUnits), 24500);
-  assert.equal(Math.round(curve.additionalHeparinUnits), 3500);
+test("estimated blood volume factor guide follows project teaching tiers", () => {
+  assert.equal(suggestEstimatedBloodVolumeFactor(10), 85);
+  assert.equal(suggestEstimatedBloodVolumeFactor(11), 80);
+  assert.equal(suggestEstimatedBloodVolumeFactor(21), 75);
+  assert.equal(suggestEstimatedBloodVolumeFactor(31), 70);
+  assert.equal(suggestEstimatedBloodVolumeFactor(41), 65);
+  assert.equal(suggestEstimatedBloodVolumeFactor(80), 75);
+});
+
+test("heparin dose response curve projects target dose from concentration rise/run", () => {
+  const curve = calculateHeparinResponseCurve(100, 520, 24000, 600, 80, 6000);
+  assert.equal(roundTo(curve.loadingConcentrationUnitsPerMl, 2), 4);
+  assert.equal(roundTo(curve.slopeActPerUnitMl, 2), 105);
+  assert.equal(Math.round(curve.requiredHeparinDosePerKg), 357);
+  assert.equal(Math.round(curve.requiredHeparinUnits), 28571);
+  assert.equal(Math.round(curve.additionalHeparinUnits), 4571);
   assert.equal(curve.targetReachedByTestDose, false);
 
   const evaluated = evaluateAnticoagulationCalculator({
-    anticoagWeightKg: "70",
+    anticoagWeightKg: "80",
+    anticoagEbvFactor: "75",
+    anticoagPrimeVolumeMl: "0",
     heparinDosePerKg: "300",
-    baselineActSeconds: "130",
-    postHeparinActSeconds: "430",
-    targetActSeconds: "480",
+    baselineActSeconds: "100",
+    postHeparinActSeconds: "520",
+    targetActSeconds: "600",
     protamineRatioMgPer100U: "1",
   });
 
-  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 24500);
+  assert.equal(evaluated.results.bloodVolumeMl, 6000);
+  assert.equal(evaluated.results.distributionVolumeMl, 6000);
+  assert.equal(roundTo(evaluated.results.heparinLoadingConcentrationUnitsPerMl, 2), 4);
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 28571);
+});
+
+test("prime volume is included in heparin concentration distribution volume", () => {
+  const evaluated = evaluateAnticoagulationCalculator({
+    anticoagWeightKg: "80",
+    anticoagEbvFactor: "75",
+    anticoagPrimeVolumeMl: "1200",
+    heparinDosePerKg: "300",
+    baselineActSeconds: "100",
+    postHeparinActSeconds: "520",
+    targetActSeconds: "600",
+    protamineRatioMgPer100U: "1",
+  });
+
+  assert.equal(evaluated.results.distributionVolumeMl, 7200);
+  assert.equal(roundTo(evaluated.results.heparinLoadingConcentrationUnitsPerMl, 2), 3.33);
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinDosePerKg), 357);
 });
 
 test("heparin dose response curve follows the selected target ACT", () => {
   const evaluated = evaluateAnticoagulationCalculator({
     anticoagWeightKg: "70",
+    anticoagEbvFactor: "75",
+    anticoagPrimeVolumeMl: "0",
     heparinDosePerKg: "300",
     baselineActSeconds: "130",
     postHeparinActSeconds: "430",
@@ -357,6 +384,8 @@ test("heparin dose response curve follows the selected target ACT", () => {
 test("heparin dose response curve exposes high projected dose scenarios", () => {
   const evaluated = evaluateAnticoagulationCalculator({
     anticoagWeightKg: "70",
+    anticoagEbvFactor: "75",
+    anticoagPrimeVolumeMl: "0",
     heparinDosePerKg: "300",
     baselineActSeconds: "130",
     postHeparinActSeconds: "330",

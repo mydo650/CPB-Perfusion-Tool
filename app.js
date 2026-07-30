@@ -23,6 +23,8 @@ const PRIME_FIELD_CONFIG = {
 
 const ANTICOAG_FIELD_CONFIG = {
   anticoagWeightKg: { label: "Weight", min: 1, max: 300, allowZero: false },
+  anticoagEbvFactor: { label: "Estimated blood volume factor", min: 40, max: 100, allowZero: false },
+  anticoagPrimeVolumeMl: { label: "Prime volume", min: 0, max: 5000, allowZero: true },
   heparinDosePerKg: { label: "Heparin loading dose", min: 50, max: 1000, allowZero: false },
   baselineActSeconds: { label: "Baseline ACT", min: 50, max: 400, allowZero: false },
   postHeparinActSeconds: { label: "Post-heparin ACT", min: 50, max: 1200, allowZero: false },
@@ -37,6 +39,7 @@ const SHARED_FIELD_GROUPS = {
   patientHeightCm: ["heightCm"],
   patientCardiacIndex: ["cardiacIndex"],
   patientPumpFlow: ["pumpFlow"],
+  casePrimeVolumeMl: ["primeVolumeMl", "anticoagPrimeVolumeMl"],
 };
 
 const SHARED_FIELD_STORAGE_KEY = "cpbSupportSharedFields";
@@ -503,10 +506,9 @@ function readHeparinLogState() {
 
     return {
       entries,
-      protamineSource: stored.protamineSource === "tally" ? "tally" : "loading",
     };
   } catch {
-    return { entries: [], protamineSource: "loading" };
+    return { entries: [] };
   }
 }
 
@@ -526,7 +528,6 @@ function writeHeparinLogState(nextState) {
       ANTICOAG_LOG_STORAGE_KEY,
       JSON.stringify({
         entries,
-        protamineSource: nextState.protamineSource === "tally" ? "tally" : "loading",
       }),
     );
   } catch {
@@ -648,6 +649,16 @@ function calculateEstimatedBloodVolume(weightKg, ebvFactor) {
   return weightKg * ebvFactor;
 }
 
+function suggestEstimatedBloodVolumeFactor(weightKg) {
+  if (!Number.isFinite(weightKg) || weightKg <= 0) return null;
+  if (weightKg <= 10) return 85;
+  if (weightKg <= 20) return 80;
+  if (weightKg <= 30) return 75;
+  if (weightKg <= 40) return 70;
+  if (weightKg <= 50) return 65;
+  return 75;
+}
+
 function calculatePredictedPrimeHct(bloodVolumeMl, baselineHctPercent, primeVolumeMl) {
   return ((bloodVolumeMl * (baselineHctPercent / 100)) / (bloodVolumeMl + primeVolumeMl)) * 100;
 }
@@ -743,66 +754,34 @@ function calculateHeparinAdministrationTotal(entries = []) {
   }, 0);
 }
 
-function resolveProtamineHeparinSource(estimatedHeparinUnits, entries = [], preferredSource = "loading") {
-  const tallyUnits = calculateHeparinAdministrationTotal(entries);
-  const hasEstimated = Number.isFinite(estimatedHeparinUnits) && estimatedHeparinUnits > 0;
-  const wantsTally = preferredSource === "tally";
-
-  if (wantsTally && tallyUnits > 0) {
-    return {
-      source: "tally",
-      heparinUnits: tallyUnits,
-      tallyUnits,
-      fellBack: false,
-    };
-  }
-
-  if (hasEstimated) {
-    return {
-      source: "loading",
-      heparinUnits: estimatedHeparinUnits,
-      tallyUnits,
-      fellBack: wantsTally,
-    };
-  }
-
-  if (tallyUnits > 0) {
-    return {
-      source: "tally",
-      heparinUnits: tallyUnits,
-      tallyUnits,
-      fellBack: preferredSource === "loading",
-    };
-  }
-
-  return {
-    source: wantsTally ? "tally" : "loading",
-    heparinUnits: null,
-    tallyUnits: 0,
-    fellBack: false,
-  };
-}
-
-function calculateHeparinResponseCurve(baselineActSeconds, postHeparinActSeconds, heparinDosePerKg, targetActSeconds, weightKg) {
+function calculateHeparinResponseCurve(baselineActSeconds, postHeparinActSeconds, heparinUnits, targetActSeconds, weightKg, distributionVolumeMl) {
   const actDelta = postHeparinActSeconds - baselineActSeconds;
-  if (actDelta <= 0 || heparinDosePerKg <= 0) return null;
+  if (actDelta <= 0 || heparinUnits <= 0 || weightKg <= 0 || distributionVolumeMl <= 0) return null;
 
-  const slopeActPerUnitKg = actDelta / heparinDosePerKg;
-  const requiredHeparinDosePerKg = Math.max(0, (targetActSeconds - baselineActSeconds) / slopeActPerUnitKg);
-  const requiredHeparinUnits = requiredHeparinDosePerKg * weightKg;
-  const givenHeparinUnits = heparinDosePerKg * weightKg;
+  const loadingConcentrationUnitsPerMl = heparinUnits / distributionVolumeMl;
+  if (loadingConcentrationUnitsPerMl <= 0) return null;
+
+  const slopeActPerUnitMl = actDelta / loadingConcentrationUnitsPerMl;
+  const requiredHeparinConcentrationUnitsPerMl = Math.max(0, (targetActSeconds - baselineActSeconds) / slopeActPerUnitMl);
+  const requiredHeparinUnits = requiredHeparinConcentrationUnitsPerMl * distributionVolumeMl;
+  const requiredHeparinDosePerKg = requiredHeparinUnits / weightKg;
+  const givenHeparinDosePerKg = heparinUnits / weightKg;
 
   return {
-    slopeActPerUnitKg,
+    slopeActPerUnitMl,
+    loadingConcentrationUnitsPerMl,
+    requiredHeparinConcentrationUnitsPerMl,
     requiredHeparinDosePerKg,
     requiredHeparinUnits,
-    givenHeparinUnits,
-    additionalHeparinUnits: Math.max(0, requiredHeparinUnits - givenHeparinUnits),
+    givenHeparinUnits: heparinUnits,
+    givenHeparinDosePerKg,
+    distributionVolumeMl,
+    additionalHeparinUnits: Math.max(0, requiredHeparinUnits - heparinUnits),
     targetReachedByTestDose: postHeparinActSeconds >= targetActSeconds,
     points: {
-      baseline: { dosePerKg: 0, actSeconds: baselineActSeconds },
-      measured: { dosePerKg: heparinDosePerKg, actSeconds: postHeparinActSeconds },
-      target: { dosePerKg: requiredHeparinDosePerKg, actSeconds: targetActSeconds },
+      baseline: { concentrationUnitsPerMl: 0, dosePerKg: 0, actSeconds: baselineActSeconds },
+      measured: { concentrationUnitsPerMl: loadingConcentrationUnitsPerMl, dosePerKg: givenHeparinDosePerKg, actSeconds: postHeparinActSeconds },
+      target: { concentrationUnitsPerMl: requiredHeparinConcentrationUnitsPerMl, dosePerKg: requiredHeparinDosePerKg, actSeconds: targetActSeconds },
     },
   };
 }
@@ -952,11 +931,22 @@ function evaluateAnticoagulationCalculator(rawInputs) {
   const valueOf = (name) => fields[name].value;
   const results = {
     heparinLoadingUnits: null,
+    bloodVolumeMl: null,
+    distributionVolumeMl: null,
+    heparinLoadingConcentrationUnitsPerMl: null,
     bivalirudinLoadingMg: null,
     at3DoseUnits: null,
     protamineDoseMg: null,
     heparinResponseCurve: null,
   };
+
+  if (valid("anticoagWeightKg") && valid("anticoagEbvFactor")) {
+    results.bloodVolumeMl = calculateEstimatedBloodVolume(valueOf("anticoagWeightKg"), valueOf("anticoagEbvFactor"));
+  }
+
+  if (results.bloodVolumeMl !== null && valid("anticoagPrimeVolumeMl")) {
+    results.distributionVolumeMl = results.bloodVolumeMl + valueOf("anticoagPrimeVolumeMl");
+  }
 
   if (valid("anticoagWeightKg")) {
     results.bivalirudinLoadingMg = calculateBivalirudinLoadingDose(valueOf("anticoagWeightKg"));
@@ -970,17 +960,22 @@ function evaluateAnticoagulationCalculator(rawInputs) {
     results.heparinLoadingUnits = calculateHeparinLoadingDose(valueOf("anticoagWeightKg"), valueOf("heparinDosePerKg"));
   }
 
+  if (results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && results.distributionVolumeMl > 0) {
+    results.heparinLoadingConcentrationUnitsPerMl = results.heparinLoadingUnits / results.distributionVolumeMl;
+  }
+
   if (results.heparinLoadingUnits !== null && valid("protamineRatioMgPer100U")) {
     results.protamineDoseMg = calculateProtamineDose(results.heparinLoadingUnits, valueOf("protamineRatioMgPer100U"));
   }
 
-  if (valid("anticoagWeightKg") && valid("heparinDosePerKg") && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
+  if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
     results.heparinResponseCurve = calculateHeparinResponseCurve(
       valueOf("baselineActSeconds"),
       valueOf("postHeparinActSeconds"),
-      valueOf("heparinDosePerKg"),
+      results.heparinLoadingUnits,
       valueOf("targetActSeconds"),
       valueOf("anticoagWeightKg"),
+      results.distributionVolumeMl,
     );
   }
 
@@ -995,6 +990,7 @@ const anticoagForm = document.querySelector("#anticoag-form");
 const anticoagSummary = document.querySelector("#anticoagValidationSummary");
 const primeEbvQuickButtons = Array.from(document.querySelectorAll("[data-prime-ebv-quick]"));
 const targetActButtons = Array.from(document.querySelectorAll("[data-target-act]"));
+const anticoagEbvGuideButton = document.querySelector("#applyAnticoagEbvGuide");
 const primePlanCard = document.querySelector("#primePlanCard");
 const heparinCurvePanel = document.querySelector(".curve-panel");
 const expandCurveButton = document.querySelector("#expandCurveButton");
@@ -1215,6 +1211,18 @@ const anticoagOutputs = anticoagForm
         format: (value) => `${Math.round(value).toLocaleString()} units`,
         empty: "Enter weight and a heparin units/kg assumption.",
       },
+      distributionVolumeMl: {
+        value: document.querySelector("#heparinDistributionVolumeOutput"),
+        status: document.querySelector("#heparinDistributionVolumeStatus"),
+        format: (value) => `${Math.round(value).toLocaleString()} mL`,
+        empty: "Enter weight, EBV factor, and prime volume.",
+      },
+      heparinLoadingConcentrationUnitsPerMl: {
+        value: document.querySelector("#heparinConcentrationOutput"),
+        status: document.querySelector("#heparinConcentrationStatus"),
+        format: (value) => `${roundTo(value, 2).toFixed(2)} units/mL`,
+        empty: "Heparin units divided by EBV plus prime volume.",
+      },
       bivalirudinLoadingMg: {
         value: document.querySelector("#bivalirudinLoadingOutput"),
         status: document.querySelector("#bivalirudinLoadingStatus"),
@@ -1237,25 +1245,21 @@ const anticoagOutputs = anticoagForm
         value: document.querySelector("#protamineDoseOutput"),
         status: document.querySelector("#protamineDoseStatus"),
         format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
-        empty: "Calculated from the estimated heparin loading dose.",
+        empty: "Add the initial heparin dose to the log, plus any extra boluses, to calculate protamine from the tally.",
       },
       heparinTallyUnits: {
         value: document.querySelector("#heparinTallyOutput"),
         status: document.querySelector("#heparinTallyStatus"),
         format: (value) => `${Math.round(value).toLocaleString()} units`,
       },
-      protamineSource: {
-        value: document.querySelector("#protamineSourceOutput"),
-        status: document.querySelector("#protamineSourceStatus"),
-      },
       heparinLogTimeInput: document.querySelector("#heparinAdminTime"),
       heparinLogUnitsInput: document.querySelector("#heparinAdminUnits"),
       heparinLogValidation: document.querySelector("#heparinLogValidation"),
       heparinLogList: document.querySelector("#heparinLogList"),
       heparinLogEmpty: document.querySelector("#heparinLogEmpty"),
-      protamineDoseSourceSelect: document.querySelector("#protamineDoseSource"),
       useLoadingDoseForLogButton: document.querySelector("#useLoadingDoseForLog"),
       addHeparinLogEntryButton: document.querySelector("#addHeparinLogEntry"),
+      clearHeparinLogButton: document.querySelector("#clearHeparinLog"),
       curveChart: document.querySelector("#heparinCurveChart"),
       curveSummary: document.querySelector("#heparinCurveSummary"),
       curveTooltip: document.querySelector("#heparinCurveTooltip"),
@@ -1267,7 +1271,7 @@ const anticoagOutputs = anticoagForm
     }
   : null;
 
-let heparinLogState = anticoagForm ? readHeparinLogState() : { entries: [], protamineSource: "loading" };
+let heparinLogState = anticoagForm ? readHeparinLogState() : { entries: [] };
 
 const drugDoseCheckForm = document.querySelector("#drug-dose-check-form");
 const drugDoseCheckOutputs = drugDoseCheckForm
@@ -1465,11 +1469,6 @@ function renderHeparinAdministrationLog(evaluation) {
 
   const entries = heparinLogState.entries;
   const tallyUnits = calculateHeparinAdministrationTotal(entries);
-  const protamineResolution = resolveProtamineHeparinSource(
-    evaluation.results.heparinLoadingUnits,
-    entries,
-    heparinLogState.protamineSource,
-  );
 
   if (anticoagOutputs.heparinTallyUnits.value) {
     anticoagOutputs.heparinTallyUnits.value.textContent = tallyUnits > 0
@@ -1482,28 +1481,11 @@ function renderHeparinAdministrationLog(evaluation) {
       : "No heparin entries recorded yet.";
   }
 
-  if (anticoagOutputs.protamineSource.value) {
-    anticoagOutputs.protamineSource.value.textContent = protamineResolution.source === "tally"
-      ? "Heparin tally"
-      : "Loading estimate";
-  }
-  if (anticoagOutputs.protamineSource.status) {
-    anticoagOutputs.protamineSource.status.textContent = protamineResolution.source === "tally"
-      ? "Protamine is following the running case total from the heparin log."
-      : protamineResolution.fellBack
-        ? "Tally was selected, but no heparin entries are recorded yet, so the loading estimate is being used."
-        : "Protamine is following the estimated loading dose.";
-  }
-
-  if (evaluation.fields.protamineRatioMgPer100U?.valid && protamineResolution.heparinUnits !== null) {
+  if (evaluation.fields.protamineRatioMgPer100U?.valid && tallyUnits > 0) {
     anticoagOutputs.protamineDoseMg.value.textContent = anticoagOutputs.protamineDoseMg.format(
-      calculateProtamineDose(protamineResolution.heparinUnits, evaluation.fields.protamineRatioMgPer100U.value),
+      calculateProtamineDose(tallyUnits, evaluation.fields.protamineRatioMgPer100U.value),
     );
-    anticoagOutputs.protamineDoseMg.status.textContent = protamineResolution.source === "tally"
-      ? "Based on the total tallied heparin administered and selected protamine ratio."
-      : protamineResolution.fellBack
-        ? "Tally was selected, but no entries are logged yet, so this is based on the estimated loading dose."
-        : "Based on the estimated heparin loading dose and selected protamine ratio.";
+    anticoagOutputs.protamineDoseMg.status.textContent = "Based on the total logged heparin and selected protamine ratio.";
   } else {
     anticoagOutputs.protamineDoseMg.value.textContent = "--";
     anticoagOutputs.protamineDoseMg.status.textContent = evaluation.fields.protamineRatioMgPer100U?.valid
@@ -2792,7 +2774,7 @@ function renderHeparinCurve(curve, options = {}) {
   chart.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
   if (!curve) {
-    summary.textContent = "Enter ACT response values to plot the baseline, measured response, and projected target dose.";
+    summary.textContent = "Enter ACT response, EBV factor, and prime volume to plot the baseline, measured concentration response, and projected target concentration.";
     chart.innerHTML = `
       <rect class="curve-bg" x="0" y="0" width="${width}" height="${height}" rx="18"></rect>
       <text class="curve-empty-text" x="${width / 2}" y="${height / 2}" text-anchor="middle">Waiting for ACT response data</text>
@@ -2807,28 +2789,35 @@ function renderHeparinCurve(curve, options = {}) {
   const plotHeight = height - margin.top - margin.bottom;
   const points = [curve.points.baseline, curve.points.measured, curve.points.target];
   const referenceActs = [480, 600];
-  const maxDose = Math.max(...points.map((point) => point.dosePerKg), curve.points.measured.dosePerKg + 50, 100);
-  const referenceDoseMax = Math.max(...referenceActs.map((actSeconds) => Math.max(0, (actSeconds - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg)));
+  const concentrationForAct = (actSeconds) => Math.max(0, (actSeconds - curve.points.baseline.actSeconds) / curve.slopeActPerUnitMl);
+  const weightKg = curve.givenHeparinDosePerKg > 0 ? curve.givenHeparinUnits / curve.givenHeparinDosePerKg : null;
+  const dosePerKgForConcentration = (concentrationUnitsPerMl) => (
+    weightKg ? (concentrationUnitsPerMl * curve.distributionVolumeMl) / weightKg : 0
+  );
+  const unitsForConcentration = (concentrationUnitsPerMl) => concentrationUnitsPerMl * curve.distributionVolumeMl;
+  const maxConcentration = Math.max(...points.map((point) => point.concentrationUnitsPerMl), curve.points.measured.concentrationUnitsPerMl + 0.75, 5);
+  const referenceConcentrationMax = Math.max(...referenceActs.map((actSeconds) => concentrationForAct(actSeconds)));
   const maxAct = Math.max(...points.map((point) => point.actSeconds), ...referenceActs, isHeparinCurveZoomedOut ? 1000 : 800);
-  const xMax = Math.ceil(Math.max(maxDose, referenceDoseMax, isHeparinCurveZoomedOut ? 900 : 100) / 50) * 50;
+  const xMax = Math.ceil(Math.max(maxConcentration, referenceConcentrationMax, isHeparinCurveZoomedOut ? 12 : 5));
   const yMax = Math.ceil(maxAct / 100) * 100;
-  const x = (dosePerKg) => margin.left + (dosePerKg / xMax) * plotWidth;
+  const x = (concentrationUnitsPerMl) => margin.left + (concentrationUnitsPerMl / xMax) * plotWidth;
   const y = (actSeconds) => margin.top + plotHeight - (actSeconds / yMax) * plotHeight;
-  const visibleLineEndDosePerKg = Math.min(xMax, (yMax - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg);
+  const visibleLineEndConcentration = Math.min(xMax, concentrationForAct(yMax));
   const lineEnd = {
-    dosePerKg: visibleLineEndDosePerKg,
-    actSeconds: curve.points.baseline.actSeconds + curve.slopeActPerUnitKg * visibleLineEndDosePerKg,
+    concentrationUnitsPerMl: visibleLineEndConcentration,
+    actSeconds: curve.points.baseline.actSeconds + curve.slopeActPerUnitMl * visibleLineEndConcentration,
   };
   const xTicks = isHeparinCurveZoomedOut ? [0, xMax / 2, xMax] : [0, xMax / 2, xMax];
   const yTicks = isHeparinCurveZoomedOut
     ? [0, 400, 800, yMax].filter((tick, index, ticks) => tick <= yMax && ticks.indexOf(tick) === index)
     : Array.from(new Set([0, Math.round(yMax / 2), 480, 600, yMax].filter((tick) => tick <= yMax))).sort((a, b) => a - b);
-  const formatHover = (label, point) => `${label}: ${roundTo(point.dosePerKg, 0).toFixed(0)} units/kg, ACT ${roundTo(point.actSeconds, 0).toFixed(0)} sec`;
+  const formatTick = (tick) => roundTo(tick, 1).toFixed(tick % 1 === 0 ? 0 : 1);
+  const formatHover = (label, point) => `${label}: ${roundTo(point.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(point.dosePerKg, 0).toFixed(0)} units/kg, ACT ${roundTo(point.actSeconds, 0).toFixed(0)} sec`;
   const formatReferenceHover = (label, actSeconds) => {
-    const dosePerKg = Math.max(0, (actSeconds - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg);
-    const weightKg = curve.givenHeparinUnits / curve.points.measured.dosePerKg;
-    const additionalUnits = Math.max(0, dosePerKg * weightKg - curve.givenHeparinUnits);
-    return `${label}: ACT ${actSeconds} sec, ${roundTo(dosePerKg, 0).toFixed(0)} units/kg, ${Math.round(additionalUnits).toLocaleString()} additional units`;
+    const concentrationUnitsPerMl = concentrationForAct(actSeconds);
+    const dosePerKg = dosePerKgForConcentration(concentrationUnitsPerMl);
+    const additionalUnits = Math.max(0, unitsForConcentration(concentrationUnitsPerMl) - curve.givenHeparinUnits);
+    return `${label}: ACT ${actSeconds} sec, ${roundTo(concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(dosePerKg, 0).toFixed(0)} units/kg, ${Math.round(additionalUnits).toLocaleString()} additional units`;
   };
   const starPoints = (centerX, centerY, outerRadius, innerRadius, spikes = 5) => {
     const pointsList = [];
@@ -2845,38 +2834,38 @@ function renderHeparinCurve(curve, options = {}) {
   ]
     .map(({ key, label, point }) => `
       <g class="curve-point curve-point-${key}" tabindex="0" data-tooltip="${formatHover(label, point)}">
-        <circle cx="${x(point.dosePerKg)}" cy="${y(point.actSeconds)}" r="7"></circle>
-        <text x="${x(point.dosePerKg)}" y="${y(point.actSeconds) - 12}" text-anchor="middle">${label}</text>
+        <circle cx="${x(point.concentrationUnitsPerMl)}" cy="${y(point.actSeconds)}" r="7"></circle>
+        <text x="${x(point.concentrationUnitsPerMl)}" y="${y(point.actSeconds) - 12}" text-anchor="middle">${label}</text>
       </g>
     `)
     .join("");
-  const act480DosePerKg = Math.max(0, (480 - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg);
-  const act600DosePerKg = Math.max(0, (600 - curve.points.baseline.actSeconds) / curve.slopeActPerUnitKg);
+  const act480Concentration = concentrationForAct(480);
+  const act600Concentration = concentrationForAct(600);
   const targetAct = roundTo(curve.points.target.actSeconds, 0).toFixed(0);
   const targetAdditionalUnits = Math.round(curve.additionalHeparinUnits).toLocaleString();
   const targetLabel = `Target ACT ${targetAct}`;
-  const targetTooltip = `${targetLabel}: ${roundTo(curve.points.target.dosePerKg, 0).toFixed(0)} units/kg, ${targetAdditionalUnits} additional units`;
+  const targetTooltip = `${targetLabel}: ${roundTo(curve.points.target.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(curve.points.target.dosePerKg, 0).toFixed(0)} units/kg, ${targetAdditionalUnits} additional units`;
   const referencePointMarkup = `
     <g class="curve-reference curve-reference-480" tabindex="0" data-tooltip="${formatReferenceHover("ACT 480 reference", 480)}">
-      <polygon points="${starPoints(x(act480DosePerKg), y(480), 12, 5)}"></polygon>
-      <text x="${x(act480DosePerKg)}" y="${y(480) - 18}" text-anchor="middle">480</text>
+      <polygon points="${starPoints(x(act480Concentration), y(480), 12, 5)}"></polygon>
+      <text x="${x(act480Concentration)}" y="${y(480) - 18}" text-anchor="middle">480</text>
     </g>
     <g class="curve-reference curve-reference-600" tabindex="0" data-tooltip="${formatReferenceHover("ACT 600 reference", 600)}">
-      <circle cx="${x(act600DosePerKg)}" cy="${y(600)}" r="8"></circle>
-      <text x="${x(act600DosePerKg)}" y="${y(600) - 14}" text-anchor="middle">600</text>
+      <circle cx="${x(act600Concentration)}" cy="${y(600)}" r="8"></circle>
+      <text x="${x(act600Concentration)}" y="${y(600) - 14}" text-anchor="middle">600</text>
     </g>
     <g class="curve-selected-target" tabindex="0" data-tooltip="${targetTooltip}">
-      <rect x="${x(curve.points.target.dosePerKg) - 8}" y="${y(curve.points.target.actSeconds) - 8}" width="16" height="16" transform="rotate(45 ${x(curve.points.target.dosePerKg)} ${y(curve.points.target.actSeconds)})"></rect>
-      <text x="${x(curve.points.target.dosePerKg)}" y="${y(curve.points.target.actSeconds) + 28}" text-anchor="middle">
-        <tspan x="${x(curve.points.target.dosePerKg)}">${targetLabel}</tspan>
-        <tspan x="${x(curve.points.target.dosePerKg)}" dy="16">${targetAdditionalUnits} units addl.</tspan>
+      <rect x="${x(curve.points.target.concentrationUnitsPerMl) - 8}" y="${y(curve.points.target.actSeconds) - 8}" width="16" height="16" transform="rotate(45 ${x(curve.points.target.concentrationUnitsPerMl)} ${y(curve.points.target.actSeconds)})"></rect>
+      <text x="${x(curve.points.target.concentrationUnitsPerMl)}" y="${y(curve.points.target.actSeconds) + 28}" text-anchor="middle">
+        <tspan x="${x(curve.points.target.concentrationUnitsPerMl)}">${targetLabel}</tspan>
+        <tspan x="${x(curve.points.target.concentrationUnitsPerMl)}" dy="16">${targetAdditionalUnits} units addl.</tspan>
       </text>
     </g>
   `;
 
   summary.textContent = curve.targetReachedByTestDose
-    ? `The measured ACT reaches the selected target of ACT ${roundTo(curve.points.target.actSeconds, 0).toFixed(0)} with the current loading dose.`
-    : `Selected Target ACT ${roundTo(curve.points.target.actSeconds, 0).toFixed(0)} updates the target line and diamond marker. Reference markers remain at ACT 480 and ACT 600.`;
+    ? `HDR rise/run: ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. The measured ACT reaches the selected target with the current loading concentration.`
+    : `HDR rise/run: ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. Selected Target ACT ${roundTo(curve.points.target.actSeconds, 0).toFixed(0)} updates the concentration target and diamond marker.`;
 
   chart.innerHTML = `
     <rect class="curve-bg" x="0" y="0" width="${width}" height="${height}" rx="18"></rect>
@@ -2889,16 +2878,16 @@ function renderHeparinCurve(curve, options = {}) {
     ${xTicks.map((tick) => `
       <g class="curve-gridline">
         <line x1="${x(tick)}" y1="${margin.top}" x2="${x(tick)}" y2="${height - margin.bottom}"></line>
-        <text x="${x(tick)}" y="${height - margin.bottom + 26}" text-anchor="middle">${Math.round(tick)}</text>
+        <text x="${x(tick)}" y="${height - margin.bottom + 26}" text-anchor="middle">${formatTick(tick)}</text>
       </g>
     `).join("")}
     <line class="curve-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
     <line class="curve-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"></line>
     <line class="curve-target-line" x1="${margin.left}" y1="${y(curve.points.target.actSeconds)}" x2="${width - margin.right}" y2="${y(curve.points.target.actSeconds)}"></line>
-    <line class="curve-response-line" x1="${x(0)}" y1="${y(curve.points.baseline.actSeconds)}" x2="${x(lineEnd.dosePerKg)}" y2="${y(lineEnd.actSeconds)}"></line>
+    <line class="curve-response-line" x1="${x(0)}" y1="${y(curve.points.baseline.actSeconds)}" x2="${x(lineEnd.concentrationUnitsPerMl)}" y2="${y(lineEnd.actSeconds)}"></line>
     ${pointMarkup}
     ${referencePointMarkup}
-    <text class="curve-axis-label" x="${width / 2}" y="${height - 18}" text-anchor="middle">Heparin dose (units/kg)</text>
+    <text class="curve-axis-label" x="${width / 2}" y="${height - 18}" text-anchor="middle">Heparin concentration (units/mL)</text>
     <text class="curve-axis-label" transform="translate(20 ${height / 2}) rotate(-90)" text-anchor="middle">ACT (seconds)</text>
   `;
 }
@@ -2984,6 +2973,28 @@ function renderAnticoagulation() {
   } else {
     anticoagOutputs.heparinLoadingUnits.value.textContent = "--";
     anticoagOutputs.heparinLoadingUnits.status.textContent = anticoagOutputs.heparinLoadingUnits.empty;
+  }
+
+  if (evaluation.results.distributionVolumeMl !== null) {
+    const weightKg = evaluation.fields.anticoagWeightKg.value;
+    const ebvFactor = evaluation.fields.anticoagEbvFactor.value;
+    const suggestedEbvFactor = suggestEstimatedBloodVolumeFactor(weightKg);
+    const suggestionCopy = suggestedEbvFactor !== null && suggestedEbvFactor !== ebvFactor
+      ? ` Suggested guide factor for this weight is ${suggestedEbvFactor} mL/kg.`
+      : "";
+    anticoagOutputs.distributionVolumeMl.value.textContent = anticoagOutputs.distributionVolumeMl.format(evaluation.results.distributionVolumeMl);
+    anticoagOutputs.distributionVolumeMl.status.textContent = `EBV ${Math.round(evaluation.results.bloodVolumeMl).toLocaleString()} mL + prime ${Math.round(evaluation.fields.anticoagPrimeVolumeMl.value).toLocaleString()} mL.${suggestionCopy}`;
+  } else {
+    anticoagOutputs.distributionVolumeMl.value.textContent = "--";
+    anticoagOutputs.distributionVolumeMl.status.textContent = anticoagOutputs.distributionVolumeMl.empty;
+  }
+
+  if (evaluation.results.heparinLoadingConcentrationUnitsPerMl !== null) {
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.format(evaluation.results.heparinLoadingConcentrationUnitsPerMl);
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(evaluation.results.heparinLoadingUnits).toLocaleString()} units / ${Math.round(evaluation.results.distributionVolumeMl).toLocaleString()} mL.`;
+  } else {
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = "--";
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.empty;
   }
 
   if (evaluation.results.bivalirudinLoadingMg !== null) {
@@ -3092,14 +3103,6 @@ if (anticoagForm) {
   anticoagForm.addEventListener("change", renderAnticoagulation);
   anticoagForm.addEventListener("input", (event) => syncSharedFieldValue(event.target));
   anticoagForm.addEventListener("change", (event) => syncSharedFieldValue(event.target));
-  if (anticoagOutputs.protamineDoseSourceSelect) {
-    anticoagOutputs.protamineDoseSourceSelect.value = heparinLogState.protamineSource;
-    anticoagOutputs.protamineDoseSourceSelect.addEventListener("change", () => {
-      heparinLogState.protamineSource = anticoagOutputs.protamineDoseSourceSelect.value === "tally" ? "tally" : "loading";
-      writeHeparinLogState(heparinLogState);
-      renderAnticoagulation();
-    });
-  }
   if (anticoagOutputs.heparinLogTimeInput && anticoagOutputs.heparinLogTimeInput.value === "") {
     anticoagOutputs.heparinLogTimeInput.value = getCurrentClockTime();
   }
@@ -3143,7 +3146,13 @@ if (anticoagForm) {
     if (anticoagOutputs.heparinLogUnitsInput) {
       anticoagOutputs.heparinLogUnitsInput.value = "";
     }
-    setHeparinLogValidation("");
+    setHeparinLogValidation("Heparin entry added. Protamine is calculated from the total logged heparin.");
+    renderAnticoagulation();
+  });
+  anticoagOutputs.clearHeparinLogButton?.addEventListener("click", () => {
+    heparinLogState.entries = [];
+    writeHeparinLogState(heparinLogState);
+    setHeparinLogValidation("Heparin log cleared.");
     renderAnticoagulation();
   });
   anticoagOutputs.heparinLogList?.addEventListener("click", (event) => {
@@ -3162,6 +3171,16 @@ if (anticoagForm) {
       anticoagForm.elements.namedItem("targetActSeconds").value = button.dataset.targetAct;
       renderAnticoagulation();
     });
+  });
+  anticoagEbvGuideButton?.addEventListener("click", () => {
+    const weightField = validateAnticoagField("anticoagWeightKg", anticoagForm.elements.namedItem("anticoagWeightKg")?.value);
+    const suggestedEbvFactor = suggestEstimatedBloodVolumeFactor(weightField.value);
+    if (!weightField.valid || suggestedEbvFactor === null) {
+      updateFormInvalidState(anticoagForm, { anticoagWeightKg: weightField }, anticoagSummary);
+      return;
+    }
+    anticoagForm.elements.namedItem("anticoagEbvFactor").value = String(suggestedEbvFactor);
+    renderAnticoagulation();
   });
   expandCurveButton?.addEventListener("click", () => {
     isHeparinCurveExpanded = true;

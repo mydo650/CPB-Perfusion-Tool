@@ -85,6 +85,10 @@ body.page-cannula-selection {
   width: min(1540px, calc(100% - 2rem));
 }
 
+.page-anticoagulation .app-shell {
+  width: min(1440px, calc(100% - 2rem));
+}
+
 .page-drug-library .app-shell {
   width: min(1440px, calc(100% - 2rem));
 }
@@ -252,6 +256,11 @@ h1 {
 .page-blood-management .workspace,
 .page-cannula-selection .workspace {
   grid-template-columns: 1fr;
+}
+
+.page-anticoagulation .workspace {
+  grid-template-columns: minmax(260px, 0.85fr) minmax(310px, 1fr) minmax(420px, 1.35fr);
+  align-items: start;
 }
 
 .page-references .workspace {
@@ -1090,6 +1099,25 @@ input[aria-invalid="true"] {
   display: none;
 }
 
+.anticoag-input-panel,
+.anticoag-support-panel {
+  grid-column: 1 / -1;
+}
+
+.page-anticoagulation .anticoag-input-panel .field-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.page-anticoagulation .anticoag-results-panel .results-grid {
+  grid-template-columns: 1fr;
+}
+
+.page-anticoagulation .anticoag-results-panel,
+.page-anticoagulation .heparin-log-panel,
+.page-anticoagulation .curve-panel {
+  height: 100%;
+}
+
 .heparin-log-panel {
   margin-top: 1rem;
   padding: 1.1rem;
@@ -1098,8 +1126,21 @@ input[aria-invalid="true"] {
   background: rgba(255, 255, 255, 0.66);
 }
 
+.page-anticoagulation .heparin-log-panel,
+.page-anticoagulation .curve-panel {
+  margin-top: 0;
+}
+
 .heparin-log-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page-anticoagulation .heparin-log-grid {
+  grid-template-columns: 1fr;
+}
+
+.page-anticoagulation .heparin-log-results {
+  grid-template-columns: 1fr;
 }
 
 .heparin-log-results {
@@ -1181,6 +1222,11 @@ input[aria-invalid="true"] {
   background: rgba(255, 255, 255, 0.66);
 }
 
+.page-anticoagulation .curve-chart-wrap {
+  aspect-ratio: 16 / 10;
+  min-height: 280px;
+}
+
 .cannula-compare-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1249,6 +1295,20 @@ input[aria-invalid="true"] {
   .page-cannula-selection.has-bicaval .cannula-compare-grid,
   .page-cannula-selection.has-bicaval .cannula-setup-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .page-anticoagulation .workspace {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-anticoagulation .anticoag-input-panel .field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-anticoagulation .curve-panel {
+    grid-column: 1 / -1;
   }
 }
 
@@ -1578,6 +1638,10 @@ input[aria-invalid="true"] {
   margin-top: 1rem;
 }
 
+.page-anticoagulation .info-tabs {
+  margin-top: 0;
+}
+
 .tabs-header {
   display: flex;
   align-items: center;
@@ -1779,11 +1843,27 @@ input[aria-invalid="true"] {
     grid-template-columns: 1fr;
   }
 
+  .page-anticoagulation .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .page-anticoagulation .anticoag-input-panel,
+  .page-anticoagulation .anticoag-results-panel,
+  .page-anticoagulation .heparin-log-panel,
+  .page-anticoagulation .curve-panel,
+  .page-anticoagulation .anticoag-support-panel {
+    grid-column: 1 / -1;
+  }
+
   .home-grid {
     grid-template-columns: 1fr;
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-anticoagulation .anticoag-input-panel .field-grid {
     grid-template-columns: 1fr;
   }
 

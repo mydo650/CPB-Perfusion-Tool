@@ -6,7 +6,7 @@
     <title>CPB Anticoagulation Support</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
+  <body class="page-anticoagulation">
     <main class="app-shell">
       <section class="hero">
         <p class="eyebrow">Simulation Support Tool</p>
@@ -53,8 +53,8 @@
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
 
-      <section class="workspace page-workspace" aria-label="Anticoagulation calculator">
-        <section class="panel input-panel" aria-labelledby="anticoag-inputs-title">
+      <section class="workspace page-workspace anticoag-workspace" aria-label="Anticoagulation calculator">
+        <section class="panel input-panel anticoag-input-panel" aria-labelledby="anticoag-inputs-title">
           <div class="panel-header">
             <h2 id="anticoag-inputs-title">Anticoagulation Inputs</h2>
             <p>Weight is shared across tabs. Dosing assumptions stay editable so the math is transparent.</p>
@@ -62,6 +62,8 @@
           <form id="anticoag-form" novalidate>
             <div class="field-grid">
               <label class="field"><span>Weight</span><div class="input-wrap"><input id="anticoagWeightKg" name="anticoagWeightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" autofocus /><span class="unit">kg</span></div><small class="hint">Shared from other tabs when already entered</small></label>
+              <label class="field"><span>EBV Factor</span><div class="input-wrap"><input id="anticoagEbvFactor" name="anticoagEbvFactor" type="number" inputmode="decimal" min="40" max="100" step="1" value="75" autocomplete="off" /><span class="unit">mL/kg</span></div><div class="quick-select-row"><button type="button" class="quick-select-button" id="applyAnticoagEbvGuide">Use guide</button></div><small class="hint">Editable guide: ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, adult default 75</small></label>
+              <label class="field"><span>Prime Volume</span><div class="input-wrap"><input id="anticoagPrimeVolumeMl" name="anticoagPrimeVolumeMl" type="number" inputmode="decimal" min="0" max="5000" step="10" value="0" autocomplete="off" /><span class="unit">mL</span></div><small class="hint">Added to EBV for heparin concentration; shared from Prime Planner when entered</small></label>
               <label class="field"><span>Heparin Loading Dose</span><div class="input-wrap"><input id="heparinDosePerKg" name="heparinDosePerKg" type="number" inputmode="decimal" min="50" max="1000" step="1" value="300" autocomplete="off" /><span class="unit">units/kg</span></div><small class="hint">Initial bolus or dose used for the measured ACT response</small></label>
               <label class="field"><span>Baseline ACT</span><div class="input-wrap"><input id="baselineActSeconds" name="baselineActSeconds" type="number" inputmode="decimal" min="50" max="400" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT before heparin administration</small></label>
               <label class="field"><span>Post-Heparin ACT</span><div class="input-wrap"><input id="postHeparinActSeconds" name="postHeparinActSeconds" type="number" inputmode="decimal" min="50" max="1200" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT after the test dose has circulated</small></label>
@@ -74,96 +76,85 @@
           <div id="anticoagValidationSummary" class="validation-summary" role="status" aria-live="polite"></div>
         </section>
 
-        <section class="panel output-panel" aria-labelledby="anticoag-results-title">
+        <section class="panel output-panel anticoag-results-panel" aria-labelledby="anticoag-results-title">
           <div class="panel-header">
             <h2 id="anticoag-results-title">Anticoagulation Results</h2>
             <p>Focused on quick loading and reversal estimates for the current workflow.</p>
           </div>
           <div class="results-grid results-grid-compact">
             <article class="result-card accent-card"><p class="result-label">Heparin Loading Dose</p><output id="heparinLoadingOutput" class="result-value">--</output><p id="heparinLoadingStatus" class="result-status">Enter weight and a heparin units/kg assumption.</p></article>
+            <article class="result-card"><p class="result-label">Distribution Volume</p><output id="heparinDistributionVolumeOutput" class="result-value">--</output><p id="heparinDistributionVolumeStatus" class="result-status">EBV + prime volume for concentration-based HDR.</p></article>
+            <article class="result-card"><p class="result-label">Loading Concentration</p><output id="heparinConcentrationOutput" class="result-value">--</output><p id="heparinConcentrationStatus" class="result-status">Heparin units divided by EBV plus prime volume.</p></article>
             <article class="result-card accent-card"><p class="result-label">Bivalirudin Loading Dose</p><output id="bivalirudinLoadingOutput" class="result-value">--</output><p id="bivalirudinLoadingStatus" class="result-status">Enter weight to calculate 1 mg/kg.</p></article>
             <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
             <article class="result-card"><p class="result-label">Protamine Reversal Dose</p><output id="protamineDoseOutput" class="result-value">--</output><p id="protamineDoseStatus" class="result-status">Calculated from the estimated heparin loading dose.</p></article>
             <article class="result-card"><p class="result-label">AT3 Dose</p><output id="at3DoseOutput" class="result-value">--</output><p id="at3DoseStatus" class="result-status">Enter weight, desired AT3, and current AT3.</p></article>
           </div>
           <div id="heparinResistanceWarning" class="clinical-warning" role="status" aria-live="polite" hidden></div>
+        </section>
 
-          <section class="heparin-log-panel" aria-labelledby="heparin-log-title">
-            <div class="panel-header">
-              <h3 id="heparin-log-title">Heparin Administration Log</h3>
-              <p>Track when heparin was given and the amount so total case heparin can be reviewed before reversal.</p>
-            </div>
-            <div class="field-grid heparin-log-grid">
-              <label class="field">
-                <span>Administration Time</span>
-                <div class="input-wrap">
-                  <input id="heparinAdminTime" name="heparinAdminTime" type="time" step="60" autocomplete="off" />
-                </div>
-                <small class="hint">Record the case time for each heparin dose</small>
-              </label>
-              <label class="field">
-                <span>Heparin Amount</span>
-                <div class="input-wrap">
-                  <input id="heparinAdminUnits" name="heparinAdminUnits" type="number" inputmode="decimal" min="1" max="100000" step="1" autocomplete="off" />
-                  <span class="unit">units</span>
-                </div>
-                <div class="quick-select-row" aria-label="Heparin log actions">
-                  <button type="button" class="quick-select-button" id="useLoadingDoseForLog">Use loading dose</button>
-                  <button type="button" class="quick-select-button" id="addHeparinLogEntry">Add entry</button>
-                </div>
-                <small class="hint">Use for the initial dose, boluses, or additional doses during bypass</small>
-              </label>
-              <label class="field">
-                <span>Protamine Calculation Source</span>
-                <div class="input-wrap">
-                  <select id="protamineDoseSource" name="protamineDoseSource">
-                    <option value="loading">Estimated loading dose</option>
-                    <option value="tally">Heparin administration tally</option>
-                  </select>
-                </div>
-                <small class="hint">Choose whether reversal follows the loading estimate or the running case tally</small>
-              </label>
-            </div>
-            <div id="heparinLogValidation" class="validation-summary" role="status" aria-live="polite"></div>
-            <div class="results-grid results-grid-compact heparin-log-results">
-              <article class="result-card">
-                <p class="result-label">Total Tallied Heparin</p>
-                <output id="heparinTallyOutput" class="result-value">--</output>
-                <p id="heparinTallyStatus" class="result-status">No heparin entries recorded yet.</p>
-              </article>
-              <article class="result-card">
-                <p class="result-label">Protamine Source</p>
-                <output id="protamineSourceOutput" class="result-value">--</output>
-                <p id="protamineSourceStatus" class="result-status">Using the estimated loading dose unless the tally is selected.</p>
-              </article>
-            </div>
-            <p id="heparinLogEmpty" class="heparin-log-empty">No heparin entries recorded yet.</p>
-            <ol id="heparinLogList" class="heparin-log-list" aria-label="Heparin administration entries"></ol>
-          </section>
-
-          <section class="curve-panel" aria-labelledby="heparin-curve-title">
-            <div class="curve-header">
-              <div>
-                <h3 id="heparin-curve-title">Heparin Dose Response Curve</h3>
-                <p id="heparinCurveSummary">Enter ACT response values to plot the baseline, measured response, and projected target dose.</p>
-                <div class="curve-legend" aria-label="Graph key">
-                  <span><span class="legend-symbol legend-star" aria-hidden="true"></span>ACT 480</span>
-                  <span><span class="legend-symbol legend-dot" aria-hidden="true"></span>ACT 600</span>
-                </div>
+        <section class="panel heparin-log-panel" aria-labelledby="heparin-log-title">
+          <div class="panel-header">
+            <h3 id="heparin-log-title">Heparin Administration Log</h3>
+            <p>Track each heparin dose so total case heparin can be reviewed before protamine reversal.</p>
+          </div>
+          <div class="field-grid heparin-log-grid">
+            <label class="field">
+              <span>Administration Time</span>
+              <div class="input-wrap">
+                <input id="heparinAdminTime" name="heparinAdminTime" type="time" step="60" autocomplete="off" />
               </div>
-              <div class="curve-actions" aria-label="Graph controls">
-                <button type="button" class="curve-action-button" id="expandCurveButton" aria-pressed="false">Expand</button>
-                <button type="button" class="curve-action-button" id="zoomCurveButton" aria-pressed="false">Zoom out</button>
+              <small class="hint">Record the case time for each heparin dose</small>
+            </label>
+            <label class="field">
+              <span>Heparin Amount</span>
+              <div class="input-wrap">
+                <input id="heparinAdminUnits" name="heparinAdminUnits" type="number" inputmode="decimal" min="1" max="100000" step="1" autocomplete="off" />
+                <span class="unit">units</span>
+              </div>
+              <div class="quick-select-row" aria-label="Heparin log actions">
+                <button type="button" class="quick-select-button" id="useLoadingDoseForLog">Use loading dose</button>
+                <button type="button" class="quick-select-button" id="addHeparinLogEntry">Add entry</button>
+                <button type="button" class="quick-select-button" id="clearHeparinLog">Clear log</button>
+              </div>
+              <small class="hint">Use for the initial dose, boluses, or additional doses during bypass</small>
+            </label>
+          </div>
+          <div id="heparinLogValidation" class="validation-summary" role="status" aria-live="polite"></div>
+          <div class="results-grid results-grid-compact heparin-log-results">
+            <article class="result-card">
+              <p class="result-label">Total Tallied Heparin</p>
+              <output id="heparinTallyOutput" class="result-value">--</output>
+              <p id="heparinTallyStatus" class="result-status">No heparin entries recorded yet.</p>
+            </article>
+          </div>
+          <p id="heparinLogEmpty" class="heparin-log-empty">No heparin entries recorded yet.</p>
+          <ol id="heparinLogList" class="heparin-log-list" aria-label="Heparin administration entries"></ol>
+        </section>
+
+        <section class="panel curve-panel anticoag-curve-panel" aria-labelledby="heparin-curve-title">
+          <div class="curve-header">
+            <div>
+              <h3 id="heparin-curve-title">Heparin Concentration Response Curve</h3>
+              <p id="heparinCurveSummary">Enter ACT response values to plot baseline ACT, measured concentration response, and projected target concentration.</p>
+              <div class="curve-legend" aria-label="Graph key">
+                <span><span class="legend-symbol legend-star" aria-hidden="true"></span>ACT 480</span>
+                <span><span class="legend-symbol legend-dot" aria-hidden="true"></span>ACT 600</span>
               </div>
             </div>
-            <div class="curve-chart-wrap">
-              <svg id="heparinCurveChart" class="curve-chart" viewBox="0 0 640 360" role="img" aria-labelledby="heparin-curve-title heparinCurveSummary"></svg>
-              <div id="heparinCurveTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+            <div class="curve-actions" aria-label="Graph controls">
+              <button type="button" class="curve-action-button" id="expandCurveButton" aria-pressed="false">Expand</button>
+              <button type="button" class="curve-action-button" id="zoomCurveButton" aria-pressed="false">Zoom out</button>
             </div>
-            <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
-          </section>
+          </div>
+          <div class="curve-chart-wrap">
+            <svg id="heparinCurveChart" class="curve-chart" viewBox="0 0 640 360" role="img" aria-labelledby="heparin-curve-title heparinCurveSummary"></svg>
+            <div id="heparinCurveTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+          </div>
+          <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
+        </section>
 
-          <section class="info-tabs" aria-labelledby="anticoag-support-title">
+        <section class="panel info-tabs anticoag-support-panel" aria-labelledby="anticoag-support-title">
             <div class="panel-header tabs-header">
               <h3 id="anticoag-support-title">Support Material</h3>
               <div class="tab-list" role="tablist" aria-label="Anticoagulation support material">
@@ -174,13 +165,15 @@
             <section class="formula-panel tab-panel is-active" id="tab-panel-anticoag-calculations" role="tabpanel" aria-labelledby="tab-button-anticoag-calculations" data-tab-group="anticoag-support" data-tab-panel="calculations">
               <dl class="formula-list">
                 <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
+                <div><dt>Estimated Blood Volume</dt><dd>weight (kg) × EBV factor (mL/kg)</dd></div>
+                <div><dt>Heparin Concentration</dt><dd>heparin loading units / (estimated blood volume + prime volume)</dd></div>
                 <div><dt>Bivalirudin Loading Dose</dt><dd>weight (kg) × 1 mg/kg</dd></div>
                 <div><dt>AT3 Dose</dt><dd>(desired AT3 - current AT3) × weight (kg) / 1.4</dd></div>
-                <div><dt>Dose Response Slope</dt><dd>(post-heparin ACT - baseline ACT) / heparin dose (units/kg)</dd></div>
-                <div><dt>Projected Dose to Target</dt><dd>(target ACT - baseline ACT) / dose response slope</dd></div>
-                <div><dt>Protamine Reversal Dose</dt><dd>(estimated heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>
+                <div><dt>HDR Rise/Run</dt><dd>(post-heparin ACT - baseline ACT) / (loading heparin concentration - 0)</dd></div>
+                <div><dt>Projected Concentration to Target</dt><dd>(target ACT - baseline ACT) / HDR rise/run</dd></div>
+                <div><dt>Protamine Reversal Dose</dt><dd>(total logged heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>
               </dl>
-              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the test dose. It does not yet account for heparin concentration assays, supplemental bolus timing, heparin in the pump prime, or elapsed time since dosing.</p>
+              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the first heparin dose. Prime volume is included in the distribution volume for concentration-based HDR teaching, but the projection still requires local protocol review and clinical confirmation.</p>
               <p class="disclaimer">Decision-support for simulation and workflow use only. Confirm local anticoagulation protocols and product labeling before clinical application.</p>
             </section>
             <section class="formula-panel references-panel tab-panel" id="tab-panel-anticoag-references" role="tabpanel" aria-labelledby="tab-button-anticoag-references" data-tab-group="anticoag-support" data-tab-panel="references" hidden>
@@ -190,7 +183,6 @@
               </ol>
             </section>
           </section>
-        </section>
       </section>
     </main>
 

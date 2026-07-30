@@ -24,6 +24,136 @@ Working PICOT question:
 
 In perfusion students participating in CPB education or simulation, does use of a web-based CPB Perfusion Tool improve calculation accuracy, workflow efficiency, and student confidence compared with traditional manual calculation methods?
 
+## Capstone Proposal Source Bank
+
+Use this section as a reusable project-information bank when drafting assignments, IRB responses, README updates, presentations, poster text, methods language, and future tool-design decisions. It is intentionally written as a synthesis rather than a full copy/paste of prior submissions.
+
+### Source Documents Integrated
+
+- `Capston Project Proposal #1.pdf`
+  - Date on title page: June 26, 2026
+  - Main value: background, significance, initial PICOT framing, literature review, first PRISMA/evidence table/Gantt content, and early scope justification
+  - Local source path: `/Users/mydo/Desktop/Perfusion School/Summer /Project Planning 613 /Assignments/Capston Project Proposal #1.pdf`
+- `Project Proposal #2.docx`
+  - Date on title page: July 23, 2026
+  - Main value: current Methods section language, pilot-study design, procedures, measures, data plan, human-subjects protection, dissemination plan, updated evidence table, and expanded Gantt tasks
+  - Local source path: `/Users/mydo/Desktop/Perfusion School/Summer /Project Planning 613 /Assignments/Project Proposal #2.docx`
+
+### Current Project Identity
+
+- Official working title: `Development and Evaluation of a Web-Based Cardiopulmonary Bypass Perfusion Support Tool for Education and Simulation`
+- Project type: pilot simulation-based educational evaluation with quality-improvement elements
+- Tool identity: mobile-friendly, web-based, educational CPB support tool designed for simulation, learner support, workflow organization, calculation cross-checking, and cognitive-load reduction
+- Educational-use boundary: the tool is not intended to replace instructor guidance, institutional protocols, perfusionist judgment, or clinical decision-making
+
+### Background And Significance Language To Reuse
+
+Cardiopulmonary bypass requires perfusionists and students to manage patient-specific calculations related to body surface area, pump flow, oxygen delivery, prime volume, hemodilution, anticoagulation, and reversal. These calculations are central to perfusion training because learners must develop accuracy, speed, and clinical reasoning while also learning the larger operative workflow. The project addresses the cognitive burden created by repeated calculations and fragmented reference information during simulation. A student-centered web tool may help make assumptions more visible, improve calculation consistency, support workflow organization, and give learners a quick-reference resource during CPB planning activities.
+
+### Problem Statement To Reuse
+
+Perfusion students are expected to complete multiple calculations and workflow steps while developing unfamiliar psychomotor, clinical reasoning, and simulation skills. Delays, calculation errors, or uncertainty during these tasks may interrupt simulation flow, increase perceived workload, and reduce learner confidence. Existing resources often exist as separate calculators, paper checklists, commercial tools, or documentation systems rather than as one mobile-friendly educational workflow tool designed specifically for CPB simulation.
+
+### Study Design And Approach
+
+- Design: pilot educational evaluation using quantitative and qualitative feedback
+- Setting: dedicated perfusion simulation rooms at Emory University’s Emory Nursing Learning Center, with access to the Califia heart-lung simulator, high-fidelity simulation rooms, and necessary perfusion training equipment
+- Population: currently enrolled Emory University perfusion students age 18 or older
+- Primary participant group: incoming perfusion students learning introductory CPB planning and simulation workflow
+- Possible secondary participant group: senior perfusion students as near-peer or expert feedback participants, if included in the approved IRB protocol
+- Sampling plan: convenience sampling from enrolled Emory perfusion students
+- Enrollment ceiling: up to 30 students to allow for scheduling limitations, withdrawals, and incomplete data
+- Expected completed participants: approximately 20, depending on eligibility and voluntary participation
+- Individual participation time: approximately 90 minutes
+- Recruitment: student investigators will recruit during the fall semester after IRB approval or determination
+- Consent: signed paper consent or electronically signed consent, depending on the approved IRB process
+- Compensation: none
+
+### Planned Simulation Procedure
+
+The planned study sequence is consent, standardized instructions, simulation-based CPB planning activity, NASA-TLX, usability survey, and debrief. The simulation case should use an adult cardiac surgery scenario on the Califia heart-lung simulator and include height, weight, diagnosis, planned procedure, baseline hematocrit or hemoglobin, selected lab values, and other information needed for introductory perfusion planning tasks.
+
+Because incoming students may have limited prior CPB exposure, the introductory study mode should emphasize educational support rather than independent clinical decision-making. Appropriate pilot tasks include a fail-safe checklist, basic BSA/flow/cardiac-index calculations, timer-based workflow prompts, prime/hemodilution concepts, and instructional support for circuit or A-V loop setup. Depending on the final approved study sequence, some students may complete conventional/manual tasks first and tool-supported tasks later. The exact comparison sequence should remain aligned with participant availability, faculty guidance, and IRB-approved procedures.
+
+### Educational Intervention Scope
+
+For the pilot evaluation, the most defensible introductory tool features are:
+
+- perfusion planning checklist
+- basic BSA, pump-flow, and cardiac-index calculations
+- timer-based workflow prompts
+- prime and hemodilution support
+- circuit or A-V loop instructional resources
+- mobile-friendly layout for quick simulation use
+
+Additional modules can support the broader capstone product if validated and kept within the approved study scope:
+
+- anticoagulation support, including heparin tally, protamine from total logged heparin, AT3 support, bivalirudin, argatroban, and heparin concentration rise/run
+- cannula selection support with estimated pressure drops
+- drug library and dose/concentration safety-check references
+- demo profiles or learner modes for limited-exposure students versus more advanced students
+- eventual pediatric mode, pediatric prime support, and pediatric-relevant drug content
+
+### Outcomes And Measures
+
+Primary pilot data elements:
+
+- task completion time
+- calculation accuracy
+- checklist or task completion
+- observed errors
+- Raw NASA-TLX perceived workload score
+- System Usability Scale score
+- brief demographic or educational-background variables approved by IRB
+- open-ended usability and debrief feedback
+
+Working outcome goal: explore whether the support tool is associated with changes in perceived cognitive workload, calculation efficiency, calculation proficiency, workflow support, and usability during simulation-based CPB planning.
+
+### Measurement And Rigor Notes
+
+- Raw NASA-TLX is preferred because it is shorter and less burdensome than weighted NASA-TLX while still supporting workload assessment in healthcare or simulation-adjacent contexts.
+- SUS is preferred because it is brief, widely used, and allows usability scores to be compared against broader digital-health usability benchmarks.
+- Use the same standardized case, task instructions, timing approach, checklist, and scoring guide for all participants.
+- Data should be collected by My Do and Sydney Lias under faculty or mentor oversight.
+- Before pilot testing, the investigators should rehearse the case materials, tool features, scoring process, and survey procedures to reduce variation across sessions.
+
+### Data Analysis Plan
+
+Because this is a small pilot evaluation, analysis should be descriptive and exploratory. Quantitative variables such as completion time, accuracy, checklist completion, NASA-TLX scores, and SUS scores can be summarized using frequencies, percentages, means, medians, and ranges. If both conventional/manual and tool-supported performance are collected, the investigators may compare time, accuracy, workload, and usability patterns between conditions. Open-ended survey and debrief comments should be reviewed for common themes related to usability, workflow support, confusing features, missing content, and recommended improvements. Findings should be framed as pilot data for tool refinement, not evidence of clinical effectiveness.
+
+### Data Security And Human Subjects Notes
+
+- IRB approval or determination must be obtained before recruitment or data collection.
+- Participation must be voluntary and must not affect grades, evaluations, course standing, or relationships with faculty or investigators.
+- The project is expected to be minimal risk because it occurs in simulation and does not involve patient care, medical records, biological specimens, or PHI.
+- Use assigned study IDs rather than names on research data whenever possible.
+- Store survey and study data in Emory-approved systems such as REDCap or Qualtrics.
+- Store consent forms and any code key separately from coded data.
+- Report findings in aggregate or de-identified form.
+- Do not use the CPB Support Tool itself as the storage location for identifiable participant research data.
+
+### Stakeholders And Site Needs
+
+Key stakeholders include My Do, Sydney Lias, Leslie Jeter as PI, Emory perfusion students, senior student volunteers if approved, instructors, project mentors, simulation-site personnel, and the Emory perfusion program. The organizational need is an accessible educational resource that helps students organize CPB planning tasks, cross-check calculations, and reduce cognitive burden during simulation-based learning.
+
+### Dissemination Plan
+
+Expected dissemination includes the final Capstone paper, Capstone presentation, feedback to faculty and mentors, and communication of findings to Emory perfusion program stakeholders. Findings should also guide future tool revisions and may help future student cohorts continue developing the tool as a growing educational reference hub for perfusion students.
+
+### Evidence And Literature Artifacts
+
+The proposal documents identify and reuse evidence in these categories:
+
+- perfusion standards and professional guidelines: AmSECT standards, STS/SCA/AmSECT anticoagulation guidance, patient blood management guidance
+- CPB history and practice context: Hessel, Stoney
+- perfusion simulation and education: Sistino, Searles, Babar
+- digital or workflow support: AHRQ clinical decision support, University of Iowa perfusion calculator, Ottens
+- oxygen delivery, hemodilution, and blood management: Mukaida, Ranucci, Gao, Newland and Baker, Tibi
+- cognitive workload and cardiac surgery workflow: Said, Hutson, Kennedy-Metz, Dias, Avrunin
+- usability and reporting methods: Hyzy for SUS, Page for PRISMA
+
+Working note: `Project Proposal #2.docx` describes a PRISMA count of 6 included sources, while the later working plan updated the PRISMA/evidence synthesis toward 8 included sources after adding newer NASA-TLX and usability support. For future assignments, use the most recently approved instructor-facing count and keep the PRISMA diagram, evidence table, and references page internally consistent.
+
 ## Preferred Evidence Sources
 
 Because this project is clinically grounded and includes formula- and workflow-based content, evidence sources should be chosen carefully.
@@ -238,6 +368,17 @@ This section is meant to function as a practical research operations checklist d
 
 This section captures the current build priorities that came out of mentor feedback so both project members can work from the same list.
 
+### Ben Feedback Notes
+
+- Build demo profiles or demo centers so the tool can split between limited-exposure students and more seasoned users
+- For the first student pilot, prioritize BSA, cardiac index calculations, a pump-building checklist, and simple timer-based workflow support
+- Keep the application mobile-friendly for quick use during simulation
+- Consider ways to make the learning workflow more interactive or lightly gamified
+- Track how long it takes students to build each section of the cardiopulmonary bypass pump
+- Revisit whether the study design should include a small early-semester group, such as 5 students using the tool near the beginning of the semester
+- Add a height/weight toggle or clearer unit-switching behavior if needed for usability
+- Implement heparin concentration rise/run after the current heparin tally and dose-response workflow is stable
+
 ### Highest Priority
 
 - [ ] Add a `Pediatric Mode` workflow to make the tool more useful for all perfusionists, not just adult cases
@@ -252,17 +393,16 @@ This section captures the current build priorities that came out of mentor feedb
 
 ### Anticoagulation Updates
 
-- [ ] Add a heparin tally system so total heparin given through the case can be tracked
-- [ ] Use the heparin tally to calculate final protamine dose from `total heparin administered`
-- [ ] If a full tally is not entered, keep fallback guidance:
-  - `Protamine dose based off initial heparin dose`
-- [ ] Add a clear UI choice for protamine calculation source
-  - initial heparin dose only
-  - total heparin given during case
-- [ ] Add `AT3 / antithrombin III` support to the anticoagulation section
+- [x] Add a heparin tally system so total heparin given through the case can be tracked
+- [x] Use the heparin tally to calculate final protamine dose from `total heparin administered`
+- [x] Remove the separate protamine source choice so reversal follows the heparin tally only
+- [x] If no heparin is tallied, prompt the user to log the initial heparin dose before protamine is calculated
+- [x] Add heparin concentration rise/run using EBV + prime volume as the distribution volume
+- [x] Add the editable EBV factor guide: ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, adult default 75
+- [x] Add `AT3 / antithrombin III` support to the anticoagulation section
 - [ ] Expand heparin-resistance support notes where relevant
-- [ ] Add `Bivalirudin` dosing support
-- [ ] Add `Argatroban` dosing support
+- [x] Add `Bivalirudin` dosing support
+- [x] Add `Argatroban` dosing support
 
 ### Prime / Pediatric Prime Updates
 
@@ -328,7 +468,7 @@ The heparin tally idea is strong and should improve the anticoagulation section 
 - The output should show both:
   - `Initial heparin dose`
   - `Total heparin dose tallied`
-  - `Protamine dose source used`
+  - `Protamine dose from total logged heparin`
 
 ### Open Decision To Make Before Building
 
