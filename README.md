@@ -23,6 +23,7 @@ For anyone helping with this project, including AI collaborators:
 - The master source list lives in `/Users/mydo/Documents/GitHub/CPB-Perfusion-Tool/references.html`
 - When a new reference is used for project content, add it to the master reference list
 - Page-level reference sections can stay in place, but the master references page should remain the complete source list
+- Capstone assignment language and reusable research-planning details are summarized in `PROJECT_NOTES.md` under `Capstone Proposal Source Bank`
 
 ## Current Scope
 
