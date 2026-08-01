@@ -1227,7 +1227,7 @@ const anticoagOutputs = anticoagForm
         value: document.querySelector("#bivalirudinLoadingOutput"),
         status: document.querySelector("#bivalirudinLoadingStatus"),
         format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
-        empty: "Enter weight to calculate 1 mg/kg.",
+        empty: "Enter weight in any shared-weight tab to calculate 1 mg/kg.",
       },
       at3DoseUnits: {
         value: document.querySelector("#at3DoseOutput"),
@@ -2999,7 +2999,7 @@ function renderAnticoagulation() {
 
   if (evaluation.results.bivalirudinLoadingMg !== null) {
     anticoagOutputs.bivalirudinLoadingMg.value.textContent = anticoagOutputs.bivalirudinLoadingMg.format(evaluation.results.bivalirudinLoadingMg);
-    anticoagOutputs.bivalirudinLoadingMg.status.textContent = "Weight × 1 mg/kg loading dose.";
+    anticoagOutputs.bivalirudinLoadingMg.status.textContent = "Shared weight × 1 mg/kg loading dose.";
   } else {
     anticoagOutputs.bivalirudinLoadingMg.value.textContent = "--";
     anticoagOutputs.bivalirudinLoadingMg.status.textContent = anticoagOutputs.bivalirudinLoadingMg.empty;
