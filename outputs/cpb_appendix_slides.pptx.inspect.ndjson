@@ -1,0 +1,126 @@
+{"kind":"deck","id":"pr/hwelbc","name":"Deck"}
+{"kind":"layout","layoutId":"c45a119e-c35a-4be6-9fd0-11c375304140","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"41682f7b-60c1-4e49-a0c8-45b36bef1a18","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/0iv9oi","slide":1,"title":"Appendix A","textShapes":11}
+{"kind":"textbox","id":"sh/47y1kre1","slide":1,"text":"Appendix A","textPreview":"Appendix A","textChars":10,"textLines":1,"bbox":[42,34,240,30]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":1,"text":"PRISMA Flow Diagram","textPreview":"PRISMA Flow Diagram","textChars":19,"textLines":1,"bbox":[42,72,980,62]}
+{"kind":"shape","id":"sh/m1cfa9w3","slide":1,"bbox":[42,142,1196,1]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":1,"text":"Records identified through database and web searches\nn = 42","textPreview":"Records identified through database and web searches | n = 42","textChars":59,"textLines":2,"bbox":[110,185,430,62]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":1,"text":"Duplicates removed\nn = 8","textPreview":"Duplicates removed | n = 8","textChars":24,"textLines":2,"bbox":[110,285,430,62]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":1,"text":"Records screened by title / abstract\nn = 34","textPreview":"Records screened by title / abstract | n = 34","textChars":43,"textLines":2,"bbox":[110,385,430,62]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":1,"text":"Records excluded\nn = 21","textPreview":"Records excluded | n = 21","textChars":23,"textLines":2,"bbox":[760,385,430,62]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":1,"text":"Full-text records assessed\nn = 13","textPreview":"Full-text records assessed | n = 13","textChars":33,"textLines":2,"bbox":[110,485,430,62]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":1,"text":"Full-text records excluded\nn = 7\nReasons: not CPB-specific, limited relevance, not education/usability focused","textPreview":"Full-text records excluded | n = 7 | Reasons: not CPB-specific, limited relevance, not education/usability focused","textChars":110,"textLines":3,"bbox":[760,485,390,82]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":1,"text":"Studies and guidelines included in synthesis\nn = 6","textPreview":"Studies and guidelines included in synthesis | n = 6","textChars":50,"textLines":2,"bbox":[110,585,430,62]}
+{"kind":"shape","id":"sh/judg7ads","slide":1,"bbox":[325,247,0,38]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":1,"bbox":[325,347,0,38]}
+{"kind":"shape","id":"sh/1032lszq","slide":1,"bbox":[540,416,220,0]}
+{"kind":"shape","id":"sh/u18jqh0f","slide":1,"bbox":[325,447,0,38]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":1,"bbox":[540,516,220,0]}
+{"kind":"shape","id":"sh/c7u54zid","slide":1,"bbox":[325,567,0,18]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":1,"text":"Search strategy summarized for the Capstone evidence review.","textPreview":"Search strategy summarized for the Capstone evidence review.","textChars":60,"textLines":1,"bbox":[680,192,430,58]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":1,"text":"CPB Perfusion Tool Appendix | 1","textPreview":"CPB Perfusion Tool Appendix | 1","textChars":31,"textLines":1,"bbox":[1015,665,224,26]}
+{"kind":"notes","id":"nt/0iv9oi","slide":1,"text":""}
+{"kind":"slide","id":"sl/qs61y6","slide":2,"title":"Appendix B","textShapes":22}
+{"kind":"textbox","id":"sh/knih4byh","slide":2,"text":"Appendix B","textPreview":"Appendix B","textChars":10,"textLines":1,"bbox":[42,34,240,30]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":2,"text":"Evidence Table","textPreview":"Evidence Table","textChars":14,"textLines":1,"bbox":[42,72,980,62]}
+{"kind":"shape","id":"sh/2lszqtcj","slide":2,"bbox":[42,142,1196,1]}
+{"kind":"textbox","id":"sh/d0z61032","slide":2,"text":"Theme","textPreview":"Theme","textChars":5,"textLines":1,"bbox":[54,176,265,66]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":2,"text":"Representative evidence","textPreview":"Representative evidence","textChars":23,"textLines":1,"bbox":[319,176,405,66]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":2,"text":"Use in project","textPreview":"Use in project","textChars":14,"textLines":1,"bbox":[724,176,456,66]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":2,"text":"Perfusion standards","textPreview":"Perfusion standards","textChars":19,"textLines":1,"bbox":[54,246,265,66]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":2,"text":"AmSECT; Shore-Lesserson et al.; Tibi et al.","textPreview":"AmSECT; Shore-Lesserson et al.; Tibi et al.","textChars":43,"textLines":1,"bbox":[319,246,405,66]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":2,"text":"Protocol framing, safety language, anticoagulation and blood management context","textPreview":"Protocol framing, safety language, anticoagulation and blood management context","textChars":79,"textLines":1,"bbox":[724,246,456,66]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":2,"text":"Goal-directed perfusion","textPreview":"Goal-directed perfusion","textChars":23,"textLines":1,"bbox":[54,316,265,66]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":2,"text":"Mukaida et al.; Ranucci et al.; Gao et al.; Newland & Baker","textPreview":"Mukaida et al.; Ranucci et al.; Gao et al.; Newland & Baker","textChars":59,"textLines":1,"bbox":[319,316,405,66]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":2,"text":"Supports DO2i, BSA, flow, hemoglobin, and AKI-risk education","textPreview":"Supports DO2i, BSA, flow, hemoglobin, and AKI-risk education","textChars":60,"textLines":1,"bbox":[724,316,456,66]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":2,"text":"Prime / hemodilution","textPreview":"Prime / hemodilution","textChars":20,"textLines":1,"bbox":[54,386,265,66]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":2,"text":"Asopa & Elahi; Ranucci et al.","textPreview":"Asopa & Elahi; Ranucci et al.","textChars":29,"textLines":1,"bbox":[319,386,405,66]}
+{"kind":"textbox","id":"sh/32lszqtc","slide":2,"text":"Supports prime planning, hematocrit dilution, and transfusion discussion","textPreview":"Supports prime planning, hematocrit dilution, and transfusion discussion","textChars":72,"textLines":1,"bbox":[724,386,456,66]}
+{"kind":"textbox","id":"sh/sneloj2t","slide":2,"text":"Simulation education","textPreview":"Simulation education","textChars":20,"textLines":1,"bbox":[54,456,265,66]}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":2,"text":"Searles et al.; Sistino et al.; Babar et al.","textPreview":"Searles et al.; Sistino et al.; Babar et al.","textChars":44,"textLines":1,"bbox":[319,456,405,66]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":2,"text":"Supports simulation as the setting for tool evaluation","textPreview":"Supports simulation as the setting for tool evaluation","textChars":54,"textLines":1,"bbox":[724,456,456,66]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":2,"text":"Usability and workload","textPreview":"Usability and workload","textChars":22,"textLines":1,"bbox":[54,526,265,66]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":2,"text":"Hyzy et al.; Said et al.; Hutson et al.; Kennedy-Metz et al.; Avrunin et al.; Dias et al.","textPreview":"Hyzy et al.; Said et al.; Hutson et al.; Kennedy-Metz et al.; Avrunin et al.; Dias et al.","textChars":89,"textLines":1,"bbox":[319,526,405,66]}
+{"kind":"textbox","id":"sh/61032lsz","slide":2,"text":"Supports SUS, NASA-TLX, and cognitive-load feedback","textPreview":"Supports SUS, NASA-TLX, and cognitive-load feedback","textChars":51,"textLines":1,"bbox":[724,526,456,66]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":2,"text":"Master appraisal list includes JHEBP level and quality ratings in the written appendix.","textPreview":"Master appraisal list includes JHEBP level and quality ratings in the written appendix.","textChars":87,"textLines":1,"bbox":[54,616,840,34]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":2,"text":"CPB Perfusion Tool Appendix | 2","textPreview":"CPB Perfusion Tool Appendix | 2","textChars":31,"textLines":1,"bbox":[1015,665,224,26]}
+{"kind":"notes","id":"nt/qs61y6","slide":2,"text":""}
+{"kind":"slide","id":"sl/q4kcqx","slide":3,"title":"Appendix C","textShapes":16}
+{"kind":"textbox","id":"sh/4nap4r65","slide":3,"text":"Appendix C","textPreview":"Appendix C","textChars":10,"textLines":1,"bbox":[42,34,240,30]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":3,"text":"Timeline / Gantt Chart","textPreview":"Timeline / Gantt Chart","textChars":22,"textLines":1,"bbox":[42,72,980,62]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":3,"bbox":[42,142,1196,1]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":3,"text":"Project activity","textPreview":"Project activity","textChars":16,"textLines":1,"bbox":[58,154,430,30]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":3,"text":"Month 1","textPreview":"Month 1","textChars":7,"textLines":1,"bbox":[488,154,170,30]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":3,"text":"Month 2","textPreview":"Month 2","textChars":7,"textLines":1,"bbox":[658,154,170,30]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":3,"text":"Month 3","textPreview":"Month 3","textChars":7,"textLines":1,"bbox":[828,154,170,30]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":3,"text":"Month 4","textPreview":"Month 4","textChars":7,"textLines":1,"bbox":[998,154,170,30]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":3,"text":"Finalize scope and research question","textPreview":"Finalize scope and research question","textChars":36,"textLines":1,"bbox":[58,199,420,30]}
+{"kind":"shape","id":"sh/adsji5sn","slide":3,"bbox":[488,190,162,45]}
+{"kind":"shape","id":"sh/3ylc7u54","slide":3,"bbox":[658,190,162,45]}
+{"kind":"shape","id":"sh/sji5snel","slide":3,"bbox":[828,190,162,45]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":3,"bbox":[998,190,162,45]}
+{"kind":"shape","id":"sh/a5gbq1or","slide":3,"bbox":[488,198,162,29]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":3,"text":"Complete literature review and evidence table","textPreview":"Complete literature review and evidence table","textChars":45,"textLines":1,"bbox":[58,254,420,30]}
+{"kind":"shape","id":"sh/s72x4nap","slide":3,"bbox":[488,245,162,45]}
+{"kind":"shape","id":"sh/lszqtcj6","slide":3,"bbox":[658,245,162,45]}
+{"kind":"shape","id":"sh/a1gvy90j","slide":3,"bbox":[828,245,162,45]}
+{"kind":"shape","id":"sh/zidonyd0","slide":3,"bbox":[998,245,162,45]}
+{"kind":"shape","id":"sh/val87ed8","slide":3,"bbox":[488,253,332,29]}
+{"kind":"textbox","id":"sh/6psfil0r","slide":3,"text":"Validate formulas and assumptions","textPreview":"Validate formulas and assumptions","textChars":33,"textLines":1,"bbox":[58,309,420,30]}
+{"kind":"shape","id":"sh/dcbulwva","slide":3,"bbox":[488,300,162,45]}
+{"kind":"shape","id":"sh/kre1w7mp","slide":3,"bbox":[658,300,162,45]}
+{"kind":"shape","id":"sh/vixczed8","slide":3,"bbox":[828,300,162,45]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":3,"bbox":[998,300,162,45]}
+{"kind":"shape","id":"sh/donyd0z6","slide":3,"bbox":[658,308,162,29]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":3,"text":"Refine web tool and mobile workflow","textPreview":"Refine web tool and mobile workflow","textChars":35,"textLines":1,"bbox":[58,364,420,30]}
+{"kind":"shape","id":"sh/vu9knih4","slide":3,"bbox":[488,355,162,45]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":3,"bbox":[658,355,162,45]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":3,"bbox":[828,355,162,45]}
+{"kind":"shape","id":"sh/1032lszq","slide":3,"bbox":[998,355,162,45]}
+{"kind":"shape","id":"sh/u9knih4b","slide":3,"bbox":[658,363,332,29]}
+{"kind":"textbox","id":"sh/judg7ads","slide":3,"text":"Conduct simulation and usability testing","textPreview":"Conduct simulation and usability testing","textChars":40,"textLines":1,"bbox":[58,419,420,30]}
+{"kind":"shape","id":"sh/c7u54zid","slide":3,"bbox":[488,410,162,45]}
+{"kind":"shape","id":"sh/1orytsvu","slide":3,"bbox":[658,410,162,45]}
+{"kind":"shape","id":"sh/u18jqh0f","slide":3,"bbox":[828,410,162,45]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":3,"bbox":[998,410,162,45]}
+{"kind":"shape","id":"sh/cvixczed","slide":3,"bbox":[828,418,162,29]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":3,"text":"Analyze feedback and revise tool","textPreview":"Analyze feedback and revise tool","textChars":32,"textLines":1,"bbox":[58,474,420,30]}
+{"kind":"shape","id":"sh/xc3ylc7u","slide":3,"bbox":[488,465,162,45]}
+{"kind":"shape","id":"sh/4r65wjud","slide":3,"bbox":[658,465,162,45]}
+{"kind":"shape","id":"sh/f6dcbulw","slide":3,"bbox":[828,465,162,45]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":3,"bbox":[998,465,162,45]}
+{"kind":"shape","id":"sh/xkf6dcbu","slide":3,"bbox":[998,473,162,29]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":3,"text":"Finalize paper, slides, and dissemination","textPreview":"Finalize paper, slides, and dissemination","textChars":41,"textLines":1,"bbox":[58,529,420,30]}
+{"kind":"shape","id":"sh/fepkzupw","slide":3,"bbox":[488,520,162,45]}
+{"kind":"shape","id":"sh/mtwra5gb","slide":3,"bbox":[658,520,162,45]}
+{"kind":"shape","id":"sh/xobm58z2","slide":3,"bbox":[828,520,162,45]}
+{"kind":"shape","id":"sh/83itgfml","slide":3,"bbox":[998,520,162,45]}
+{"kind":"shape","id":"sh/i5sneloj","slide":3,"bbox":[998,528,162,29]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":3,"text":"Milestone: deliverable accepted when the tool, evidence appendix, user feedback summary, and final presentation are complete.","textPreview":"Milestone: deliverable accepted when the tool, evidence appendix, user feedback summary, and final presentation are complete.","textChars":125,"textLines":1,"bbox":[58,610,1050,42]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":3,"text":"CPB Perfusion Tool Appendix | 3","textPreview":"CPB Perfusion Tool Appendix | 3","textChars":31,"textLines":1,"bbox":[1015,665,224,26]}
+{"kind":"notes","id":"nt/q4kcqx","slide":3,"text":""}
+{"kind":"slide","id":"sl/jezfmr","slide":4,"title":"Appendix D","textShapes":8}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":4,"text":"Appendix D","textPreview":"Appendix D","textChars":10,"textLines":1,"bbox":[42,34,240,30]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":4,"text":"IRB Determination","textPreview":"IRB Determination","textChars":17,"textLines":1,"bbox":[42,72,980,62]}
+{"kind":"shape","id":"sh/mp0bi9s3","slide":4,"bbox":[42,142,1196,1]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":4,"text":"Anticipated determination","textPreview":"Anticipated determination","textChars":25,"textLines":1,"bbox":[70,185,360,32]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":4,"text":"Educational quality improvement / evidence-based practice project\nNo protected health information collected\nNo clinical intervention or patient assignment","textPreview":"Educational quality improvement / evidence-based practice project | No protected health information collected | No clinical intervention ...","textChars":154,"textLines":3,"bbox":[70,230,510,185]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":4,"text":"Required documentation","textPreview":"Required documentation","textChars":22,"textLines":1,"bbox":[690,185,360,32]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":4,"text":"Submit school or institutional IRB screening form\nMaintain faculty approval\nUse de-identified usability and confidence feedback\nStore responses securely","textPreview":"Submit school or institutional IRB screening form | Maintain faculty approval | Use de-identified usability and confidence feedback | Sto...","textChars":152,"textLines":4,"bbox":[690,230,510,185]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":4,"text":"Final wording should be updated to match the official IRB or program determination once received.","textPreview":"Final wording should be updated to match the official IRB or program determination once received.","textChars":97,"textLines":1,"bbox":[70,490,1130,74]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":4,"text":"CPB Perfusion Tool Appendix | 4","textPreview":"CPB Perfusion Tool Appendix | 4","textChars":31,"textLines":1,"bbox":[1015,665,224,26]}
+{"kind":"notes","id":"nt/jezfmr","slide":4,"text":""}
+{"kind":"slide","id":"sl/9poj0e","slide":5,"title":"Appendix E","textShapes":10}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":5,"text":"Appendix E","textPreview":"Appendix E","textChars":10,"textLines":1,"bbox":[42,34,240,30]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":5,"text":"Data Collection Tools","textPreview":"Data Collection Tools","textChars":21,"textLines":1,"bbox":[42,72,980,62]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":5,"bbox":[42,142,1196,1]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":5,"text":"Tool performance","textPreview":"Tool performance","textChars":16,"textLines":1,"bbox":[64,182,330,42]}
+{"kind":"textbox","id":"sh/z61032ls","slide":5,"text":"Calculation accuracy checklist\nScenario completion time\nObserved input or navigation errors","textPreview":"Calculation accuracy checklist | Scenario completion time | Observed input or navigation errors","textChars":91,"textLines":3,"bbox":[64,246,340,245]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":5,"text":"User experience","textPreview":"User experience","textChars":15,"textLines":1,"bbox":[454,182,330,42]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":5,"text":"System Usability Scale\nConfidence rating before / after use\nOpen-ended feedback prompts","textPreview":"System Usability Scale | Confidence rating before / after use | Open-ended feedback prompts","textChars":87,"textLines":3,"bbox":[454,246,340,245]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":5,"text":"Workload and simulation fit","textPreview":"Workload and simulation fit","textChars":27,"textLines":1,"bbox":[844,182,330,42]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":5,"text":"NASA-TLX or brief workload rating\nMobile usability notes\nInstructor / preceptor feedback","textPreview":"NASA-TLX or brief workload rating | Mobile usability notes | Instructor / preceptor feedback","textChars":88,"textLines":3,"bbox":[844,246,340,245]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":5,"text":"Data sources align with the project question: accuracy, workflow efficiency, usability, cognitive load, and learner confidence.","textPreview":"Data sources align with the project question: accuracy, workflow efficiency, usability, cognitive load, and learner confidence.","textChars":127,"textLines":1,"bbox":[64,560,1030,50]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":5,"text":"CPB Perfusion Tool Appendix | 5","textPreview":"CPB Perfusion Tool Appendix | 5","textChars":31,"textLines":1,"bbox":[1015,665,224,26]}
+{"kind":"notes","id":"nt/9poj0e","slide":5,"text":""}
