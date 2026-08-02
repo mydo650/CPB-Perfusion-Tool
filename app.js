@@ -99,7 +99,7 @@ const DRUG_DOSE_CHECKS = {
     suggestedDose: 2,
     suggestedConcentration: 1000,
     rangeLabel: "reference HIT initial range: 0.5 to 2 mcg/kg/min",
-    caution: "Hepatic impairment or critical illness may require lower initial dosing. Monitor aPTT per protocol and watch for bleeding.",
+    caution: "Not approved for CPB/bypass anticoagulation. Hepatic impairment or critical illness may require lower initial dosing. Monitor aPTT per protocol and watch for bleeding.",
   },
   "argatroban-pci-bolus": {
     label: "Argatroban PCI bolus",
@@ -112,7 +112,7 @@ const DRUG_DOSE_CHECKS = {
     suggestedDose: 350,
     suggestedConcentration: 1000,
     rangeLabel: "labeled PCI bolus: 350 mcg/kg",
-    caution: "PCI dosing is ACT-guided. This is not a routine CPB anticoagulation substitute; verify indication and protocol.",
+    caution: "PCI dosing is ACT-guided. Argatroban is not approved for CPB/bypass anticoagulation; verify indication and protocol.",
   },
   "argatroban-pci-infusion": {
     label: "Argatroban PCI infusion",
@@ -712,6 +712,10 @@ function calculateBivalirudinLoadingDose(weightKg) {
   return weightKg;
 }
 
+function calculateArgatrobanInfusionRate(weightKg) {
+  return 2 * weightKg;
+}
+
 function calculateAt3DoseUnits(desiredAt3Percent, currentAt3Percent, weightKg) {
   return Math.max(0, ((desiredAt3Percent - currentAt3Percent) * weightKg) / 1.4);
 }
@@ -937,6 +941,7 @@ function evaluateAnticoagulationCalculator(rawInputs) {
     distributionVolumeMl: null,
     heparinLoadingConcentrationUnitsPerMl: null,
     bivalirudinLoadingMg: null,
+    argatrobanRateMcgPerMin: null,
     at3DoseUnits: null,
     protamineDoseMg: null,
     preAt3HeparinResponseCurve: null,
@@ -955,6 +960,7 @@ function evaluateAnticoagulationCalculator(rawInputs) {
 
   if (valid("anticoagWeightKg")) {
     results.bivalirudinLoadingMg = calculateBivalirudinLoadingDose(valueOf("anticoagWeightKg"));
+    results.argatrobanRateMcgPerMin = calculateArgatrobanInfusionRate(valueOf("anticoagWeightKg"));
   }
 
   if (valid("anticoagWeightKg") && valid("desiredAt3Percent") && valid("currentAt3Percent")) {
@@ -1262,7 +1268,13 @@ const anticoagOutputs = anticoagForm
         value: document.querySelector("#bivalirudinLoadingOutput"),
         status: document.querySelector("#bivalirudinLoadingStatus"),
         format: (value) => `${roundTo(value, 1).toFixed(1)} mg`,
-        empty: "Enter weight to calculate 1 mg/kg.",
+        empty: "Enter weight in any shared-weight tab to calculate 1 mg/kg.",
+      },
+      argatrobanRateMcgPerMin: {
+        value: document.querySelector("#argatrobanRateOutput"),
+        status: document.querySelector("#argatrobanRateStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} mcg/min`,
+        empty: "Enter weight in any shared-weight tab to calculate 2 mcg/kg/min.",
       },
       at3DoseUnits: {
         value: document.querySelector("#at3DoseOutput"),
@@ -3130,10 +3142,18 @@ function renderAnticoagulation() {
 
   if (evaluation.results.bivalirudinLoadingMg !== null) {
     anticoagOutputs.bivalirudinLoadingMg.value.textContent = anticoagOutputs.bivalirudinLoadingMg.format(evaluation.results.bivalirudinLoadingMg);
-    anticoagOutputs.bivalirudinLoadingMg.status.textContent = "Weight × 1 mg/kg loading dose.";
+    anticoagOutputs.bivalirudinLoadingMg.status.textContent = "Shared weight × 1 mg/kg loading dose.";
   } else {
     anticoagOutputs.bivalirudinLoadingMg.value.textContent = "--";
     anticoagOutputs.bivalirudinLoadingMg.status.textContent = anticoagOutputs.bivalirudinLoadingMg.empty;
+  }
+
+  if (evaluation.results.argatrobanRateMcgPerMin !== null) {
+    anticoagOutputs.argatrobanRateMcgPerMin.value.textContent = anticoagOutputs.argatrobanRateMcgPerMin.format(evaluation.results.argatrobanRateMcgPerMin);
+    anticoagOutputs.argatrobanRateMcgPerMin.status.textContent = "Not approved for CPB/bypass anticoagulation; shared weight × 2 mcg/kg/min.";
+  } else {
+    anticoagOutputs.argatrobanRateMcgPerMin.value.textContent = "--";
+    anticoagOutputs.argatrobanRateMcgPerMin.status.textContent = anticoagOutputs.argatrobanRateMcgPerMin.empty;
   }
 
   if (evaluation.results.at3DoseUnits !== null) {

@@ -36,6 +36,7 @@
             <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
             <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
             <a href="./drug-library.html#antifibrinolytics">Antifibrinolytics</a>
+            <a href="./drug-library.html#paralytics">Paralytics</a>
           </div>
         </details>
         <details class="nav-dropdown">
@@ -50,6 +51,7 @@
           </div>
         </details>
         <a class="module-button page-link" href="./blood-management.html" aria-current="false">Blood Products/Blood Management</a>
+        <a class="module-button page-link" href="./checklist.html" aria-current="false">Checklist</a>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
 
@@ -88,6 +90,7 @@
             <article class="result-card"><p class="result-label">Current Heparin Concentration</p><output id="heparinConcentrationOutput" class="result-value">--</output><p id="heparinConcentrationStatus" class="result-status">Logged heparin units divided by EBV plus prime volume.</p></article>
             <article class="result-card"><p class="result-label">HDR Slope</p><output id="hdrSlopeOutput" class="result-value">--</output><p id="hdrSlopeStatus" class="result-status">Calculated from observed ACT response.</p></article>
             <article class="result-card accent-card"><p class="result-label">Bivalirudin Loading Dose</p><output id="bivalirudinLoadingOutput" class="result-value">--</output><p id="bivalirudinLoadingStatus" class="result-status">Enter weight to calculate 1 mg/kg.</p></article>
+            <article class="result-card accent-card"><p class="result-label">Argatroban Infusion Rate</p><output id="argatrobanRateOutput" class="result-value">--</output><p id="argatrobanRateStatus" class="result-status">Not approved for CPB; uses shared weight to calculate 2 mcg/kg/min.</p></article>
             <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
             <article class="result-card"><p class="result-label">AT3 Dose</p><output id="at3DoseOutput" class="result-value">--</output><p id="at3DoseStatus" class="result-status">Enter weight, current AT3, and desired AT3.</p></article>
           </div>
@@ -189,6 +192,7 @@
                 <div><dt>Estimated Blood Volume</dt><dd>weight (kg) × EBV factor (mL/kg)</dd></div>
                 <div><dt>Current Heparin Concentration</dt><dd>total logged heparin units / (estimated blood volume + prime volume)</dd></div>
                 <div><dt>Bivalirudin Loading Dose</dt><dd>weight (kg) × 1 mg/kg</dd></div>
+                <div><dt>Argatroban Infusion Rate</dt><dd>weight (kg) × 2 mcg/kg/min; argatroban is not approved for CPB/bypass anticoagulation</dd></div>
                 <div><dt>AT3 Dose</dt><dd>(desired AT3 - current AT3) × weight (kg) / 1.4</dd></div>
                 <div><dt>HDR Rise/Run</dt><dd>(post-heparin ACT - baseline ACT) / (loading heparin concentration - 0)</dd></div>
                 <div><dt>AT3-Updated HDR</dt><dd>(repeat ACT after AT3 - baseline ACT) / (loading heparin concentration - 0)</dd></div>
