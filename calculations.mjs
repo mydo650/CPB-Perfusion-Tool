@@ -28,6 +28,7 @@ const ANTICOAG_FIELD_CONFIG = {
   heparinDosePerKg: { label: "Heparin loading dose", min: 50, max: 1000, allowZero: false },
   baselineActSeconds: { label: "Baseline ACT", min: 50, max: 400, allowZero: false },
   postHeparinActSeconds: { label: "Post-heparin ACT", min: 50, max: 1200, allowZero: false },
+  repeatActAfterAt3Seconds: { label: "Repeat ACT after AT3", min: 50, max: 1200, allowZero: false, optional: true },
   targetActSeconds: { label: "Target ACT", min: 200, max: 1200, allowZero: false },
   protamineRatioMgPer100U: { label: "Protamine ratio", min: 0.1, max: 5, allowZero: false },
 };
@@ -41,6 +42,7 @@ function validateField(configMap, name, rawValue) {
   const config = configMap[name];
   if (!config) return { valid: false, value: null, message: "Unknown field." };
   if (rawValue === "" || rawValue === null || rawValue === undefined) {
+    if (config.optional) return { valid: true, value: null, message: "" };
     return { valid: false, value: null, message: `${config.label} is required.` };
   }
 
@@ -125,7 +127,7 @@ export function suggestEstimatedBloodVolumeFactor(weightKg) {
   if (weightKg <= 30) return 75;
   if (weightKg <= 40) return 70;
   if (weightKg <= 50) return 65;
-  return 75;
+  return 70;
 }
 
 export function calculatePredictedPrimeHct(bloodVolumeMl, baselineHctPercent, primeVolumeMl) {
@@ -382,7 +384,10 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
     distributionVolumeMl: null,
     heparinLoadingConcentrationUnitsPerMl: null,
     protamineDoseMg: null,
+    preAt3HeparinResponseCurve: null,
+    at3UpdatedHeparinResponseCurve: null,
     heparinResponseCurve: null,
+    heparinResponseCurveMode: "initial",
   };
 
   if (valid("anticoagWeightKg") && valid("anticoagEbvFactor")) {
@@ -406,7 +411,7 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
   }
 
   if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
-    results.heparinResponseCurve = calculateHeparinResponseCurve(
+    results.preAt3HeparinResponseCurve = calculateHeparinResponseCurve(
       valueOf("baselineActSeconds"),
       valueOf("postHeparinActSeconds"),
       results.heparinLoadingUnits,
@@ -414,6 +419,27 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
       valueOf("anticoagWeightKg"),
       results.distributionVolumeMl,
     );
+    if (results.preAt3HeparinResponseCurve !== null) {
+      results.preAt3HeparinResponseCurve.responseLabel = "Measured";
+    }
+    results.heparinResponseCurve = results.preAt3HeparinResponseCurve;
+  }
+
+  if (results.preAt3HeparinResponseCurve !== null && valid("repeatActAfterAt3Seconds") && valueOf("repeatActAfterAt3Seconds") !== null) {
+    results.at3UpdatedHeparinResponseCurve = calculateHeparinResponseCurve(
+      valueOf("baselineActSeconds"),
+      valueOf("repeatActAfterAt3Seconds"),
+      results.heparinLoadingUnits,
+      valueOf("targetActSeconds"),
+      valueOf("anticoagWeightKg"),
+      results.distributionVolumeMl,
+    );
+
+    if (results.at3UpdatedHeparinResponseCurve !== null) {
+      results.at3UpdatedHeparinResponseCurve.responseLabel = "After AT3";
+      results.heparinResponseCurve = results.at3UpdatedHeparinResponseCurve;
+      results.heparinResponseCurveMode = "at3-updated";
+    }
   }
 
   return { fields, results };

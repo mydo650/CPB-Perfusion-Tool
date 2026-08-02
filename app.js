@@ -28,6 +28,7 @@ const ANTICOAG_FIELD_CONFIG = {
   heparinDosePerKg: { label: "Heparin loading dose", min: 50, max: 1000, allowZero: false },
   baselineActSeconds: { label: "Baseline ACT", min: 50, max: 400, allowZero: false },
   postHeparinActSeconds: { label: "Post-heparin ACT", min: 50, max: 1200, allowZero: false },
+  repeatActAfterAt3Seconds: { label: "Repeat ACT after AT3", min: 50, max: 1200, allowZero: false, optional: true },
   targetActSeconds: { label: "Target ACT", min: 200, max: 1200, allowZero: false },
   protamineRatioMgPer100U: { label: "Protamine ratio", min: 0.1, max: 5, allowZero: false },
   desiredAt3Percent: { label: "Desired AT3", min: 0, max: 200, allowZero: true },
@@ -584,6 +585,7 @@ function validateField(configMap, name, rawValue) {
   const config = configMap[name];
   if (!config) return { valid: false, value: null, message: "Unknown field." };
   if (rawValue === "" || rawValue === null || rawValue === undefined) {
+    if (config.optional) return { valid: true, value: null, message: "" };
     return { valid: false, value: null, message: `${config.label} is required.` };
   }
 
@@ -656,7 +658,7 @@ function suggestEstimatedBloodVolumeFactor(weightKg) {
   if (weightKg <= 30) return 75;
   if (weightKg <= 40) return 70;
   if (weightKg <= 50) return 65;
-  return 75;
+  return 70;
 }
 
 function calculatePredictedPrimeHct(bloodVolumeMl, baselineHctPercent, primeVolumeMl) {
@@ -937,7 +939,10 @@ function evaluateAnticoagulationCalculator(rawInputs) {
     bivalirudinLoadingMg: null,
     at3DoseUnits: null,
     protamineDoseMg: null,
+    preAt3HeparinResponseCurve: null,
+    at3UpdatedHeparinResponseCurve: null,
     heparinResponseCurve: null,
+    heparinResponseCurveMode: "initial",
   };
 
   if (valid("anticoagWeightKg") && valid("anticoagEbvFactor")) {
@@ -969,7 +974,7 @@ function evaluateAnticoagulationCalculator(rawInputs) {
   }
 
   if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
-    results.heparinResponseCurve = calculateHeparinResponseCurve(
+    results.preAt3HeparinResponseCurve = calculateHeparinResponseCurve(
       valueOf("baselineActSeconds"),
       valueOf("postHeparinActSeconds"),
       results.heparinLoadingUnits,
@@ -977,6 +982,27 @@ function evaluateAnticoagulationCalculator(rawInputs) {
       valueOf("anticoagWeightKg"),
       results.distributionVolumeMl,
     );
+    if (results.preAt3HeparinResponseCurve !== null) {
+      results.preAt3HeparinResponseCurve.responseLabel = "Measured";
+    }
+    results.heparinResponseCurve = results.preAt3HeparinResponseCurve;
+  }
+
+  if (results.preAt3HeparinResponseCurve !== null && valid("repeatActAfterAt3Seconds") && valueOf("repeatActAfterAt3Seconds") !== null) {
+    results.at3UpdatedHeparinResponseCurve = calculateHeparinResponseCurve(
+      valueOf("baselineActSeconds"),
+      valueOf("repeatActAfterAt3Seconds"),
+      results.heparinLoadingUnits,
+      valueOf("targetActSeconds"),
+      valueOf("anticoagWeightKg"),
+      results.distributionVolumeMl,
+    );
+
+    if (results.at3UpdatedHeparinResponseCurve !== null) {
+      results.at3UpdatedHeparinResponseCurve.responseLabel = "After AT3";
+      results.heparinResponseCurve = results.at3UpdatedHeparinResponseCurve;
+      results.heparinResponseCurveMode = "at3-updated";
+    }
   }
 
   return { fields, results };
@@ -989,8 +1015,11 @@ const primeSummary = document.querySelector("#primeValidationSummary");
 const anticoagForm = document.querySelector("#anticoag-form");
 const anticoagSummary = document.querySelector("#anticoagValidationSummary");
 const primeEbvQuickButtons = Array.from(document.querySelectorAll("[data-prime-ebv-quick]"));
+const primeEbvGuideButton = document.querySelector("#applyPrimeEbvGuide");
 const targetActButtons = Array.from(document.querySelectorAll("[data-target-act]"));
+const anticoagEbvQuickButtons = Array.from(document.querySelectorAll("[data-anticoag-ebv-quick]"));
 const anticoagEbvGuideButton = document.querySelector("#applyAnticoagEbvGuide");
+const desiredAt3NormalButton = document.querySelector("#applyDesiredAt3Normal");
 const primePlanCard = document.querySelector("#primePlanCard");
 const heparinCurvePanel = document.querySelector(".curve-panel");
 const expandCurveButton = document.querySelector("#expandCurveButton");
@@ -1221,7 +1250,13 @@ const anticoagOutputs = anticoagForm
         value: document.querySelector("#heparinConcentrationOutput"),
         status: document.querySelector("#heparinConcentrationStatus"),
         format: (value) => `${roundTo(value, 2).toFixed(2)} units/mL`,
-        empty: "Heparin units divided by EBV plus prime volume.",
+        empty: "Logged heparin units divided by EBV plus prime volume.",
+      },
+      hdrSlope: {
+        value: document.querySelector("#hdrSlopeOutput"),
+        status: document.querySelector("#hdrSlopeStatus"),
+        format: (value) => `${roundTo(value, 1).toFixed(1)} sec / unit/mL`,
+        empty: "Calculated from observed ACT response.",
       },
       bivalirudinLoadingMg: {
         value: document.querySelector("#bivalirudinLoadingOutput"),
@@ -1233,7 +1268,7 @@ const anticoagOutputs = anticoagForm
         value: document.querySelector("#at3DoseOutput"),
         status: document.querySelector("#at3DoseStatus"),
         format: (value) => `${Math.round(value).toLocaleString()} units`,
-        empty: "Enter weight, desired AT3, and current AT3.",
+        empty: "Enter weight, current AT3, and desired AT3.",
       },
       additionalHeparin: {
         value: document.querySelector("#additionalHeparinOutput"),
@@ -1263,7 +1298,14 @@ const anticoagOutputs = anticoagForm
       curveChart: document.querySelector("#heparinCurveChart"),
       curveSummary: document.querySelector("#heparinCurveSummary"),
       curveTooltip: document.querySelector("#heparinCurveTooltip"),
+      currentAt3Guidance: document.querySelector("#currentAt3Guidance"),
       heparinResistanceWarning: document.querySelector("#heparinResistanceWarning"),
+      at3CurveNotice: document.querySelector("#at3CurveNotice"),
+      hdrComparisonPanel: document.querySelector("#hdrComparisonPanel"),
+      preAt3AdditionalHeparinOutput: document.querySelector("#preAt3AdditionalHeparinOutput"),
+      preAt3AdditionalHeparinStatus: document.querySelector("#preAt3AdditionalHeparinStatus"),
+      afterAt3AdditionalHeparinOutput: document.querySelector("#afterAt3AdditionalHeparinOutput"),
+      afterAt3AdditionalHeparinStatus: document.querySelector("#afterAt3AdditionalHeparinStatus"),
       curveModal: document.querySelector("#heparinCurveModal"),
       curveModalChart: document.querySelector("#heparinCurveModalChart"),
       curveModalSummary: document.querySelector("#heparinCurveModalSummary"),
@@ -1560,6 +1602,26 @@ function syncPrimeEbvQuickState() {
   primeEbvQuickButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.primeEbvQuick === currentEbvFactor);
   });
+}
+
+function syncAnticoagEbvQuickState() {
+  if (!anticoagForm) return;
+  const currentEbvFactor = anticoagForm.elements.namedItem("anticoagEbvFactor")?.value;
+  anticoagEbvQuickButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.anticoagEbvQuick === currentEbvFactor);
+  });
+}
+
+function applyWeightBasedEbvGuide(form, weightFieldName, ebvFieldName, configMap, summaryElement, renderCallback) {
+  const weightField = validateField(configMap, weightFieldName, form.elements.namedItem(weightFieldName)?.value);
+  const suggestedEbvFactor = suggestEstimatedBloodVolumeFactor(weightField.value);
+  if (!weightField.valid || suggestedEbvFactor === null) {
+    updateFormInvalidState(form, { [weightFieldName]: weightField }, summaryElement);
+    return;
+  }
+
+  form.elements.namedItem(ebvFieldName).value = String(suggestedEbvFactor);
+  renderCallback();
 }
 
 function updateFormInvalidState(form, fields, summaryElement) {
@@ -2767,6 +2829,7 @@ function renderHeparinCurve(curve, options = {}) {
   const chart = options.chart ?? anticoagOutputs.curveChart;
   const summary = options.summary ?? anticoagOutputs.curveSummary;
   const isModal = Boolean(options.isModal);
+  const comparisonCurve = options.comparisonCurve ?? null;
   if (!chart || !summary) return;
 
   const width = isModal ? 1100 : 640;
@@ -2787,19 +2850,27 @@ function renderHeparinCurve(curve, options = {}) {
     : { top: 28, right: 34, bottom: 58, left: 70 };
   const plotWidth = width - margin.left - margin.right;
   const plotHeight = height - margin.top - margin.bottom;
-  const points = [curve.points.baseline, curve.points.measured, curve.points.target];
+  const comparisonPoints = comparisonCurve ? [comparisonCurve.points.measured, comparisonCurve.points.target] : [];
+  const points = [curve.points.baseline, curve.points.measured, curve.points.target, ...comparisonPoints];
   const referenceActs = [480, 600];
   const concentrationForAct = (actSeconds) => Math.max(0, (actSeconds - curve.points.baseline.actSeconds) / curve.slopeActPerUnitMl);
+  const comparisonConcentrationForAct = (actSeconds) => comparisonCurve
+    ? Math.max(0, (actSeconds - comparisonCurve.points.baseline.actSeconds) / comparisonCurve.slopeActPerUnitMl)
+    : 0;
   const weightKg = curve.givenHeparinDosePerKg > 0 ? curve.givenHeparinUnits / curve.givenHeparinDosePerKg : null;
   const dosePerKgForConcentration = (concentrationUnitsPerMl) => (
     weightKg ? (concentrationUnitsPerMl * curve.distributionVolumeMl) / weightKg : 0
   );
   const unitsForConcentration = (concentrationUnitsPerMl) => concentrationUnitsPerMl * curve.distributionVolumeMl;
   const maxConcentration = Math.max(...points.map((point) => point.concentrationUnitsPerMl), curve.points.measured.concentrationUnitsPerMl + 0.75, 5);
-  const referenceConcentrationMax = Math.max(...referenceActs.map((actSeconds) => concentrationForAct(actSeconds)));
+  const referenceConcentrationMax = Math.max(
+    ...referenceActs.map((actSeconds) => concentrationForAct(actSeconds)),
+    ...referenceActs.map((actSeconds) => comparisonConcentrationForAct(actSeconds)),
+  );
   const maxAct = Math.max(...points.map((point) => point.actSeconds), ...referenceActs, isHeparinCurveZoomedOut ? 1000 : 800);
   const xMax = Math.ceil(Math.max(maxConcentration, referenceConcentrationMax, isHeparinCurveZoomedOut ? 12 : 5));
   const yMax = Math.ceil(maxAct / 100) * 100;
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
   const x = (concentrationUnitsPerMl) => margin.left + (concentrationUnitsPerMl / xMax) * plotWidth;
   const y = (actSeconds) => margin.top + plotHeight - (actSeconds / yMax) * plotHeight;
   const visibleLineEndConcentration = Math.min(xMax, concentrationForAct(yMax));
@@ -2807,12 +2878,22 @@ function renderHeparinCurve(curve, options = {}) {
     concentrationUnitsPerMl: visibleLineEndConcentration,
     actSeconds: curve.points.baseline.actSeconds + curve.slopeActPerUnitMl * visibleLineEndConcentration,
   };
+  const comparisonLineEnd = comparisonCurve
+    ? {
+        concentrationUnitsPerMl: Math.min(xMax, comparisonConcentrationForAct(yMax)),
+        actSeconds: comparisonCurve.points.baseline.actSeconds + comparisonCurve.slopeActPerUnitMl * Math.min(xMax, comparisonConcentrationForAct(yMax)),
+      }
+    : null;
   const xTicks = isHeparinCurveZoomedOut ? [0, xMax / 2, xMax] : [0, xMax / 2, xMax];
   const yTicks = isHeparinCurveZoomedOut
     ? [0, 400, 800, yMax].filter((tick, index, ticks) => tick <= yMax && ticks.indexOf(tick) === index)
     : Array.from(new Set([0, Math.round(yMax / 2), 480, 600, yMax].filter((tick) => tick <= yMax))).sort((a, b) => a - b);
   const formatTick = (tick) => roundTo(tick, 1).toFixed(tick % 1 === 0 ? 0 : 1);
   const formatHover = (label, point) => `${label}: ${roundTo(point.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(point.dosePerKg, 0).toFixed(0)} units/kg, ACT ${roundTo(point.actSeconds, 0).toFixed(0)} sec`;
+  const labelX = (point) => clamp(x(point.concentrationUnitsPerMl), margin.left + 82, width - margin.right - 82);
+  const labelBelowY = (point) => clamp(y(point.actSeconds) + 30, margin.top + 30, height - margin.bottom - 12);
+  const labelAboveY = (point) => clamp(y(point.actSeconds) - 28, margin.top + 18, height - margin.bottom - 42);
+  const labelHighAboveY = (point) => clamp(y(point.actSeconds) - 46, margin.top + 18, height - margin.bottom - 60);
   const formatReferenceHover = (label, actSeconds) => {
     const concentrationUnitsPerMl = concentrationForAct(actSeconds);
     const dosePerKg = dosePerKgForConcentration(concentrationUnitsPerMl);
@@ -2830,21 +2911,48 @@ function renderHeparinCurve(curve, options = {}) {
   };
   const pointMarkup = [
     { key: "baseline", label: "Baseline", point: curve.points.baseline },
-    { key: "measured", label: "Measured", point: curve.points.measured },
+    { key: "measured", label: curve.responseLabel ?? "Measured", point: curve.points.measured },
   ]
     .map(({ key, label, point }) => `
       <g class="curve-point curve-point-${key}" tabindex="0" data-tooltip="${formatHover(label, point)}">
         <circle cx="${x(point.concentrationUnitsPerMl)}" cy="${y(point.actSeconds)}" r="7"></circle>
-        <text x="${x(point.concentrationUnitsPerMl)}" y="${y(point.actSeconds) - 12}" text-anchor="middle">${label}</text>
+        <text x="${labelX(point)}" y="${labelAboveY(point)}" text-anchor="middle">${label}</text>
       </g>
     `)
     .join("");
+  const comparisonMarkup = comparisonCurve
+    ? `
+      <line class="curve-comparison-line" x1="${x(0)}" y1="${y(comparisonCurve.points.baseline.actSeconds)}" x2="${x(comparisonLineEnd.concentrationUnitsPerMl)}" y2="${y(comparisonLineEnd.actSeconds)}"></line>
+      <g class="curve-comparison-point" tabindex="0" data-tooltip="${formatHover("Pre-AT3", comparisonCurve.points.measured)}">
+        <circle cx="${x(comparisonCurve.points.measured.concentrationUnitsPerMl)}" cy="${y(comparisonCurve.points.measured.actSeconds)}" r="6"></circle>
+        <text x="${labelX(comparisonCurve.points.measured)}" y="${labelBelowY(comparisonCurve.points.measured)}" text-anchor="middle">Pre-AT3</text>
+      </g>
+    `
+    : "";
   const act480Concentration = concentrationForAct(480);
   const act600Concentration = concentrationForAct(600);
   const targetAct = roundTo(curve.points.target.actSeconds, 0).toFixed(0);
   const targetAdditionalUnits = Math.round(curve.additionalHeparinUnits).toLocaleString();
   const targetLabel = `Target ACT ${targetAct}`;
   const targetTooltip = `${targetLabel}: ${roundTo(curve.points.target.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(curve.points.target.dosePerKg, 0).toFixed(0)} units/kg, ${targetAdditionalUnits} additional units`;
+  const comparisonTargetAct = comparisonCurve ? roundTo(comparisonCurve.points.target.actSeconds, 0).toFixed(0) : "";
+  const comparisonTargetTotalDosePerKg = comparisonCurve ? roundTo(comparisonCurve.points.target.dosePerKg, 0).toFixed(0) : "";
+  const comparisonTargetAdditionalUnits = comparisonCurve ? Math.round(comparisonCurve.additionalHeparinUnits).toLocaleString() : "";
+  const comparisonTargetTooltip = comparisonCurve
+    ? `Pre-AT3 to Target ACT ${comparisonTargetAct}: ${roundTo(comparisonCurve.points.target.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, about ${comparisonTargetTotalDosePerKg} units/kg total, ${comparisonTargetAdditionalUnits} additional units`
+    : "";
+  const comparisonTargetMarkup = comparisonCurve
+    ? `
+      <g class="curve-comparison-target" tabindex="0" data-tooltip="${comparisonTargetTooltip}">
+        <rect x="${x(comparisonCurve.points.target.concentrationUnitsPerMl) - 7}" y="${y(comparisonCurve.points.target.actSeconds) - 7}" width="14" height="14" transform="rotate(45 ${x(comparisonCurve.points.target.concentrationUnitsPerMl)} ${y(comparisonCurve.points.target.actSeconds)})"></rect>
+        <text x="${labelX(comparisonCurve.points.target)}" y="${labelHighAboveY(comparisonCurve.points.target)}" text-anchor="middle">
+          <tspan x="${labelX(comparisonCurve.points.target)}">Pre-AT3 to ACT ${comparisonTargetAct}</tspan>
+          <tspan x="${labelX(comparisonCurve.points.target)}" dy="15">${comparisonTargetTotalDosePerKg} units/kg total</tspan>
+          <tspan x="${labelX(comparisonCurve.points.target)}" dy="15">+${comparisonTargetAdditionalUnits} units</tspan>
+        </text>
+      </g>
+    `
+    : "";
   const referencePointMarkup = `
     <g class="curve-reference curve-reference-480" tabindex="0" data-tooltip="${formatReferenceHover("ACT 480 reference", 480)}">
       <polygon points="${starPoints(x(act480Concentration), y(480), 12, 5)}"></polygon>
@@ -2856,16 +2964,20 @@ function renderHeparinCurve(curve, options = {}) {
     </g>
     <g class="curve-selected-target" tabindex="0" data-tooltip="${targetTooltip}">
       <rect x="${x(curve.points.target.concentrationUnitsPerMl) - 8}" y="${y(curve.points.target.actSeconds) - 8}" width="16" height="16" transform="rotate(45 ${x(curve.points.target.concentrationUnitsPerMl)} ${y(curve.points.target.actSeconds)})"></rect>
-      <text x="${x(curve.points.target.concentrationUnitsPerMl)}" y="${y(curve.points.target.actSeconds) + 28}" text-anchor="middle">
-        <tspan x="${x(curve.points.target.concentrationUnitsPerMl)}">${targetLabel}</tspan>
-        <tspan x="${x(curve.points.target.concentrationUnitsPerMl)}" dy="16">${targetAdditionalUnits} units addl.</tspan>
+      <text x="${labelX(curve.points.target)}" y="${labelBelowY(curve.points.target)}" text-anchor="middle">
+        <tspan x="${labelX(curve.points.target)}">${comparisonCurve ? "After-AT3 target" : targetLabel}</tspan>
+        <tspan x="${labelX(curve.points.target)}" dy="16">${targetAdditionalUnits} units addl.</tspan>
       </text>
     </g>
   `;
 
-  summary.textContent = curve.targetReachedByTestDose
-    ? `HDR rise/run: ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. The measured ACT reaches the selected target with the current loading concentration.`
-    : `HDR rise/run: ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. Selected Target ACT ${roundTo(curve.points.target.actSeconds, 0).toFixed(0)} updates the concentration target and diamond marker.`;
+  if (comparisonCurve) {
+    summary.textContent = `Comparing HDR slopes: pre-AT3 ${roundTo(comparisonCurve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL vs after-AT3 ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. The solid line uses the repeat ACT after AT3.`;
+  } else {
+    summary.textContent = curve.targetReachedByTestDose
+      ? `HDR rise/run: ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. The measured ACT reaches the selected target with the current loading concentration.`
+      : `HDR rise/run: ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec per unit/mL. Selected Target ACT ${roundTo(curve.points.target.actSeconds, 0).toFixed(0)} updates the concentration target and diamond marker.`;
+  }
 
   chart.innerHTML = `
     <rect class="curve-bg" x="0" y="0" width="${width}" height="${height}" rx="18"></rect>
@@ -2884,9 +2996,11 @@ function renderHeparinCurve(curve, options = {}) {
     <line class="curve-axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
     <line class="curve-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"></line>
     <line class="curve-target-line" x1="${margin.left}" y1="${y(curve.points.target.actSeconds)}" x2="${width - margin.right}" y2="${y(curve.points.target.actSeconds)}"></line>
+    ${comparisonMarkup}
     <line class="curve-response-line" x1="${x(0)}" y1="${y(curve.points.baseline.actSeconds)}" x2="${x(lineEnd.concentrationUnitsPerMl)}" y2="${y(lineEnd.actSeconds)}"></line>
     ${pointMarkup}
     ${referencePointMarkup}
+    ${comparisonTargetMarkup}
     <text class="curve-axis-label" x="${width / 2}" y="${height - 18}" text-anchor="middle">Heparin concentration (units/mL)</text>
     <text class="curve-axis-label" transform="translate(20 ${height / 2}) rotate(-90)" text-anchor="middle">ACT (seconds)</text>
   `;
@@ -2966,6 +3080,14 @@ function renderAnticoagulation() {
   const evaluation = evaluateAnticoagulationCalculator(collectInputs(anticoagForm));
   updateFormInvalidState(anticoagForm, evaluation.fields, anticoagSummary);
   syncTargetActPresetState();
+  syncAnticoagEbvQuickState();
+  const hasAt3Deficit = evaluation.results.at3DoseUnits !== null && evaluation.results.at3DoseUnits > 0;
+  if (anticoagOutputs.currentAt3Guidance) {
+    anticoagOutputs.currentAt3Guidance.hidden = !hasAt3Deficit;
+    anticoagOutputs.currentAt3Guidance.textContent = hasAt3Deficit
+      ? "Below target; may reduce heparin responsiveness. Follow local protocol and recheck ACT."
+      : "";
+  }
 
   if (evaluation.results.heparinLoadingUnits !== null) {
     anticoagOutputs.heparinLoadingUnits.value.textContent = anticoagOutputs.heparinLoadingUnits.format(evaluation.results.heparinLoadingUnits);
@@ -2978,20 +3100,29 @@ function renderAnticoagulation() {
   if (evaluation.results.distributionVolumeMl !== null) {
     const weightKg = evaluation.fields.anticoagWeightKg.value;
     const ebvFactor = evaluation.fields.anticoagEbvFactor.value;
-    const suggestedEbvFactor = suggestEstimatedBloodVolumeFactor(weightKg);
+    const suggestedEbvFactor = weightKg <= 50 ? suggestEstimatedBloodVolumeFactor(weightKg) : null;
     const suggestionCopy = suggestedEbvFactor !== null && suggestedEbvFactor !== ebvFactor
       ? ` Suggested guide factor for this weight is ${suggestedEbvFactor} mL/kg.`
       : "";
     anticoagOutputs.distributionVolumeMl.value.textContent = anticoagOutputs.distributionVolumeMl.format(evaluation.results.distributionVolumeMl);
-    anticoagOutputs.distributionVolumeMl.status.textContent = `EBV ${Math.round(evaluation.results.bloodVolumeMl).toLocaleString()} mL + prime ${Math.round(evaluation.fields.anticoagPrimeVolumeMl.value).toLocaleString()} mL.${suggestionCopy}`;
+    anticoagOutputs.distributionVolumeMl.status.textContent = `EBV ${Math.round(evaluation.results.bloodVolumeMl).toLocaleString()} mL + prime ${Math.round(evaluation.fields.anticoagPrimeVolumeMl.value).toLocaleString()} mL. Teaching estimate for concentration math.${suggestionCopy}`;
   } else {
     anticoagOutputs.distributionVolumeMl.value.textContent = "--";
     anticoagOutputs.distributionVolumeMl.status.textContent = anticoagOutputs.distributionVolumeMl.empty;
   }
 
-  if (evaluation.results.heparinLoadingConcentrationUnitsPerMl !== null) {
-    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.format(evaluation.results.heparinLoadingConcentrationUnitsPerMl);
-    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(evaluation.results.heparinLoadingUnits).toLocaleString()} units / ${Math.round(evaluation.results.distributionVolumeMl).toLocaleString()} mL.`;
+  const talliedHeparinUnits = calculateHeparinAdministrationTotal(heparinLogState.entries);
+  const currentHeparinConcentrationUnitsPerMl = talliedHeparinUnits > 0 && evaluation.results.distributionVolumeMl !== null && evaluation.results.distributionVolumeMl > 0
+    ? talliedHeparinUnits / evaluation.results.distributionVolumeMl
+    : evaluation.results.heparinLoadingConcentrationUnitsPerMl;
+
+  if (currentHeparinConcentrationUnitsPerMl !== null) {
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.format(currentHeparinConcentrationUnitsPerMl);
+    if (talliedHeparinUnits > 0) {
+      anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(talliedHeparinUnits).toLocaleString()} tallied units / ${Math.round(evaluation.results.distributionVolumeMl).toLocaleString()} mL. HDR slope still follows the dose tied to the measured ACT.`;
+    } else {
+      anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(evaluation.results.heparinLoadingUnits).toLocaleString()} estimated loading units / ${Math.round(evaluation.results.distributionVolumeMl).toLocaleString()} mL until doses are logged.`;
+    }
   } else {
     anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = "--";
     anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.empty;
@@ -3007,8 +3138,8 @@ function renderAnticoagulation() {
 
   if (evaluation.results.at3DoseUnits !== null) {
     anticoagOutputs.at3DoseUnits.value.textContent = anticoagOutputs.at3DoseUnits.format(evaluation.results.at3DoseUnits);
-    anticoagOutputs.at3DoseUnits.status.textContent = evaluation.results.at3DoseUnits > 0
-      ? "Formula: (desired AT3 - current AT3) × kg / 1.4."
+    anticoagOutputs.at3DoseUnits.status.textContent = hasAt3Deficit
+      ? "Estimated replacement amount to selected target; repeat ACT after intervention."
       : "Current AT3 meets or exceeds desired AT3.";
   } else {
     anticoagOutputs.at3DoseUnits.value.textContent = "--";
@@ -3017,15 +3148,30 @@ function renderAnticoagulation() {
 
   if (evaluation.results.heparinResponseCurve !== null) {
     const projectedDosePerKg = evaluation.results.heparinResponseCurve.requiredHeparinDosePerKg;
+    const isAt3UpdatedCurve = evaluation.results.heparinResponseCurveMode === "at3-updated";
+    const repeatActEntered = evaluation.fields.repeatActAfterAt3Seconds?.value !== null;
+    const repeatActCouldNotUpdate = repeatActEntered && !isAt3UpdatedCurve;
     anticoagOutputs.additionalHeparin.value.textContent = anticoagOutputs.additionalHeparin.format(evaluation.results.heparinResponseCurve);
     anticoagOutputs.additionalHeparin.status.textContent = evaluation.results.heparinResponseCurve.targetReachedByTestDose
-      ? "Measured ACT already reaches the selected target."
-      : `Extra heparin needed beyond the ${Math.round(evaluation.results.heparinResponseCurve.givenHeparinUnits).toLocaleString()} unit loading dose.`;
+      ? `${isAt3UpdatedCurve ? "Repeat ACT after AT3" : "Measured ACT"} already reaches the selected target.`
+      : `Extra heparin needed beyond the ${Math.round(evaluation.results.heparinResponseCurve.givenHeparinUnits).toLocaleString()} unit loading dose${isAt3UpdatedCurve ? " using the repeat ACT after AT3" : ""}.`;
+
+    anticoagOutputs.hdrSlope.value.textContent = anticoagOutputs.hdrSlope.format(evaluation.results.heparinResponseCurve.slopeActPerUnitMl);
+    anticoagOutputs.hdrSlope.status.textContent = isAt3UpdatedCurve
+      ? "Updated from the observed repeat ACT after AT3; not predicted from AT3 dose alone."
+      : repeatActCouldNotUpdate
+        ? "Using initial post-heparin ACT because repeat ACT after AT3 must be greater than baseline ACT to update HDR."
+        : "Using baseline ACT and the first post-heparin ACT.";
 
     if (anticoagOutputs.heparinResistanceWarning) {
-      anticoagOutputs.heparinResistanceWarning.hidden = projectedDosePerKg < 500;
-      anticoagOutputs.heparinResistanceWarning.textContent = projectedDosePerKg >= 500
-        ? `Projected dose is ${roundTo(projectedDosePerKg, 0).toFixed(0)} units/kg to reach the selected ACT. Consider local heparin-resistance protocol, antithrombin status, timing, ACT device, and clinician review.`
+      const warningParts = [];
+      if (projectedDosePerKg >= 500) {
+        warningParts.push(`Projected dose is ${roundTo(projectedDosePerKg, 0).toFixed(0)} units/kg to reach the selected ACT.`);
+      }
+
+      anticoagOutputs.heparinResistanceWarning.hidden = warningParts.length === 0;
+      anticoagOutputs.heparinResistanceWarning.textContent = warningParts.length > 0
+        ? `${warningParts.join(" ")} Follow institutional heparin-resistance protocol.`
         : "";
     }
   } else {
@@ -3033,20 +3179,67 @@ function renderAnticoagulation() {
     anticoagOutputs.additionalHeparin.status.textContent = evaluation.fields.baselineActSeconds?.valid && evaluation.fields.postHeparinActSeconds?.valid
       ? "Post-heparin ACT must be greater than baseline ACT."
       : anticoagOutputs.additionalHeparin.empty;
+    anticoagOutputs.hdrSlope.value.textContent = "--";
+    anticoagOutputs.hdrSlope.status.textContent = evaluation.fields.repeatActAfterAt3Seconds?.valid === false
+      ? "Repeat ACT after AT3 must be greater than baseline ACT to update the curve."
+      : anticoagOutputs.hdrSlope.empty;
     if (anticoagOutputs.heparinResistanceWarning) {
       anticoagOutputs.heparinResistanceWarning.hidden = true;
       anticoagOutputs.heparinResistanceWarning.textContent = "";
     }
   }
 
+  if (anticoagOutputs.at3CurveNotice) {
+    const repeatActEntered = evaluation.fields.repeatActAfterAt3Seconds?.value !== null;
+    const isAt3UpdatedCurve = evaluation.results.heparinResponseCurveMode === "at3-updated";
+
+    anticoagOutputs.at3CurveNotice.hidden = !hasAt3Deficit && !repeatActEntered;
+    if (isAt3UpdatedCurve) {
+      anticoagOutputs.at3CurveNotice.textContent = "AT3-updated HDR is active. The curve is recalculated from the observed repeat ACT after AT3 administration, not estimated from the AT3 dose itself.";
+    } else if (repeatActEntered) {
+      anticoagOutputs.at3CurveNotice.textContent = "Repeat ACT after AT3 is entered but did not update the HDR curve. Confirm the value is greater than baseline ACT and that timing reflects the AT3 response.";
+    } else if (hasAt3Deficit) {
+      anticoagOutputs.at3CurveNotice.textContent = "AT3 correction may change heparin responsiveness. Recheck ACT after AT3 administration and enter the repeat ACT to update the HDR curve.";
+    } else {
+      anticoagOutputs.at3CurveNotice.textContent = "";
+    }
+  }
+
+  if (anticoagOutputs.hdrComparisonPanel) {
+    const showComparison = evaluation.results.heparinResponseCurveMode === "at3-updated"
+      && evaluation.results.preAt3HeparinResponseCurve !== null
+      && evaluation.results.at3UpdatedHeparinResponseCurve !== null;
+
+    anticoagOutputs.hdrComparisonPanel.hidden = !showComparison;
+
+    if (showComparison) {
+      const preAt3Curve = evaluation.results.preAt3HeparinResponseCurve;
+      const afterAt3Curve = evaluation.results.at3UpdatedHeparinResponseCurve;
+      anticoagOutputs.preAt3AdditionalHeparinOutput.textContent = `${Math.round(preAt3Curve.additionalHeparinUnits).toLocaleString()} units`;
+      anticoagOutputs.preAt3AdditionalHeparinStatus.textContent = `Based on original slope ${roundTo(preAt3Curve.slopeActPerUnitMl, 1).toFixed(1)} sec/unit/mL; would require about ${roundTo(preAt3Curve.requiredHeparinDosePerKg, 0).toFixed(0)} units/kg total.`;
+      anticoagOutputs.afterAt3AdditionalHeparinOutput.textContent = `${Math.round(afterAt3Curve.additionalHeparinUnits).toLocaleString()} units`;
+      anticoagOutputs.afterAt3AdditionalHeparinStatus.textContent = `Based on repeat-ACT slope ${roundTo(afterAt3Curve.slopeActPerUnitMl, 1).toFixed(1)} sec/unit/mL; would require about ${roundTo(afterAt3Curve.requiredHeparinDosePerKg, 0).toFixed(0)} units/kg total.`;
+    } else {
+      anticoagOutputs.preAt3AdditionalHeparinOutput.textContent = "--";
+      anticoagOutputs.preAt3AdditionalHeparinStatus.textContent = "Original HDR estimate before AT3 correction.";
+      anticoagOutputs.afterAt3AdditionalHeparinOutput.textContent = "--";
+      anticoagOutputs.afterAt3AdditionalHeparinStatus.textContent = "Updated from repeat ACT after AT3.";
+    }
+  }
+
   renderHeparinAdministrationLog(evaluation);
 
-  renderHeparinCurve(evaluation.results.heparinResponseCurve);
+  const comparisonCurve = evaluation.results.heparinResponseCurveMode === "at3-updated"
+    ? evaluation.results.preAt3HeparinResponseCurve
+    : null;
+
+  renderHeparinCurve(evaluation.results.heparinResponseCurve, { comparisonCurve });
   if (isHeparinCurveExpanded) {
     renderHeparinCurve(evaluation.results.heparinResponseCurve, {
       chart: anticoagOutputs.curveModalChart,
       summary: anticoagOutputs.curveModalSummary,
       isModal: true,
+      comparisonCurve,
     });
   }
 }
@@ -3078,6 +3271,9 @@ if (primeForm) {
       primeForm.elements.namedItem("primeEbvFactor").value = button.dataset.primeEbvQuick;
       renderPrime();
     });
+  });
+  primeEbvGuideButton?.addEventListener("click", () => {
+    applyWeightBasedEbvGuide(primeForm, "primeWeightKg", "primeEbvFactor", PRIME_FIELD_CONFIG, primeSummary, renderPrime);
   });
   renderPrime();
 }
@@ -3172,14 +3368,17 @@ if (anticoagForm) {
       renderAnticoagulation();
     });
   });
+  anticoagEbvQuickButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      anticoagForm.elements.namedItem("anticoagEbvFactor").value = button.dataset.anticoagEbvQuick;
+      renderAnticoagulation();
+    });
+  });
   anticoagEbvGuideButton?.addEventListener("click", () => {
-    const weightField = validateAnticoagField("anticoagWeightKg", anticoagForm.elements.namedItem("anticoagWeightKg")?.value);
-    const suggestedEbvFactor = suggestEstimatedBloodVolumeFactor(weightField.value);
-    if (!weightField.valid || suggestedEbvFactor === null) {
-      updateFormInvalidState(anticoagForm, { anticoagWeightKg: weightField }, anticoagSummary);
-      return;
-    }
-    anticoagForm.elements.namedItem("anticoagEbvFactor").value = String(suggestedEbvFactor);
+    applyWeightBasedEbvGuide(anticoagForm, "anticoagWeightKg", "anticoagEbvFactor", ANTICOAG_FIELD_CONFIG, anticoagSummary, renderAnticoagulation);
+  });
+  desiredAt3NormalButton?.addEventListener("click", () => {
+    anticoagForm.elements.namedItem("desiredAt3Percent").value = "100";
     renderAnticoagulation();
   });
   expandCurveButton?.addEventListener("click", () => {

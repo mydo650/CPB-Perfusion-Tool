@@ -62,15 +62,16 @@
           <form id="anticoag-form" novalidate>
             <div class="field-grid">
               <label class="field"><span>Weight</span><div class="input-wrap"><input id="anticoagWeightKg" name="anticoagWeightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" autofocus /><span class="unit">kg</span></div><small class="hint">Shared from other tabs when already entered</small></label>
-              <label class="field"><span>EBV Factor</span><div class="input-wrap"><input id="anticoagEbvFactor" name="anticoagEbvFactor" type="number" inputmode="decimal" min="40" max="100" step="1" value="75" autocomplete="off" /><span class="unit">mL/kg</span></div><div class="quick-select-row"><button type="button" class="quick-select-button" id="applyAnticoagEbvGuide">Use guide</button></div><small class="hint">Editable guide: ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, adult default 75</small></label>
+              <label class="field"><span>EBV Factor</span><div class="input-wrap"><input id="anticoagEbvFactor" name="anticoagEbvFactor" type="number" inputmode="decimal" min="40" max="100" step="1" value="70" autocomplete="off" /><span class="unit">mL/kg</span></div><div class="quick-select-row" aria-label="Quick estimated blood volume factors"><button type="button" class="quick-select-button" data-anticoag-ebv-quick="75">Adult male</button><button type="button" class="quick-select-button" data-anticoag-ebv-quick="65">Adult female</button><button type="button" class="quick-select-button" data-anticoag-ebv-quick="70">Adult average</button><button type="button" class="quick-select-button" id="applyAnticoagEbvGuide">Weight guide</button></div><small class="hint">Adult male 75, adult female 65, adult average 70, or weight-based pediatric guide</small></label>
               <label class="field"><span>Prime Volume</span><div class="input-wrap"><input id="anticoagPrimeVolumeMl" name="anticoagPrimeVolumeMl" type="number" inputmode="decimal" min="0" max="5000" step="10" value="0" autocomplete="off" /><span class="unit">mL</span></div><small class="hint">Added to EBV for heparin concentration; shared from Prime Planner when entered</small></label>
               <label class="field"><span>Heparin Loading Dose</span><div class="input-wrap"><input id="heparinDosePerKg" name="heparinDosePerKg" type="number" inputmode="decimal" min="50" max="1000" step="1" value="300" autocomplete="off" /><span class="unit">units/kg</span></div><small class="hint">Initial bolus or dose used for the measured ACT response</small></label>
               <label class="field"><span>Baseline ACT</span><div class="input-wrap"><input id="baselineActSeconds" name="baselineActSeconds" type="number" inputmode="decimal" min="50" max="400" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT before heparin administration</small></label>
               <label class="field"><span>Post-Heparin ACT</span><div class="input-wrap"><input id="postHeparinActSeconds" name="postHeparinActSeconds" type="number" inputmode="decimal" min="50" max="1200" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">ACT after the test dose has circulated</small></label>
               <label class="field"><span>Target ACT</span><div class="input-wrap"><input id="targetActSeconds" name="targetActSeconds" type="number" inputmode="decimal" min="200" max="1200" step="1" value="480" autocomplete="off" /><span class="unit">sec</span></div><div class="quick-select-row" aria-label="Quick target ACT values"><button type="button" class="quick-select-button" data-target-act="500">500</button><button type="button" class="quick-select-button" data-target-act="550">550</button><button type="button" class="quick-select-button" data-target-act="600">600</button></div><small class="hint">Editable protocol target for initiating bypass</small></label>
               <label class="field"><span>Protamine Reversal Ratio</span><div class="input-wrap"><input id="protamineRatioMgPer100U" name="protamineRatioMgPer100U" type="number" inputmode="decimal" min="0.1" max="5" step="0.1" value="1" autocomplete="off" /><span class="unit">mg / 100 units</span></div><small class="hint">Default 1 mg protamine per 100 units heparin</small></label>
-              <label class="field"><span>Desired AT3</span><div class="input-wrap"><input id="desiredAt3Percent" name="desiredAt3Percent" type="number" inputmode="decimal" min="0" max="200" step="1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Target antithrombin activity</small></label>
-              <label class="field"><span>Current AT3</span><div class="input-wrap"><input id="currentAt3Percent" name="currentAt3Percent" type="number" inputmode="decimal" min="0" max="200" step="1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Measured antithrombin activity</small></label>
+              <label class="field"><span>Current AT3</span><div class="input-wrap"><input id="currentAt3Percent" name="currentAt3Percent" type="number" inputmode="decimal" min="0" max="200" step="1" autocomplete="off" /><span class="unit">%</span></div><small class="hint">Measured antithrombin activity</small><small id="currentAt3Guidance" class="at3-inline-guidance" hidden></small></label>
+              <label class="field"><span>Desired AT3</span><div class="input-wrap"><input id="desiredAt3Percent" name="desiredAt3Percent" type="number" inputmode="decimal" min="0" max="200" step="1" autocomplete="off" /><span class="unit">%</span></div><div class="quick-select-row"><button type="button" class="quick-select-button" id="applyDesiredAt3Normal">Use 100%</button></div><small class="hint">Common adult AT activity reference range is about 80–120%; use the institution or lab-specific range</small></label>
+              <label class="field"><span>Repeat ACT After AT3</span><div class="input-wrap"><input id="repeatActAfterAt3Seconds" name="repeatActAfterAt3Seconds" type="number" inputmode="decimal" min="50" max="1200" step="1" autocomplete="off" /><span class="unit">sec</span></div><small class="hint">Optional: enter the observed ACT after AT3 correction, ideally before additional heparin, to update the HDR curve</small></label>
             </div>
           </form>
           <div id="anticoagValidationSummary" class="validation-summary" role="status" aria-live="polite"></div>
@@ -83,12 +84,12 @@
           </div>
           <div class="results-grid results-grid-compact">
             <article class="result-card accent-card"><p class="result-label">Heparin Loading Dose</p><output id="heparinLoadingOutput" class="result-value">--</output><p id="heparinLoadingStatus" class="result-status">Enter weight and a heparin units/kg assumption.</p></article>
-            <article class="result-card"><p class="result-label">Distribution Volume</p><output id="heparinDistributionVolumeOutput" class="result-value">--</output><p id="heparinDistributionVolumeStatus" class="result-status">EBV + prime volume for concentration-based HDR.</p></article>
-            <article class="result-card"><p class="result-label">Loading Concentration</p><output id="heparinConcentrationOutput" class="result-value">--</output><p id="heparinConcentrationStatus" class="result-status">Heparin units divided by EBV plus prime volume.</p></article>
+            <article class="result-card"><p class="result-label">Heparin Distribution Volume</p><output id="heparinDistributionVolumeOutput" class="result-value">--</output><p id="heparinDistributionVolumeStatus" class="result-status">EBV + prime volume estimate for concentration-based HDR.</p></article>
+            <article class="result-card"><p class="result-label">Current Heparin Concentration</p><output id="heparinConcentrationOutput" class="result-value">--</output><p id="heparinConcentrationStatus" class="result-status">Logged heparin units divided by EBV plus prime volume.</p></article>
+            <article class="result-card"><p class="result-label">HDR Slope</p><output id="hdrSlopeOutput" class="result-value">--</output><p id="hdrSlopeStatus" class="result-status">Calculated from observed ACT response.</p></article>
             <article class="result-card accent-card"><p class="result-label">Bivalirudin Loading Dose</p><output id="bivalirudinLoadingOutput" class="result-value">--</output><p id="bivalirudinLoadingStatus" class="result-status">Enter weight to calculate 1 mg/kg.</p></article>
             <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
-            <article class="result-card"><p class="result-label">Protamine Reversal Dose</p><output id="protamineDoseOutput" class="result-value">--</output><p id="protamineDoseStatus" class="result-status">Calculated from the estimated heparin loading dose.</p></article>
-            <article class="result-card"><p class="result-label">AT3 Dose</p><output id="at3DoseOutput" class="result-value">--</output><p id="at3DoseStatus" class="result-status">Enter weight, desired AT3, and current AT3.</p></article>
+            <article class="result-card"><p class="result-label">AT3 Dose</p><output id="at3DoseOutput" class="result-value">--</output><p id="at3DoseStatus" class="result-status">Enter weight, current AT3, and desired AT3.</p></article>
           </div>
           <div id="heparinResistanceWarning" class="clinical-warning" role="status" aria-live="polite" hidden></div>
         </section>
@@ -127,6 +128,11 @@
               <output id="heparinTallyOutput" class="result-value">--</output>
               <p id="heparinTallyStatus" class="result-status">No heparin entries recorded yet.</p>
             </article>
+            <article class="result-card">
+              <p class="result-label">Protamine Reversal Dose</p>
+              <output id="protamineDoseOutput" class="result-value">--</output>
+              <p id="protamineDoseStatus" class="result-status">Calculated from the total logged heparin.</p>
+            </article>
           </div>
           <p id="heparinLogEmpty" class="heparin-log-empty">No heparin entries recorded yet.</p>
           <ol id="heparinLogList" class="heparin-log-list" aria-label="Heparin administration entries"></ol>
@@ -140,6 +146,8 @@
               <div class="curve-legend" aria-label="Graph key">
                 <span><span class="legend-symbol legend-star" aria-hidden="true"></span>ACT 480</span>
                 <span><span class="legend-symbol legend-dot" aria-hidden="true"></span>ACT 600</span>
+                <span><span class="legend-symbol legend-line-solid" aria-hidden="true"></span>Active HDR</span>
+                <span><span class="legend-symbol legend-line-dashed" aria-hidden="true"></span>Pre-AT3 comparison</span>
               </div>
             </div>
             <div class="curve-actions" aria-label="Graph controls">
@@ -150,6 +158,19 @@
           <div class="curve-chart-wrap">
             <svg id="heparinCurveChart" class="curve-chart" viewBox="0 0 640 360" role="img" aria-labelledby="heparin-curve-title heparinCurveSummary"></svg>
             <div id="heparinCurveTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+          </div>
+          <div id="at3CurveNotice" class="clinical-warning" role="status" aria-live="polite" hidden></div>
+          <div id="hdrComparisonPanel" class="hdr-comparison-panel" hidden>
+            <article class="hdr-comparison-card">
+              <p class="result-label">Pre-AT3 Projection</p>
+              <output id="preAt3AdditionalHeparinOutput" class="result-value">--</output>
+              <p id="preAt3AdditionalHeparinStatus" class="result-status">Original HDR estimate before AT3 correction.</p>
+            </article>
+            <article class="hdr-comparison-card">
+              <p class="result-label">After-AT3 Projection</p>
+              <output id="afterAt3AdditionalHeparinOutput" class="result-value">--</output>
+              <p id="afterAt3AdditionalHeparinStatus" class="result-status">Updated from repeat ACT after AT3.</p>
+            </article>
           </div>
           <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
         </section>
@@ -166,20 +187,23 @@
               <dl class="formula-list">
                 <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
                 <div><dt>Estimated Blood Volume</dt><dd>weight (kg) × EBV factor (mL/kg)</dd></div>
-                <div><dt>Heparin Concentration</dt><dd>heparin loading units / (estimated blood volume + prime volume)</dd></div>
+                <div><dt>Current Heparin Concentration</dt><dd>total logged heparin units / (estimated blood volume + prime volume)</dd></div>
                 <div><dt>Bivalirudin Loading Dose</dt><dd>weight (kg) × 1 mg/kg</dd></div>
                 <div><dt>AT3 Dose</dt><dd>(desired AT3 - current AT3) × weight (kg) / 1.4</dd></div>
                 <div><dt>HDR Rise/Run</dt><dd>(post-heparin ACT - baseline ACT) / (loading heparin concentration - 0)</dd></div>
+                <div><dt>AT3-Updated HDR</dt><dd>(repeat ACT after AT3 - baseline ACT) / (loading heparin concentration - 0)</dd></div>
                 <div><dt>Projected Concentration to Target</dt><dd>(target ACT - baseline ACT) / HDR rise/run</dd></div>
                 <div><dt>Protamine Reversal Dose</dt><dd>(total logged heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>
               </dl>
-              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the first heparin dose. Prime volume is included in the distribution volume for concentration-based HDR teaching, but the projection still requires local protocol review and clinical confirmation.</p>
+              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the first heparin dose. If a repeat ACT after AT3 is entered, the graph updates from the observed repeat ACT rather than predicting the AT3 effect from dose alone. Prime volume is included in the distribution volume for concentration-based HDR teaching, but the projection still requires local protocol review and clinical confirmation.</p>
               <p class="disclaimer">Decision-support for simulation and workflow use only. Confirm local anticoagulation protocols and product labeling before clinical application.</p>
             </section>
             <section class="formula-panel references-panel tab-panel" id="tab-panel-anticoag-references" role="tabpanel" aria-labelledby="tab-button-anticoag-references" data-tab-group="anticoag-support" data-tab-panel="references" hidden>
               <ol class="references-list">
                 <li>American Society of ExtraCorporeal Technology. AmSECT standards and guidelines for perfusion practice. <a href="https://amsect.org/Policy-Practice/AmSECTs-Standards-and-Guidelines" target="_blank" rel="noreferrer">AmSECT</a></li>
                 <li>Default dosing assumptions are editable because anticoagulation strategies vary by institution, patient response, and clinician protocol.</li>
+                <li>Shore-Lesserson L, Baker RA, Ferraris VA, et al. STS/SCA/AmSECT clinical practice guidelines on anticoagulation during CPB describe variable heparin responsiveness and limitations of dose-response prediction.</li>
+                <li>Avidan MS, Levy JH, van Aken H, et al. Recombinant antithrombin restored heparin responsiveness in many heparin-resistant CPB patients, supporting repeat-ACT reassessment after AT3 correction.</li>
               </ol>
             </section>
           </section>
@@ -192,6 +216,12 @@
           <div>
             <h3 id="heparin-curve-modal-title">Heparin Dose Response Curve</h3>
             <p id="heparinCurveModalSummary">Expanded view</p>
+            <div class="curve-legend" aria-label="Expanded graph key">
+              <span><span class="legend-symbol legend-star" aria-hidden="true"></span>ACT 480</span>
+              <span><span class="legend-symbol legend-dot" aria-hidden="true"></span>ACT 600</span>
+              <span><span class="legend-symbol legend-line-solid" aria-hidden="true"></span>Active HDR</span>
+              <span><span class="legend-symbol legend-line-dashed" aria-hidden="true"></span>Pre-AT3 comparison</span>
+            </div>
           </div>
           <button type="button" class="curve-action-button" id="closeCurveModalButton">Close</button>
         </div>

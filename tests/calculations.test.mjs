@@ -318,7 +318,7 @@ test("estimated blood volume factor guide follows project teaching tiers", () =>
   assert.equal(suggestEstimatedBloodVolumeFactor(21), 75);
   assert.equal(suggestEstimatedBloodVolumeFactor(31), 70);
   assert.equal(suggestEstimatedBloodVolumeFactor(41), 65);
-  assert.equal(suggestEstimatedBloodVolumeFactor(80), 75);
+  assert.equal(suggestEstimatedBloodVolumeFactor(80), 70);
 });
 
 test("heparin dose response curve projects target dose from concentration rise/run", () => {
@@ -364,6 +364,27 @@ test("prime volume is included in heparin concentration distribution volume", ()
   assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinDosePerKg), 357);
 });
 
+test("repeat ACT after AT3 updates HDR curve from observed response", () => {
+  const evaluated = evaluateAnticoagulationCalculator({
+    anticoagWeightKg: "80",
+    anticoagEbvFactor: "75",
+    anticoagPrimeVolumeMl: "0",
+    heparinDosePerKg: "300",
+    baselineActSeconds: "100",
+    postHeparinActSeconds: "350",
+    repeatActAfterAt3Seconds: "520",
+    targetActSeconds: "600",
+    protamineRatioMgPer100U: "1",
+  });
+
+  assert.equal(evaluated.fields.repeatActAfterAt3Seconds.valid, true);
+  assert.equal(evaluated.results.heparinResponseCurveMode, "at3-updated");
+  assert.equal(roundTo(evaluated.results.preAt3HeparinResponseCurve.slopeActPerUnitMl, 1), 62.5);
+  assert.equal(roundTo(evaluated.results.at3UpdatedHeparinResponseCurve.slopeActPerUnitMl, 1), 105);
+  assert.equal(evaluated.results.heparinResponseCurve.responseLabel, "After AT3");
+  assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 28571);
+});
+
 test("heparin dose response curve follows the selected target ACT", () => {
   const evaluated = evaluateAnticoagulationCalculator({
     anticoagWeightKg: "70",
@@ -403,5 +424,6 @@ test("validation rejects out of range and negative inputs", () => {
   assert.equal(validatePerfusionField("paO2", "0").valid, true);
   assert.equal(validatePrimeField("primePrbcHct", "95").valid, false);
   assert.equal(validateAnticoagField("heparinDosePerKg", "20").valid, false);
+  assert.equal(validateAnticoagField("repeatActAfterAt3Seconds", "").valid, true);
   assert.equal(validateAnticoagField("targetActSeconds", "120").valid, false);
 });

@@ -89,6 +89,7 @@ For the pilot evaluation, the most defensible introductory tool features are:
 Additional modules can support the broader capstone product if validated and kept within the approved study scope:
 
 - anticoagulation support, including heparin tally, protamine from total logged heparin, AT3 support, bivalirudin, argatroban, and heparin concentration rise/run
+- AT3 correction should be handled by repeat ACT reassessment rather than automatically predicting a new heparin dose-response curve from AT3 dose alone
 - cannula selection support with estimated pressure drops
 - drug library and dose/concentration safety-check references
 - demo profiles or learner modes for limited-exposure students versus more advanced students
@@ -398,8 +399,9 @@ This section captures the current build priorities that came out of mentor feedb
 - [x] Remove the separate protamine source choice so reversal follows the heparin tally only
 - [x] If no heparin is tallied, prompt the user to log the initial heparin dose before protamine is calculated
 - [x] Add heparin concentration rise/run using EBV + prime volume as the distribution volume
-- [x] Add the editable EBV factor guide: ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, adult default 75
+- [x] Add editable EBV factor selection across Prime Planner and Anticoagulation: adult male 75 mL/kg, adult female 65 mL/kg, adult average/unknown 70 mL/kg, and a weight-based guide of ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, and adult-sized/unknown 70
 - [x] Add `AT3 / antithrombin III` support to the anticoagulation section
+- [x] Add optional `Repeat ACT After AT3` input so the HDR curve can be updated from an observed post-AT3 ACT instead of a guessed AT3-dose effect
 - [ ] Expand heparin-resistance support notes where relevant
 - [x] Add `Bivalirudin` dosing support
 - [x] Add `Argatroban` dosing support
@@ -469,6 +471,31 @@ The heparin tally idea is strong and should improve the anticoagulation section 
   - `Initial heparin dose`
   - `Total heparin dose tallied`
   - `Protamine dose from total logged heparin`
+
+### Notes On AT3 And HDR Curve Updates
+
+The safest project direction is to treat AT3 replacement as a heparin-resistance support feature that can change observed heparin responsiveness, but not as a standalone predictor of a new heparin dose-response curve.
+
+- Current evidence supports that antithrombin supplementation can restore heparin responsiveness in many heparin-resistant cardiac surgery patients.
+- However, the literature does not provide a simple validated equation that reliably predicts a new HDR curve from current AT3 level plus AT3 replacement dose alone.
+- The tool should therefore prompt the user to repeat ACT after AT3 administration and then update the HDR curve using that observed repeat ACT.
+- This keeps the tool educational and safer because the updated curve is based on a measured patient response rather than an unvalidated assumption.
+- If AT3 dose is calculated but no repeat ACT is entered, the tool should warn that AT3 correction may change heparin responsiveness and that ACT should be rechecked before relying on the projection.
+- If repeat ACT after AT3 is entered, the tool should label the curve as `AT3-updated HDR` or `After AT3` so users understand the source of the slope.
+- When the after-AT3 curve is active, the tool should still show the original pre-AT3 projected additional heparin needed to target because some institutions may manage heparin resistance with additional heparin or may not have AT concentrate available. This should be framed as a comparison from the observed slope, not a treatment recommendation.
+- The heparin-response graph should label the pre-AT3 target projection directly on the chart, including the selected target ACT, projected total units/kg, and additional units needed. This makes the comparison visible even before reading the summary cards below the graph.
+- If current AT3 is below the selected target, the tool can provide educational heparin-resistance guidance, but should avoid saying AT3 is automatically recommended. Use wording such as: low AT3 may reduce heparin responsiveness; follow institutional protocol; options may include additional heparin, AT concentrate, FFP, or alternative anticoagulation depending on availability and clinician direction.
+- Low-AT3 guidance should appear directly under the `Current AT3` input in shortened form so users see it while entering AT3 values and the lower graph/results area does not repeat the same warning.
+- Desired AT3 should not be automatically selected because targets may vary by institution and lab reference range. A `Use 100%` quick-select button is acceptable for simulation teaching, paired with a note that common adult AT activity reference range is about 80-120% and users should follow the lab or institutional range.
+- `Heparin distribution volume` should mean the teaching estimate used for concentration math: estimated blood volume plus prime volume. It approximates the volume heparin is mixing in, but it is not a perfect synonym for real-time total circulating volume because CPB prime, transfusion, ultrafiltration, bleeding, and fluid shifts can change the actual circulating volume.
+- The displayed `Current Heparin Concentration` should use total tallied heparin divided by heparin distribution volume once doses are logged. If no doses are logged yet, it can fall back to the estimated loading dose concentration. The HDR slope should still remain tied to the heparin dose that produced the measured ACT unless the user enters a new repeat ACT after an intervention.
+
+Key sources supporting this decision:
+
+- Shore-Lesserson et al. (2018): CPB anticoagulation guideline noting heterogeneous heparin response, ATIII dependence, and limitations of dose-response prediction.
+- Avidan et al. (2005): recombinant antithrombin III restored heparin responsiveness in many heparin-resistant CPB patients.
+- Williams et al. (2000): randomized trial supporting antithrombin concentrate for heparin resistance.
+- Lemmer and Despotis (2002): clinical use of ATIII concentrate potentiated heparin effect in heparin-resistant cardiac surgery patients.
 
 ### Open Decision To Make Before Building
 
