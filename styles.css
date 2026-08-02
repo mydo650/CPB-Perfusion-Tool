@@ -394,6 +394,34 @@ h1 {
   line-height: 1.6;
 }
 
+.checklist-items {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.checklist-items label {
+  display: grid;
+  grid-template-columns: 1.35rem 1fr;
+  align-items: start;
+  gap: 0.65rem;
+  min-height: 2.4rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.checklist-items input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0.05rem 0 0;
+  accent-color: var(--accent-strong);
+}
+
 .home-cta {
   display: inline-flex;
   justify-content: center;
