@@ -134,6 +134,8 @@ h1 {
 
 .module-switcher {
   display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 1.25rem;
   padding: 0.3rem;
@@ -144,7 +146,16 @@ h1 {
 }
 
 .page-switcher {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  row-gap: 0.45rem;
   margin-bottom: 1.4rem;
+  border-radius: 30px;
+}
+
+.page-switcher .module-button {
+  padding-inline: 0.95rem;
 }
 
 .module-button {
@@ -169,6 +180,7 @@ h1 {
 
 .nav-dropdown {
   position: relative;
+  display: inline-flex;
 }
 
 .nav-dropdown > summary {
