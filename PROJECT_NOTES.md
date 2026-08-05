@@ -346,6 +346,23 @@ This section is meant to function as a practical research operations checklist d
 - if the simulation exercise is part of the curriculum, only data from students who consent to the research should be included in the analysis
 - avoid coercive recruitment, especially when faculty are recruiting their own students
 
+### Current IRB Participant-Facing Materials
+
+The current participant-facing materials for the IRB submission are stored outside the web-app source folder at:
+
+`/Users/mydo/Desktop/Perfusion School/Summer /IRB approval/`
+
+- `SHB consent revised.docx`: revised Social/Behavioral consent form
+- `CPB Tool Recruitment Email and Verbal Script.docx`: recruitment email and verbal invitation script
+- `CPB Tool Participant Simulation Instructions and Case Scenario.docx`: participant instructions and simulation case scenario material
+- `CPB Tool Participant Surveys and Debrief Questions.docx`: data collection form for workload, usability, open-ended feedback, and debrief questions
+
+Recommended IRB upload categories:
+
+- Recruitment email/verbal script: `Recruitment Material`
+- Participant simulation instructions/case scenario: `Detailed Protocol`, `Study Instrument`, or similar participant-facing study-material category
+- Surveys and debrief questions: `Data Collection Form`, `Survey/Questionnaire`, or similar study instrument category
+
 ### When To Pause And Re-check IRB Before Proceeding
 
 - if we add minors

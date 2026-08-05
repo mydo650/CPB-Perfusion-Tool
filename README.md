@@ -85,6 +85,21 @@ Develop and pilot a mobile-friendly, web-based CPB perfusion support tool that a
 
 Participation in the research portion is voluntary and will not affect grades, evaluations, academic standing, or access to educational activities. No clinical care, medical-record review, biological specimens, or protected health information are planned.
 
+### IRB Participant-Facing Materials
+
+Current participant-facing IRB materials are stored outside the web-app source folder in:
+
+`/Users/mydo/Desktop/Perfusion School/Summer /IRB approval/`
+
+Upload or maintain these documents with the IRB submission:
+
+- `SHB consent revised.docx` — revised Social/Behavioral consent form.
+- `CPB Tool Recruitment Email and Verbal Script.docx` — recruitment email and verbal invitation script.
+- `CPB Tool Participant Simulation Instructions and Case Scenario.docx` — participant instructions and simulation case scenario material.
+- `CPB Tool Participant Surveys and Debrief Questions.docx` — data collection form for workload, usability, open-ended feedback, and debrief questions.
+
+These documents are participant-facing research materials and should remain consistent with the final IRB-approved protocol before recruitment or data collection begins.
+
 ### Data Plan
 
 - Use study codes rather than participant names on research records whenever possible.

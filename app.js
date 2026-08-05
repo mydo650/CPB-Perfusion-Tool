@@ -1611,17 +1611,29 @@ function renderPrimePlan(evaluation) {
 function syncPrimeEbvQuickState() {
   if (!primeForm) return;
   const currentEbvFactor = primeForm.elements.namedItem("primeEbvFactor")?.value;
+  const source = primeForm.dataset.ebvSelectionSource ?? "";
+  const shouldHighlightQuickValue = source !== "weight-guide" && source !== "custom";
   primeEbvQuickButtons.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.primeEbvQuick === currentEbvFactor);
+    button.classList.toggle("is-active", shouldHighlightQuickValue && button.dataset.primeEbvQuick === currentEbvFactor);
   });
+  primeEbvGuideButton?.classList.toggle("is-active", source === "weight-guide");
 }
 
 function syncAnticoagEbvQuickState() {
   if (!anticoagForm) return;
   const currentEbvFactor = anticoagForm.elements.namedItem("anticoagEbvFactor")?.value;
+  const source = anticoagForm.dataset.ebvSelectionSource ?? "";
+  const shouldHighlightQuickValue = source !== "weight-guide" && source !== "custom";
   anticoagEbvQuickButtons.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.anticoagEbvQuick === currentEbvFactor);
+    button.classList.toggle("is-active", shouldHighlightQuickValue && button.dataset.anticoagEbvQuick === currentEbvFactor);
   });
+  anticoagEbvGuideButton?.classList.toggle("is-active", source === "weight-guide");
+}
+
+function markEbvSelectionCustomIfEditing(form, ebvFieldName) {
+  if (document.activeElement === form.elements.namedItem(ebvFieldName)) {
+    form.dataset.ebvSelectionSource = "custom";
+  }
 }
 
 function applyWeightBasedEbvGuide(form, weightFieldName, ebvFieldName, configMap, summaryElement, renderCallback) {
@@ -1633,6 +1645,7 @@ function applyWeightBasedEbvGuide(form, weightFieldName, ebvFieldName, configMap
   }
 
   form.elements.namedItem(ebvFieldName).value = String(suggestedEbvFactor);
+  form.dataset.ebvSelectionSource = "weight-guide";
   renderCallback();
 }
 
@@ -2737,6 +2750,7 @@ function renderPerfusion() {
 function renderPrime() {
   const evaluation = evaluatePrimeCalculator(collectInputs(primeForm));
   updateFormInvalidState(primeForm, evaluation.fields, primeSummary);
+  markEbvSelectionCustomIfEditing(primeForm, "primeEbvFactor");
   renderPrimePlan(evaluation);
   syncPrimeEbvQuickState();
 
@@ -3091,6 +3105,7 @@ function syncTargetActPresetState() {
 function renderAnticoagulation() {
   const evaluation = evaluateAnticoagulationCalculator(collectInputs(anticoagForm));
   updateFormInvalidState(anticoagForm, evaluation.fields, anticoagSummary);
+  markEbvSelectionCustomIfEditing(anticoagForm, "anticoagEbvFactor");
   syncTargetActPresetState();
   syncAnticoagEbvQuickState();
   const hasAt3Deficit = evaluation.results.at3DoseUnits !== null && evaluation.results.at3DoseUnits > 0;
@@ -3289,6 +3304,7 @@ if (primeForm) {
   primeEbvQuickButtons.forEach((button) => {
     button.addEventListener("click", () => {
       primeForm.elements.namedItem("primeEbvFactor").value = button.dataset.primeEbvQuick;
+      primeForm.dataset.ebvSelectionSource = "quick";
       renderPrime();
     });
   });
@@ -3391,6 +3407,7 @@ if (anticoagForm) {
   anticoagEbvQuickButtons.forEach((button) => {
     button.addEventListener("click", () => {
       anticoagForm.elements.namedItem("anticoagEbvFactor").value = button.dataset.anticoagEbvQuick;
+      anticoagForm.dataset.ebvSelectionSource = "quick";
       renderAnticoagulation();
     });
   });
