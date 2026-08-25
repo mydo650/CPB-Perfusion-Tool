@@ -1093,6 +1093,11 @@ input[aria-invalid="true"] {
   gap: 0.2rem;
 }
 
+.drug-detail-list .drug-detail-divider {
+  border-top: 1px dotted var(--border);
+  min-height: 0;
+}
+
 .drug-detail-list dt {
   font-weight: 800;
   color: var(--ink);
