@@ -2972,9 +2972,50 @@ function renderHeparinCurve(curve, options = {}) {
   const formatTick = (tick) => roundTo(tick, 1).toFixed(tick % 1 === 0 ? 0 : 1);
   const formatHover = (label, point) => `${label}: ${roundTo(point.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(point.dosePerKg, 0).toFixed(0)} units/kg, ACT ${roundTo(point.actSeconds, 0).toFixed(0)} sec`;
   const labelX = (point) => clamp(x(point.concentrationUnitsPerMl), margin.left + 82, width - margin.right - 82);
-  const labelBelowY = (point) => clamp(y(point.actSeconds) + 30, margin.top + 30, height - margin.bottom - 12);
-  const labelAboveY = (point) => clamp(y(point.actSeconds) - 28, margin.top + 18, height - margin.bottom - 42);
-  const labelHighAboveY = (point) => clamp(y(point.actSeconds) - 46, margin.top + 18, height - margin.bottom - 60);
+  const labelBoxes = [];
+  const boxesOverlap = (left, right) => !(
+    left.x + left.width < right.x
+    || right.x + right.width < left.x
+    || left.y + left.height < right.y
+    || right.y + right.height < left.y
+  );
+  const reserveLabelPosition = (baseX, baseY, labelWidth = 116, labelHeight = 20, yOffsets = [0]) => {
+    const clampedX = clamp(baseX, margin.left + labelWidth / 2 + 4, width - margin.right - labelWidth / 2 - 4);
+    const candidateYValues = yOffsets.map((offset) => clamp(baseY + offset, margin.top + labelHeight, height - margin.bottom - 10));
+    const uniqueCandidateYValues = [...new Set(candidateYValues.map((value) => Math.round(value)))];
+    const chosenY = uniqueCandidateYValues.find((candidateY) => {
+      const candidateBox = {
+        x: clampedX - labelWidth / 2,
+        y: candidateY - labelHeight,
+        width: labelWidth,
+        height: labelHeight,
+      };
+      return !labelBoxes.some((box) => boxesOverlap(candidateBox, box));
+    }) ?? uniqueCandidateYValues[0];
+
+    labelBoxes.push({
+      x: clampedX - labelWidth / 2,
+      y: chosenY - labelHeight,
+      width: labelWidth,
+      height: labelHeight,
+    });
+
+    return { x: clampedX, y: chosenY };
+  };
+  const reservePointLabel = (point, placement = "above", labelWidth = 116, labelHeight = 20) => {
+    const preferredOffsets = {
+      above: [-28, -44, -60, 30, 46, 62],
+      below: [30, 46, 62, -28, -44, -60],
+      highAbove: [-46, -62, -78, -30, 30, 46],
+    };
+    return reserveLabelPosition(
+      labelX(point),
+      y(point.actSeconds),
+      labelWidth,
+      labelHeight,
+      preferredOffsets[placement] ?? preferredOffsets.above,
+    );
+  };
   const lineLabelPoint = (lineCurve, lineEndPoint, verticalOffset = -12) => {
     const concentrationUnitsPerMl = Math.min(
       lineEndPoint.concentrationUnitsPerMl * 0.58,
@@ -2986,9 +3027,13 @@ function renderHeparinCurve(curve, options = {}) {
       y: clamp(y(actSeconds) + verticalOffset, margin.top + 18, height - margin.bottom - 24),
     };
   };
-  const activeSlopeLabelPoint = lineLabelPoint(curve, lineEnd, comparisonCurve ? -16 : -12);
-  const comparisonSlopeLabelPoint = comparisonCurve && comparisonLineEnd
+  const activeSlopeLabelPointRaw = lineLabelPoint(curve, lineEnd, comparisonCurve ? -16 : -12);
+  const comparisonSlopeLabelPointRaw = comparisonCurve && comparisonLineEnd
     ? lineLabelPoint(comparisonCurve, comparisonLineEnd, 22)
+    : null;
+  const activeSlopeLabelPoint = reserveLabelPosition(activeSlopeLabelPointRaw.x, activeSlopeLabelPointRaw.y, 158, 20, [0, -20, 20, -40, 40]);
+  const comparisonSlopeLabelPoint = comparisonSlopeLabelPointRaw
+    ? reserveLabelPosition(comparisonSlopeLabelPointRaw.x, comparisonSlopeLabelPointRaw.y, 158, 20, [0, 22, -22, 44, -44])
     : null;
   const slopeLabelMarkup = `
     <text class="curve-slope-label curve-slope-label-active" x="${activeSlopeLabelPoint.x}" y="${activeSlopeLabelPoint.y}" text-anchor="middle">
@@ -3009,6 +3054,23 @@ function renderHeparinCurve(curve, options = {}) {
   const graphPointAttributes = (tooltip) => usesTouchGraphControls()
     ? ""
     : `tabindex="0" data-tooltip="${tooltip}"`;
+  const targetAct = roundTo(curve.points.target.actSeconds, 0).toFixed(0);
+  const targetActNumber = Number(targetAct);
+  const targetMatchesMeasured = Math.abs(x(curve.points.target.concentrationUnitsPerMl) - x(curve.points.measured.concentrationUnitsPerMl)) < 3
+    && Math.abs(y(curve.points.target.actSeconds) - y(curve.points.measured.actSeconds)) < 3;
+  const targetLabelPosition = targetMatchesMeasured
+    ? null
+    : reservePointLabel(curve.points.target, "below", comparisonCurve ? 144 : 130, 42);
+  const shouldRenderActReference = (actSeconds) => {
+    if (Math.abs(targetActNumber - actSeconds) <= 1) return false;
+    const activeReferenceX = x(concentrationForAct(actSeconds));
+    const activeReferenceY = y(actSeconds);
+    const activePoints = [curve.points.measured, curve.points.target];
+    return !activePoints.some((point) => (
+      Math.abs(x(point.concentrationUnitsPerMl) - activeReferenceX) < 8
+      && Math.abs(y(point.actSeconds) - activeReferenceY) < 8
+    ));
+  };
   const starPoints = (centerX, centerY, outerRadius, innerRadius, spikes = 5) => {
     const pointsList = [];
     for (let index = 0; index < spikes * 2; index += 1) {
@@ -3020,27 +3082,32 @@ function renderHeparinCurve(curve, options = {}) {
   };
   const pointMarkup = [
     { key: "baseline", label: "Baseline", point: curve.points.baseline },
-    { key: "measured", label: curve.responseLabel ?? "Measured", point: curve.points.measured },
+    { key: "measured", label: targetMatchesMeasured ? `${curve.responseLabel ?? "Measured"} / Target` : curve.responseLabel ?? "Measured", point: curve.points.measured },
   ]
-    .map(({ key, label, point }) => `
+    .map(({ key, label, point }) => {
+      const labelPosition = reservePointLabel(point, "above", label.includes("Target") ? 132 : 104, 20);
+      return `
       <g class="curve-point curve-point-${key}" ${graphPointAttributes(formatHover(label, point))}>
         <circle cx="${x(point.concentrationUnitsPerMl)}" cy="${y(point.actSeconds)}" r="7"></circle>
-        <text x="${labelX(point)}" y="${labelAboveY(point)}" text-anchor="middle">${label}</text>
+        <text x="${labelPosition.x}" y="${labelPosition.y}" text-anchor="middle">${label}</text>
       </g>
-    `)
+    `;
+    })
     .join("");
+  const comparisonMeasuredLabelPosition = comparisonCurve
+    ? reservePointLabel(comparisonCurve.points.measured, "below", 104, 20)
+    : null;
   const comparisonMarkup = comparisonCurve
     ? `
       <line class="curve-comparison-line" x1="${x(0)}" y1="${y(comparisonCurve.points.baseline.actSeconds)}" x2="${x(comparisonLineEnd.concentrationUnitsPerMl)}" y2="${y(comparisonLineEnd.actSeconds)}"></line>
       <g class="curve-comparison-point" ${graphPointAttributes(formatHover("Pre-AT3", comparisonCurve.points.measured))}>
         <circle cx="${x(comparisonCurve.points.measured.concentrationUnitsPerMl)}" cy="${y(comparisonCurve.points.measured.actSeconds)}" r="6"></circle>
-        <text x="${labelX(comparisonCurve.points.measured)}" y="${labelBelowY(comparisonCurve.points.measured)}" text-anchor="middle">Pre-AT3</text>
+        <text x="${comparisonMeasuredLabelPosition.x}" y="${comparisonMeasuredLabelPosition.y}" text-anchor="middle">Pre-AT3</text>
       </g>
     `
     : "";
   const act480Concentration = concentrationForAct(480);
   const act600Concentration = concentrationForAct(600);
-  const targetAct = roundTo(curve.points.target.actSeconds, 0).toFixed(0);
   const targetAdditionalUnits = Math.round(curve.additionalHeparinUnits).toLocaleString();
   const targetLabel = `Target ACT ${targetAct}`;
   const targetTooltip = `${targetLabel}: ${roundTo(curve.points.target.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(curve.points.target.dosePerKg, 0).toFixed(0)} units/kg, ${targetAdditionalUnits} additional units`;
@@ -3050,34 +3117,49 @@ function renderHeparinCurve(curve, options = {}) {
   const comparisonTargetTooltip = comparisonCurve
     ? `Pre-AT3 to Target ACT ${comparisonTargetAct}: ${roundTo(comparisonCurve.points.target.concentrationUnitsPerMl, 2).toFixed(2)} units/mL, about ${comparisonTargetTotalDosePerKg} units/kg total, ${comparisonTargetAdditionalUnits} additional units`
     : "";
+  const comparisonTargetLabelPosition = comparisonCurve
+    ? reservePointLabel(comparisonCurve.points.target, "highAbove", 150, 50)
+    : null;
   const comparisonTargetMarkup = comparisonCurve
     ? `
       <g class="curve-comparison-target" ${graphPointAttributes(comparisonTargetTooltip)}>
         <rect x="${x(comparisonCurve.points.target.concentrationUnitsPerMl) - 7}" y="${y(comparisonCurve.points.target.actSeconds) - 7}" width="14" height="14" transform="rotate(45 ${x(comparisonCurve.points.target.concentrationUnitsPerMl)} ${y(comparisonCurve.points.target.actSeconds)})"></rect>
-        <text x="${labelX(comparisonCurve.points.target)}" y="${labelHighAboveY(comparisonCurve.points.target)}" text-anchor="middle">
-          <tspan x="${labelX(comparisonCurve.points.target)}">Pre-AT3 to ACT ${comparisonTargetAct}</tspan>
-          <tspan x="${labelX(comparisonCurve.points.target)}" dy="15">${comparisonTargetTotalDosePerKg} units/kg total</tspan>
-          <tspan x="${labelX(comparisonCurve.points.target)}" dy="15">+${comparisonTargetAdditionalUnits} units</tspan>
+        <text x="${comparisonTargetLabelPosition.x}" y="${comparisonTargetLabelPosition.y}" text-anchor="middle">
+          <tspan x="${comparisonTargetLabelPosition.x}">Pre-AT3 to ACT ${comparisonTargetAct}</tspan>
+          <tspan x="${comparisonTargetLabelPosition.x}" dy="15">${comparisonTargetTotalDosePerKg} units/kg total</tspan>
+          <tspan x="${comparisonTargetLabelPosition.x}" dy="15">+${comparisonTargetAdditionalUnits} units</tspan>
         </text>
       </g>
     `
     : "";
+  const act480LabelPosition = shouldRenderActReference(480)
+    ? reserveLabelPosition(x(act480Concentration), y(480), 52, 18, [-18, -34, 18, 34])
+    : null;
+  const act600LabelPosition = shouldRenderActReference(600)
+    ? reserveLabelPosition(x(act600Concentration), y(600), 52, 18, [-14, -30, 18, 34])
+    : null;
   const referencePointMarkup = `
+    ${shouldRenderActReference(480) ? `
     <g class="curve-reference curve-reference-480" ${graphPointAttributes(formatReferenceHover("ACT 480 reference", 480))}>
       <polygon points="${starPoints(x(act480Concentration), y(480), 12, 5)}"></polygon>
-      <text x="${x(act480Concentration)}" y="${y(480) - 18}" text-anchor="middle">480</text>
+      <text x="${act480LabelPosition.x}" y="${act480LabelPosition.y}" text-anchor="middle">480</text>
     </g>
+    ` : ""}
+    ${shouldRenderActReference(600) ? `
     <g class="curve-reference curve-reference-600" ${graphPointAttributes(formatReferenceHover("ACT 600 reference", 600))}>
       <circle cx="${x(act600Concentration)}" cy="${y(600)}" r="8"></circle>
-      <text x="${x(act600Concentration)}" y="${y(600) - 14}" text-anchor="middle">600</text>
+      <text x="${act600LabelPosition.x}" y="${act600LabelPosition.y}" text-anchor="middle">600</text>
     </g>
+    ` : ""}
+    ${targetMatchesMeasured ? "" : `
     <g class="curve-selected-target" ${graphPointAttributes(targetTooltip)}>
       <rect x="${x(curve.points.target.concentrationUnitsPerMl) - 8}" y="${y(curve.points.target.actSeconds) - 8}" width="16" height="16" transform="rotate(45 ${x(curve.points.target.concentrationUnitsPerMl)} ${y(curve.points.target.actSeconds)})"></rect>
-      <text x="${labelX(curve.points.target)}" y="${labelBelowY(curve.points.target)}" text-anchor="middle">
-        <tspan x="${labelX(curve.points.target)}">${comparisonCurve ? "After-AT3 target" : targetLabel}</tspan>
-        <tspan x="${labelX(curve.points.target)}" dy="16">${targetAdditionalUnits} units addl.</tspan>
+      <text x="${targetLabelPosition.x}" y="${targetLabelPosition.y}" text-anchor="middle">
+        <tspan x="${targetLabelPosition.x}">${comparisonCurve ? "After-AT3 target" : targetLabel}</tspan>
+        <tspan x="${targetLabelPosition.x}" dy="16">${targetAdditionalUnits} units addl.</tspan>
       </text>
     </g>
+    `}
   `;
 
   if (comparisonCurve) {
