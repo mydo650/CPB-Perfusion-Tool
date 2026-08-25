@@ -280,6 +280,13 @@ The working platform plan is:
 - keep `main` as the stable version
 - merge when a small feature is stable and tested
 - if a partner also uses Codex, divide ownership clearly by feature or file area
+- when requesting interface changes, identify the intended screen scope when possible:
+  - `mobile/phone only` for phone-specific layout or sizing changes
+  - `desktop/laptop only` for regular website view changes
+  - `tablet` for middle-size layout changes
+  - `global` or `both desktop and mobile` for changes that should affect all views
+- if the requested screen scope is unclear, Codex should ask before changing layout or visual behavior
+- calculation and wording changes usually affect the full webtool unless a separate screen-specific behavior is explicitly requested
 
 ## Decisions
 
@@ -415,7 +422,7 @@ This section captures the current build priorities that came out of mentor feedb
 - [x] Use the heparin tally to calculate final protamine dose from `total heparin administered`
 - [x] Remove the separate protamine source choice so reversal follows the heparin tally only
 - [x] If no heparin is tallied, prompt the user to log the initial heparin dose before protamine is calculated
-- [x] Add heparin concentration rise/run using EBV + prime volume as the distribution volume
+- [x] Add heparin concentration rise/run using estimated blood volume + prime volume
 - [x] Add editable EBV factor selection across Prime Planner and Anticoagulation: adult male 75 mL/kg, adult female 65 mL/kg, adult average/unknown 70 mL/kg, and a weight-based guide of ≤10 kg 85, 11–20 kg 80, 21–30 kg 75, 31–40 kg 70, 41–50 kg 65, and adult-sized/unknown 70
 - [x] Add `AT3 / antithrombin III` support to the anticoagulation section
 - [x] Add optional `Repeat ACT After AT3` input so the HDR curve can be updated from an observed post-AT3 ACT instead of a guessed AT3-dose effect
@@ -504,8 +511,9 @@ The safest project direction is to treat AT3 replacement as a heparin-resistance
 - If current AT3 is below the selected target, the tool can provide educational heparin-resistance guidance, but should avoid saying AT3 is automatically recommended. Use wording such as: low AT3 may reduce heparin responsiveness; follow institutional protocol; options may include additional heparin, AT concentrate, FFP, or alternative anticoagulation depending on availability and clinician direction.
 - Low-AT3 guidance should appear directly under the `Current AT3` input in shortened form so users see it while entering AT3 values and the lower graph/results area does not repeat the same warning.
 - Desired AT3 should not be automatically selected because targets may vary by institution and lab reference range. A `Use 100%` quick-select button is acceptable for simulation teaching, paired with a note that common adult AT activity reference range is about 80-120% and users should follow the lab or institutional range.
-- `Heparin distribution volume` should mean the teaching estimate used for concentration math: estimated blood volume plus prime volume. It approximates the volume heparin is mixing in, but it is not a perfect synonym for real-time total circulating volume because CPB prime, transfusion, ultrafiltration, bleeding, and fluid shifts can change the actual circulating volume.
-- The displayed `Current Heparin Concentration` should use total tallied heparin divided by heparin distribution volume once doses are logged. If no doses are logged yet, it can fall back to the estimated loading dose concentration. The HDR slope should still remain tied to the heparin dose that produced the measured ACT unless the user enters a new repeat ACT after an intervention.
+- `Estimated blood volume + prime volume` should remain visible as an on-bypass volume awareness estimate after the circuit prime joins circulation.
+- Pre-bypass loading concentration and HDR rise/run should use patient estimated blood volume only, because the initial heparin bolus is circulating in the patient before going on bypass and should not count the circuit prime volume yet.
+- The displayed loading concentration should be framed as heparin units divided by patient EBV before bypass. The HDR rise/run should remain tied to the heparin dose that produced the measured ACT unless the user enters a new repeat ACT after an intervention.
 
 Key sources supporting this decision:
 

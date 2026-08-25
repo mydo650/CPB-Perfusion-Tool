@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Cannula Selection</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
   </head>
   <body class="page-cannula-selection">
     <main class="app-shell">
@@ -24,36 +24,13 @@
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
         <a class="module-button page-link is-active" href="./cannula-selection.html" aria-current="page">Cannula Selection</a>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Drug Library</summary>
-          <div class="dropdown-menu">
-            <a href="./drug-library.html">Overview</a>
-            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
-            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
-            <a href="./drug-library.html#vasopressors">Vasopressors</a>
-            <a href="./drug-library.html#inotropes">Inotropes</a>
-            <a href="./drug-library.html#vasodilators">Vasodilators</a>
-            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
-            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
-            <a href="./drug-library.html#antifibrinolytics">Antifibrinolytics</a>
-            <a href="./drug-library.html#paralytics">Paralytics</a>
-          </div>
-        </details>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Electrolytes/Blood Gas Ranges</summary>
-          <div class="dropdown-menu">
-            <a href="./electrolytes.html">Overview</a>
-            <a href="./electrolytes.html#potassium">Potassium</a>
-            <a href="./electrolytes.html#calcium">Calcium</a>
-            <a href="./electrolytes.html#magnesium">Magnesium</a>
-            <a href="./electrolytes.html#sodium">Sodium</a>
-            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
-          </div>
-        </details>
+        <a class="module-button page-link" href="./drug-library.html" aria-current="false">Drug Library</a>
+        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes/Blood Gas Ranges</a>
         <a class="module-button page-link" href="./blood-management.html" aria-current="false">Blood Products/Blood Management</a>
         <a class="module-button page-link" href="./checklist.html" aria-current="false">Checklist</a>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
+      <p class="mobile-nav-hint" aria-hidden="true">Swipe tabs left/right for more →</p>
 
       <section class="workspace page-workspace" aria-label="Cannula selection">
         <section class="panel output-panel" aria-labelledby="cannula-selection-title">
@@ -97,7 +74,7 @@
                   <small class="hint">Examples include DLP, Bio-Medicus NextGen, EOPA, HLS, or Optisite depending on manufacturer.</small>
                 </label>
                 <article class="result-card">
-                  <p class="result-label">Recommended Size</p>
+                  <p class="result-label">Recommended Cannula Size</p>
                   <output id="cannulaArterialRecommendedOutput" class="result-value">--</output>
                   <p id="cannulaArterialRecommendedStatus" class="result-status">Set a target flow to generate an arterial recommendation.</p>
                 </article>
@@ -125,7 +102,7 @@
                   <small id="cannulaVenousRoleHint" class="hint">Examples include DLP, MC2, metal-tip right-angle, plastic-tip right-angle, or HLS depending on manufacturer.</small>
                 </label>
                 <article class="result-card">
-                  <p class="result-label">Recommended Size</p>
+                  <p class="result-label">Recommended Cannula Size</p>
                   <output id="cannulaVenousRecommendedOutput" class="result-value">--</output>
                   <p id="cannulaVenousRecommendedStatus" class="result-status">Set a target flow to generate a venous recommendation.</p>
                 </article>
@@ -153,7 +130,7 @@
                   <small id="cannulaBicavalRoleHint" class="hint">This lane favors two-stage, multi-stage, or bicaval-style venous families when available.</small>
                 </label>
                 <article class="result-card">
-                  <p class="result-label">Recommended Size</p>
+                  <p class="result-label">Recommended Cannula Size</p>
                   <output id="cannulaBicavalRecommendedOutput" class="result-value">--</output>
                   <p id="cannulaBicavalRecommendedStatus" class="result-status">Set a target flow to generate a bicaval recommendation.</p>
                 </article>
@@ -166,7 +143,7 @@
                 <output id="cannulaFlowDisplay" for="cannulaFlowSlider">4.0 L/min</output>
               </div>
               <input id="cannulaFlowSlider" class="cannula-flow-slider" type="range" min="0" max="7" step="0.1" value="4" />
-              <small id="cannulaFlowHint" class="hint">Use the slider or drag on either chart to move arterial and venous comparisons to the same liters per minute.</small>
+              <small id="cannulaFlowHint" class="hint">Use the slider to move arterial and venous comparisons to the same liters per minute. The charts display pressure-drop estimates.</small>
             </div>
 
             <div class="cannula-compare-grid">
@@ -176,6 +153,7 @@
                     <h3 id="cannula-arterial-title">Arterial Outflow</h3>
                     <p id="cannulaArterialSummary">Compare arterial pressure-drop behavior at the shared target flow.</p>
                   </div>
+                  <button type="button" class="curve-action-button cannula-expand-button" id="cannulaArterialExpandButton" data-cannula-expand="arterial" aria-label="Expand arterial pressure-drop graph">⤢</button>
                 </div>
                 <div class="curve-chart-wrap cannula-chart-wrap">
                   <svg id="cannulaArterialChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-arterial-title cannulaArterialSummary"></svg>
@@ -185,7 +163,8 @@
                   <article class="result-card">
                     <p class="result-label">Arterial Size Override</p>
                     <div id="cannulaArterialSizeButtons" class="quick-select-row" aria-label="Available arterial cannula sizes"></div>
-                    <p class="result-status">The tool recommends the smallest arterial size that stays under the target threshold at the shared flow.</p>
+                    <button id="cannulaArterialUseRecommended" class="curve-action-button cannula-recommendation-reset" type="button">Use recommended size</button>
+                    <p class="result-status">Choose a different arterial size to compare pressure drop, or return to the recommended size.</p>
                   </article>
                   <article class="result-card">
                     <p class="result-label">Displayed Cannula</p>
@@ -206,6 +185,7 @@
                     <h3 id="cannula-venous-title">Venous Drainage</h3>
                     <p id="cannulaVenousSummary">Compare venous drainage resistance at the same target flow.</p>
                   </div>
+                  <button type="button" class="curve-action-button cannula-expand-button" id="cannulaVenousExpandButton" data-cannula-expand="venous" aria-label="Expand venous pressure-drop graph">⤢</button>
                 </div>
                 <div class="curve-chart-wrap cannula-chart-wrap">
                   <svg id="cannulaVenousChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-venous-title cannulaVenousSummary"></svg>
@@ -215,7 +195,8 @@
                   <article class="result-card">
                     <p class="result-label">Venous Size Override</p>
                     <div id="cannulaVenousSizeButtons" class="quick-select-row" aria-label="Available venous cannula sizes"></div>
-                    <p class="result-status">The tool recommends the smallest venous size that stays under the target threshold at the shared flow.</p>
+                    <button id="cannulaVenousUseRecommended" class="curve-action-button cannula-recommendation-reset" type="button">Use recommended size</button>
+                    <p class="result-status">Choose a different venous size to compare pressure drop, or return to the recommended size.</p>
                   </article>
                   <article class="result-card">
                     <p class="result-label">Displayed Cannula</p>
@@ -236,6 +217,7 @@
                     <h3 id="cannula-bicaval-title">Bicaval / Intracardiac Venous</h3>
                     <p id="cannulaBicavalSummary">Compare a separate bicaval or intracardiac venous option at the same target flow.</p>
                   </div>
+                  <button type="button" class="curve-action-button cannula-expand-button" id="cannulaBicavalExpandButton" data-cannula-expand="bicaval" aria-label="Expand bicaval pressure-drop graph">⤢</button>
                 </div>
                 <div class="curve-chart-wrap cannula-chart-wrap">
                   <svg id="cannulaBicavalChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-bicaval-title cannulaBicavalSummary"></svg>
@@ -245,7 +227,8 @@
                   <article class="result-card">
                     <p class="result-label">Bicaval Size Override</p>
                     <div id="cannulaBicavalSizeButtons" class="quick-select-row" aria-label="Available bicaval cannula sizes"></div>
-                    <p class="result-status">Use this panel to compare a separate intracardiac drainage option at the same target flow.</p>
+                    <button id="cannulaBicavalUseRecommended" class="curve-action-button cannula-recommendation-reset" type="button">Use recommended size</button>
+                    <p class="result-status">Choose a different bicaval size to compare pressure drop, or return to the recommended size.</p>
                   </article>
                   <article class="result-card">
                     <p class="result-label">Displayed Cannula</p>
@@ -268,7 +251,7 @@
             <article class="result-card">
               <p class="result-label">Shared Target Flow</p>
               <output id="cannulaFlowOutput" class="result-value">--</output>
-              <p id="cannulaFlowStatus" class="result-status">Adjust liters per minute with the slider or either chart drag control.</p>
+              <p id="cannulaFlowStatus" class="result-status">Adjust liters per minute with the slider. The charts display pressure-drop estimates at the selected target flow.</p>
             </article>
             <article class="result-card">
               <p class="result-label">Target Cardiac Index</p>
@@ -306,10 +289,10 @@
           </section>
 
           <section class="formula-panel" aria-labelledby="cannula-chart-title">
-            <h3 id="cannula-chart-title">Interactive Chart Workflow</h3>
+            <h3 id="cannula-chart-title">Chart Workflow</h3>
             <ol class="references-list">
               <li>Select a manufacturer family.</li>
-              <li>Drag or set one shared target blood flow.</li>
+              <li>Set one shared target blood flow with the slider.</li>
               <li>Review arterial, venous, and optional bicaval family recommendations side by side.</li>
               <li>Read the expected pressure drop at that flow from each published performance curve.</li>
               <li>Optionally override the displayed size in any panel to compare nearby choices.</li>
@@ -353,6 +336,23 @@
         </section>
       </section>
     </main>
-    <script src="./app.js"></script>
+    <section class="curve-modal" id="cannulaCurveModal" aria-labelledby="cannula-curve-modal-title" aria-modal="true" role="dialog" hidden>
+      <div class="curve-modal-panel">
+        <div class="curve-modal-header">
+          <div>
+            <h3 id="cannula-curve-modal-title">Cannula Pressure-Drop Graph</h3>
+            <p id="cannulaCurveModalSummary">Expanded pressure-drop graph for the selected cannula lane.</p>
+          </div>
+          <button type="button" class="curve-action-button" id="closeCannulaCurveModalButton">Close</button>
+        </div>
+        <div class="curve-modal-chart-wrap">
+          <svg id="cannulaCurveModalChart" class="curve-chart" viewBox="0 0 720 400" role="img" aria-labelledby="cannula-curve-modal-title cannulaCurveModalSummary"></svg>
+          <div id="cannulaCurveModalTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
+        </div>
+        <p class="curve-caveat">Expanded view is for readability during simulation planning. Confirm cannula choice and pressure-drop interpretation against manufacturer data and institutional practice.</p>
+      </div>
+    </section>
+    <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
+    <script src="./app.js?v=pilot-mobile-21"></script>
   </body>
 </html>

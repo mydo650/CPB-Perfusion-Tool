@@ -347,7 +347,7 @@ test("heparin dose response curve projects target dose from concentration rise/r
   assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinUnits), 28571);
 });
 
-test("prime volume is included in heparin concentration distribution volume", () => {
+test("prime volume is tracked separately while pre-bypass HDR uses patient blood volume", () => {
   const evaluated = evaluateAnticoagulationCalculator({
     anticoagWeightKg: "80",
     anticoagEbvFactor: "75",
@@ -360,7 +360,9 @@ test("prime volume is included in heparin concentration distribution volume", ()
   });
 
   assert.equal(evaluated.results.distributionVolumeMl, 7200);
-  assert.equal(roundTo(evaluated.results.heparinLoadingConcentrationUnitsPerMl, 2), 3.33);
+  assert.equal(roundTo(evaluated.results.heparinLoadingConcentrationUnitsPerMl, 2), 4);
+  assert.equal(evaluated.results.heparinResponseCurve.distributionVolumeMl, 6000);
+  assert.equal(roundTo(evaluated.results.heparinResponseCurve.slopeActPerUnitMl, 2), 105);
   assert.equal(Math.round(evaluated.results.heparinResponseCurve.requiredHeparinDosePerKg), 357);
 });
 

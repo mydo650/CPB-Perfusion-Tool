@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Support Calculator</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
   </head>
   <body class="page-perfusion">
     <main class="app-shell">
@@ -24,47 +24,32 @@
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
         <a class="module-button page-link" href="./cannula-selection.html" aria-current="false">Cannula Selection</a>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Drug Library</summary>
-          <div class="dropdown-menu">
-            <a href="./drug-library.html">Overview</a>
-            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
-            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
-            <a href="./drug-library.html#vasopressors">Vasopressors</a>
-            <a href="./drug-library.html#inotropes">Inotropes</a>
-            <a href="./drug-library.html#vasodilators">Vasodilators</a>
-            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
-            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
-            <a href="./drug-library.html#antifibrinolytics">Antifibrinolytics</a>
-            <a href="./drug-library.html#paralytics">Paralytics</a>
-          </div>
-        </details>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Electrolytes/Blood Gas Ranges</summary>
-          <div class="dropdown-menu">
-            <a href="./electrolytes.html">Overview</a>
-            <a href="./electrolytes.html#potassium">Potassium</a>
-            <a href="./electrolytes.html#calcium">Calcium</a>
-            <a href="./electrolytes.html#magnesium">Magnesium</a>
-            <a href="./electrolytes.html#sodium">Sodium</a>
-            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
-          </div>
-        </details>
+        <a class="module-button page-link" href="./drug-library.html" aria-current="false">Drug Library</a>
+        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes/Blood Gas Ranges</a>
         <a class="module-button page-link" href="./blood-management.html" aria-current="false">Blood Products/Blood Management</a>
         <a class="module-button page-link" href="./checklist.html" aria-current="false">Checklist</a>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
+      <p class="mobile-nav-hint" aria-hidden="true">Swipe tabs left/right for more →</p>
 
       <section class="workspace page-workspace" aria-label="Perfusion calculator">
+        <section class="formula-panel perfusion-flow-map-panel" aria-labelledby="flow-map-title">
+          <div class="panel-header">
+            <h3 id="flow-map-title">Indexed Flow Map</h3>
+            <p>See how each cardiac index from 1.6 to 3.0 translates into pump flow at the current BSA.</p>
+          </div>
+          <div id="flowMapOutput" class="flow-map-grid" aria-live="polite"></div>
+          <p id="flowMapStatus" class="formula-note">Enter weight to map each cardiac index to liters per minute. Add height for Mosteller BSA.</p>
+        </section>
         <section class="panel input-panel" aria-labelledby="inputs-title">
           <div class="panel-header">
             <h2 id="inputs-title">Perfusion Inputs</h2>
-            <p>All values use metric units for fast study workflow.</p>
+            <p>All values use metric units. Results update as entries are completed.</p>
           </div>
           <form id="calculator-form" novalidate>
             <div class="field-grid">
-              <label class="field"><span>Height</span><div class="input-wrap"><input id="heightCm" name="heightCm" type="number" inputmode="decimal" min="30" max="250" step="0.1" autocomplete="off" autofocus /><span class="unit">cm</span></div><small class="hint">Expected range: 30 to 250 cm</small></label>
-              <label class="field"><span>Weight</span><div class="input-wrap"><input id="weightKg" name="weightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" /><span class="unit">kg</span></div><small class="hint">Expected range: 1 to 300 kg</small></label>
+              <label class="field"><span>Weight</span><div class="input-wrap"><input id="weightKg" name="weightKg" type="number" inputmode="decimal" min="1" max="300" step="0.1" autocomplete="off" autofocus /><span class="unit">kg</span></div><small class="hint">Expected range: 1 to 300 kg</small></label>
+              <label class="field"><span>Height</span><div class="input-wrap"><input id="heightCm" name="heightCm" type="number" inputmode="decimal" min="30" max="250" step="0.1" autocomplete="off" /><span class="unit">cm</span></div><small class="hint">Expected range: 30 to 250 cm</small></label>
               <label class="field"><span>DO<sub>2</sub>i Target</span><div class="input-wrap"><input id="do2iTarget" name="do2iTarget" type="number" inputmode="decimal" min="100" max="500" step="1" value="275" autocomplete="off" /><span class="unit">mL O2/min/m²</span></div><small class="hint">Default threshold target for reverse calculations</small></label>
               <label class="field"><span>Cardiac Index (optional)</span><div class="input-wrap"><input id="cardiacIndex" name="cardiacIndex" type="number" inputmode="decimal" min="0.1" max="6" step="0.01" autocomplete="off" /><span class="unit">L/min/m²</span></div><small class="hint">Use when you want DO2i from indexed flow</small></label>
               <label class="field"><span>Pump Flow (optional)</span><div class="input-wrap"><input id="pumpFlow" name="pumpFlow" type="number" inputmode="decimal" min="0.1" max="12" step="0.01" autocomplete="off" /><span class="unit">L/min</span></div><small class="hint">If entered, this overrides CI for DO2i</small></label>
@@ -82,15 +67,6 @@
             <h2 id="results-title">Perfusion Results</h2>
             <p>Outputs update instantly. Incomplete inputs only affect related results.</p>
           </div>
-          <section class="formula-panel perfusion-flow-map-panel" aria-labelledby="flow-map-title">
-            <div class="panel-header">
-              <h3 id="flow-map-title">Indexed Flow Map</h3>
-              <p>See how each cardiac index from 1.6 to 3.0 translates into pump flow at the current BSA.</p>
-            </div>
-            <div id="flowMapOutput" class="flow-map-grid" aria-live="polite"></div>
-            <p id="flowMapStatus" class="formula-note">Enter weight to map each cardiac index to liters per minute. Add height for Mosteller BSA.</p>
-          </section>
-
           <div class="results-grid">
             <article class="result-card"><p class="result-label">Body Surface Area</p><output id="bsaOutput" class="result-value">--</output><p id="bsaStatus" class="result-status">Enter weight. Add height for the Mosteller BSA.</p></article>
             <article class="result-card accent-card"><p class="result-label">Current DO<sub>2</sub>i</p><output id="do2iOutput" class="result-value">--</output><p id="do2iStatus" class="result-status">Enter hemoglobin or hematocrit, SaO2, PaO2, and either CI or pump flow.</p></article>
@@ -132,6 +108,7 @@
 
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
+    <script src="./app.js?v=pilot-mobile-21"></script>
   </body>
 </html>

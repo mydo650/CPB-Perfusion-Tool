@@ -556,7 +556,7 @@ function hydrateSharedFields(form) {
 
     fieldNames.forEach((fieldName) => {
       const field = form.elements.namedItem(fieldName);
-      if (field instanceof HTMLInputElement && field.value === "") {
+      if (field instanceof HTMLInputElement && (field.value === "" || field.value === field.defaultValue)) {
         field.value = storedValue;
       }
     });
@@ -971,22 +971,22 @@ function evaluateAnticoagulationCalculator(rawInputs) {
     results.heparinLoadingUnits = calculateHeparinLoadingDose(valueOf("anticoagWeightKg"), valueOf("heparinDosePerKg"));
   }
 
-  if (results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && results.distributionVolumeMl > 0) {
-    results.heparinLoadingConcentrationUnitsPerMl = results.heparinLoadingUnits / results.distributionVolumeMl;
+  if (results.heparinLoadingUnits !== null && results.bloodVolumeMl !== null && results.bloodVolumeMl > 0) {
+    results.heparinLoadingConcentrationUnitsPerMl = results.heparinLoadingUnits / results.bloodVolumeMl;
   }
 
   if (results.heparinLoadingUnits !== null && valid("protamineRatioMgPer100U")) {
     results.protamineDoseMg = calculateProtamineDose(results.heparinLoadingUnits, valueOf("protamineRatioMgPer100U"));
   }
 
-  if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
+  if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.bloodVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
     results.preAt3HeparinResponseCurve = calculateHeparinResponseCurve(
       valueOf("baselineActSeconds"),
       valueOf("postHeparinActSeconds"),
       results.heparinLoadingUnits,
       valueOf("targetActSeconds"),
       valueOf("anticoagWeightKg"),
-      results.distributionVolumeMl,
+      results.bloodVolumeMl,
     );
     if (results.preAt3HeparinResponseCurve !== null) {
       results.preAt3HeparinResponseCurve.responseLabel = "Measured";
@@ -1001,7 +1001,7 @@ function evaluateAnticoagulationCalculator(rawInputs) {
       results.heparinLoadingUnits,
       valueOf("targetActSeconds"),
       valueOf("anticoagWeightKg"),
-      results.distributionVolumeMl,
+      results.bloodVolumeMl,
     );
 
     if (results.at3UpdatedHeparinResponseCurve !== null) {
@@ -1034,13 +1034,15 @@ const closeCurveModalButton = document.querySelector("#closeCurveModalButton");
 let isHeparinCurveExpanded = false;
 let isHeparinCurveZoomedOut = false;
 
+function usesTouchGraphControls() {
+  return window.matchMedia?.("(pointer: coarse), (max-width: 640px)")?.matches ?? false;
+}
+
 const primePlanElements = {
   tone: document.querySelector("#primePlanTone"),
   headline: document.querySelector("#primePlanHeadline"),
   body: document.querySelector("#primePlanBody"),
-  gapBadge: document.querySelector("#primeGapBadge"),
   unitsBadge: document.querySelector("#primeUnitsBadge"),
-  ratioBadge: document.querySelector("#primeRatioBadge"),
 };
 const cannulaBicavalToggle = document.querySelector("#cannulaBicavalToggle");
 const cannulaFlowHint = document.querySelector("#cannulaFlowHint");
@@ -1060,6 +1062,8 @@ const cannulaPanels = {
     manufacturerSelect: document.querySelector("#cannulaArterialManufacturer"),
     familySelect: document.querySelector("#cannulaArterialFamily"),
     sizeButtons: document.querySelector("#cannulaArterialSizeButtons"),
+    useRecommendedButton: document.querySelector("#cannulaArterialUseRecommended"),
+    expandButton: document.querySelector("#cannulaArterialExpandButton"),
     chart: document.querySelector("#cannulaArterialChart"),
     chartSummary: document.querySelector("#cannulaArterialSummary"),
     tooltip: document.querySelector("#cannulaArterialChartTooltip"),
@@ -1076,6 +1080,8 @@ const cannulaPanels = {
     familySelect: document.querySelector("#cannulaVenousFamily"),
     roleHint: document.querySelector("#cannulaVenousRoleHint"),
     sizeButtons: document.querySelector("#cannulaVenousSizeButtons"),
+    useRecommendedButton: document.querySelector("#cannulaVenousUseRecommended"),
+    expandButton: document.querySelector("#cannulaVenousExpandButton"),
     chart: document.querySelector("#cannulaVenousChart"),
     chartSummary: document.querySelector("#cannulaVenousSummary"),
     tooltip: document.querySelector("#cannulaVenousChartTooltip"),
@@ -1094,6 +1100,8 @@ const cannulaPanels = {
     familySelect: document.querySelector("#cannulaBicavalFamily"),
     roleHint: document.querySelector("#cannulaBicavalRoleHint"),
     sizeButtons: document.querySelector("#cannulaBicavalSizeButtons"),
+    useRecommendedButton: document.querySelector("#cannulaBicavalUseRecommended"),
+    expandButton: document.querySelector("#cannulaBicavalExpandButton"),
     chart: document.querySelector("#cannulaBicavalChart"),
     chartSummary: document.querySelector("#cannulaBicavalSummary"),
     tooltip: document.querySelector("#cannulaBicavalChartTooltip"),
@@ -1105,6 +1113,12 @@ const cannulaPanels = {
     pressureStatus: document.querySelector("#cannulaBicavalPressureStatus"),
   },
 };
+const cannulaCurveModal = document.querySelector("#cannulaCurveModal");
+const cannulaCurveModalTitle = document.querySelector("#cannula-curve-modal-title");
+const cannulaCurveModalSummary = document.querySelector("#cannulaCurveModalSummary");
+const cannulaCurveModalChart = document.querySelector("#cannulaCurveModalChart");
+const cannulaCurveModalTooltip = document.querySelector("#cannulaCurveModalTooltip");
+const closeCannulaCurveModalButton = document.querySelector("#closeCannulaCurveModalButton");
 const cannulaState = {
   sides: {
     arterial: {
@@ -1137,6 +1151,7 @@ const cannulaState = {
   flowSourceLabel: "",
   flowSourceDetail: "",
 };
+let expandedCannulaSide = null;
 let cannulaDragFrame = null;
 let pendingCannulaPointerUpdate = null;
 
@@ -1199,24 +1214,6 @@ const primeOutputs = primeForm
         format: (value) => `${roundTo(value, 1).toFixed(1)} %`,
         empty: "Calculated once pre-CPB Hct and prime volume are entered.",
       },
-      primeToBloodRatio: {
-        value: document.querySelector("#primeRatioOutput"),
-        status: document.querySelector("#primeRatioStatus"),
-        format: (value) => `${roundTo(value, 2).toFixed(2)} : 1`,
-        empty: "Shows how large the clear prime is relative to estimated blood volume.",
-      },
-      crystalloidPrimeBicarbMeq: {
-        value: document.querySelector("#primeBicarbOutput"),
-        status: document.querySelector("#primeBicarbStatus"),
-        format: (value) => `${roundTo(value, 1).toFixed(1)} mEq`,
-        empty: "Enter prime volume to calculate sodium bicarbonate.",
-      },
-      primeMannitolG: {
-        value: document.querySelector("#primeMannitolOutput"),
-        status: document.querySelector("#primeMannitolStatus"),
-        format: (value) => `${roundTo(value, 1).toFixed(1)} g`,
-        empty: "Enter weight to calculate mannitol.",
-      },
       prbcVolumeMl: {
         value: document.querySelector("#primePrbcNeededOutput"),
         status: document.querySelector("#primePrbcNeededStatus"),
@@ -1228,12 +1225,6 @@ const primeOutputs = primeForm
         status: document.querySelector("#primeProjectedHctStatus"),
         format: (value) => `${roundTo(value, 1).toFixed(1)} %`,
         empty: "Calculated from the estimated PRBC volume.",
-      },
-      redCellDeficitMl: {
-        value: document.querySelector("#primeRedCellDeficitOutput"),
-        status: document.querySelector("#primeRedCellDeficitStatus"),
-        format: (value) => `${Math.round(value)} mL RBC`,
-        empty: "Expressed as the red-cell volume missing before any PRBC is added.",
       },
     }
   : null;
@@ -1255,14 +1246,9 @@ const anticoagOutputs = anticoagForm
       heparinLoadingConcentrationUnitsPerMl: {
         value: document.querySelector("#heparinConcentrationOutput"),
         status: document.querySelector("#heparinConcentrationStatus"),
+        slope: document.querySelector("#hdrSlopeInline"),
         format: (value) => `${roundTo(value, 2).toFixed(2)} units/mL`,
-        empty: "Logged heparin units divided by EBV plus prime volume.",
-      },
-      hdrSlope: {
-        value: document.querySelector("#hdrSlopeOutput"),
-        status: document.querySelector("#hdrSlopeStatus"),
-        format: (value) => `${roundTo(value, 1).toFixed(1)} sec / unit/mL`,
-        empty: "Calculated from observed ACT response.",
+        empty: "Enter weight, EBV factor, and heparin loading dose.",
       },
       bivalirudinLoadingMg: {
         value: document.querySelector("#bivalirudinLoadingOutput"),
@@ -1579,16 +1565,11 @@ function renderPrimePlan(evaluation) {
 
   if (results.predictedHct === null) {
     setPrimePlan("idle", "Build a dilution estimate", "Enter weight, baseline hematocrit, and prime volume to generate a quick bypass planning summary.");
-    primePlanElements.gapBadge.textContent = "Target gap: --";
     primePlanElements.unitsBadge.textContent = "Estimated PRBC: --";
-    primePlanElements.ratioBadge.textContent = "Prime ratio: --";
     return;
   }
 
-  const targetGap = results.targetHct !== null ? Math.max(0, results.targetHct - results.predictedHct) : null;
-  primePlanElements.gapBadge.textContent = targetGap === null ? "Target gap: --" : `Target gap: ${roundTo(targetGap, 1).toFixed(1)} %`;
   primePlanElements.unitsBadge.textContent = `Estimated PRBC: ${results.prbcVolumeMl === null ? "--" : `${Math.round(results.prbcVolumeMl)} mL (${formatPrimeUnits(results.prbcVolumeMl)})`}`;
-  primePlanElements.ratioBadge.textContent = results.primeToBloodRatio === null ? "Prime ratio: --" : `Prime ratio: ${roundTo(results.primeToBloodRatio, 2).toFixed(2)} : 1`;
 
   if (results.targetMetWithoutPrbc) {
     setPrimePlan("good", "Clear prime already stays at or above target", `Predicted post-prime hematocrit is ${roundTo(results.predictedHct, 1).toFixed(1)}%, so no added PRBC volume is needed with the current assumptions.`);
@@ -1678,6 +1659,15 @@ function formatDelta(value, unit) {
 
   const direction = value > 0 ? "Increase by" : "Decrease by";
   return `${direction} ${unit === "g/dL" ? rounded.toFixed(1) : rounded.toFixed(2)} ${unit}`;
+}
+
+function formatIncreaseToDo2iTarget(requiredValue, currentValue, unit, suffix) {
+  if (requiredValue === null || currentValue === null) return null;
+
+  const delta = requiredValue - currentValue;
+  if (delta <= 0) return "Target DO₂i is met.";
+
+  return `${formatDelta(delta, unit)} ${suffix}`;
 }
 
 function interpolateCurve(points, flow) {
@@ -1979,7 +1969,7 @@ function syncCannulaFlowFromPerfusion(force = false) {
   const perfusionContext = getSharedPerfusionContext();
   let nextFlow = cannulaState.flow;
   let flowSourceLabel = "Manual target flow";
-  let flowSourceDetail = "Adjust liters per minute with the slider or chart drag control.";
+  let flowSourceDetail = "Adjust liters per minute with the slider.";
   let linkedToPerfusion = false;
 
   if (perfusionContext.pumpFlow !== null) {
@@ -2121,6 +2111,10 @@ function syncCannulaSizeButtons(side) {
   const sizes = getCannulaSizes(side);
   if (!sizes.length) {
     panel.sizeButtons.innerHTML = `<span class="quick-select-button is-disabled">No sizes listed</span>`;
+    if (panel.useRecommendedButton) {
+      panel.useRecommendedButton.disabled = true;
+      panel.useRecommendedButton.textContent = "No recommendation available";
+    }
     return;
   }
   if (!sizes.some((size) => size.id === panelState.sizeId)) {
@@ -2129,6 +2123,28 @@ function syncCannulaSizeButtons(side) {
   panel.sizeButtons.innerHTML = sizes
     .map((size) => `<button type="button" class="quick-select-button${size.id === panelState.sizeId ? " is-active" : ""}" data-cannula-size="${size.id}">${size.label}</button>`)
     .join("");
+
+  if (panel.useRecommendedButton) {
+    const recommendedSize = getRecommendedCannulaSize(side);
+    const recommendationIsActive = Boolean(recommendedSize && !panelState.manualOverride && panelState.sizeId === recommendedSize.id);
+    panel.useRecommendedButton.disabled = !recommendedSize || recommendationIsActive;
+    panel.useRecommendedButton.textContent = recommendedSize
+      ? recommendationIsActive
+        ? `Recommended ${recommendedSize.label} active`
+        : `Return to recommended ${recommendedSize.label}`
+      : "Use recommended size";
+  }
+}
+
+function resetCannulaSizeToRecommended(side) {
+  const panelState = getCannulaPanelState(side);
+  const recommendedSize = getRecommendedCannulaSize(side);
+  if (!panelState || !recommendedSize) return;
+  panelState.sizeId = recommendedSize.id;
+  panelState.manualOverride = false;
+  syncCannulaSizeButtons(side);
+  renderCannulaSideOutputs(side);
+  renderCannulaChart(side);
 }
 
 function syncCannulaFlowControls() {
@@ -2147,7 +2163,7 @@ function setCannulaManualFlowSource() {
   cannulaState.manualFlowOverride = true;
   cannulaState.flowLinkedToPerfusion = false;
   cannulaState.flowSourceLabel = "Manual target flow";
-  cannulaState.flowSourceDetail = "Adjusted directly on the cannula selection tab with the slider or chart drag.";
+  cannulaState.flowSourceDetail = "Adjusted directly on the cannula selection tab.";
 }
 
 function formatCannulaTooltip(side) {
@@ -2184,12 +2200,16 @@ function syncCannulaBicavalVisibility() {
   cannulaPanels.bicaval.setupPanel.hidden = !isEnabled;
   cannulaPanels.bicaval.comparePanel.hidden = !isEnabled;
   if (cannulaFlowHint) {
-    cannulaFlowHint.textContent = isEnabled
-      ? "Use the slider or drag on any chart to move arterial, venous, and bicaval comparisons to the same liters per minute."
-      : "Use the slider or drag on either chart to move arterial and venous comparisons to the same liters per minute.";
+    const sideList = isEnabled ? "arterial, venous, and bicaval" : "arterial and venous";
+    cannulaFlowHint.textContent = usesTouchGraphControls()
+      ? `Use the slider to move ${sideList} comparisons to the same liters per minute. The charts display pressure-drop estimates.`
+      : `Use the slider or drag on the charts to move ${sideList} comparisons to the same liters per minute.`;
   }
   if (!isEnabled) {
     cannulaState.draggingSide = cannulaState.draggingSide === "bicaval" ? null : cannulaState.draggingSide;
+    if (expandedCannulaSide === "bicaval") {
+      closeCannulaChartModal();
+    }
     hideCannulaTooltips();
   }
 }
@@ -2238,7 +2258,9 @@ function renderCannulaSharedOutputs() {
   cannulaFlowOutput.textContent = `${roundTo(cannulaState.flow, 1).toFixed(1)} L/min`;
   cannulaFlowStatus.textContent = cannulaState.flowLinkedToPerfusion
     ? `${cannulaState.flowSourceLabel}. ${cannulaState.flowSourceDetail}`
-    : "Click and drag on any chart or use the slider to move the shared target flow.";
+    : usesTouchGraphControls()
+      ? "Use the slider to move the shared target flow. Charts are display-only on mobile to prevent accidental changes."
+      : "Use the slider or click and drag on any chart to move the shared target flow.";
   if (cannulaCiOutput && cannulaCiStatus) {
     cannulaCiOutput.textContent = targetCardiacIndex !== null ? `${roundTo(targetCardiacIndex, 2).toFixed(2)} L/min/m²` : "--";
     if (targetCardiacIndex === null) {
@@ -2314,8 +2336,8 @@ function renderCannulaSideOutputs(side) {
 
   panel.recommendedOutput.textContent = recommendedSize.label;
   panel.recommendedStatus.textContent = recommendedPressure <= family.recommendedMaxPressure
-    ? `Recommended at ${roundTo(cannulaState.flow, 1).toFixed(1)} L/min using a target pressure-drop threshold of ${family.recommendedMaxPressure} mmHg.`
-    : `No listed size stays at or below ${family.recommendedMaxPressure} mmHg at this flow; showing the lowest-resistance available size.`;
+    ? `Minimum recommended size that stays at or below the ${family.recommendedMaxPressure} mmHg pressure-drop threshold at the selected target flow of ${roundTo(cannulaState.flow, 1).toFixed(1)} L/min.`
+    : `No listed size stays at or below the ${family.recommendedMaxPressure} mmHg pressure-drop threshold at the selected target flow; showing the lowest-resistance available size.`;
   panel.selectedOutput.textContent = selectedSize.label;
   panel.selectedStatus.textContent = panelState.manualOverride
     ? `Manual override active for ${manufacturer.label} ${family.label}.`
@@ -2338,11 +2360,43 @@ function renderAllCannulaOutputs() {
 
 function renderAllCannulaCharts() {
   getActiveCannulaSides().forEach((side) => renderCannulaChart(side));
+  renderExpandedCannulaChart();
 }
 
 function renderAllCannulaViews() {
   renderAllCannulaOutputs();
   renderAllCannulaCharts();
+}
+
+function renderExpandedCannulaChart() {
+  if (!expandedCannulaSide || !cannulaCurveModal || cannulaCurveModal.hidden || !cannulaCurveModalChart) return;
+  const panel = cannulaPanels[expandedCannulaSide];
+  if (!panel?.chart) return;
+  cannulaCurveModalChart.setAttribute("viewBox", panel.chart.getAttribute("viewBox") ?? "0 0 720 400");
+  cannulaCurveModalChart.innerHTML = panel.chart.innerHTML;
+  if (cannulaCurveModalTitle) {
+    cannulaCurveModalTitle.textContent = `${panel.label} Pressure-Drop Graph`;
+  }
+  if (cannulaCurveModalSummary) {
+    cannulaCurveModalSummary.textContent = panel.chartSummary?.textContent ?? "Expanded pressure-drop graph for the selected cannula lane.";
+  }
+}
+
+function openCannulaChartModal(side) {
+  if (!cannulaCurveModal || !cannulaPanels[side]?.chart) return;
+  expandedCannulaSide = side;
+  cannulaCurveModal.hidden = false;
+  document.body.classList.add("has-expanded-curve");
+  renderExpandedCannulaChart();
+  closeCannulaCurveModalButton?.focus();
+}
+
+function closeCannulaChartModal() {
+  if (!cannulaCurveModal) return;
+  cannulaCurveModal.hidden = true;
+  expandedCannulaSide = null;
+  cannulaCurveModalTooltip?.classList.remove("is-visible");
+  document.body.classList.toggle("has-expanded-curve", isHeparinCurveExpanded);
 }
 
 function updateCannulaFlowFromPointer(event, side, showTooltip = false) {
@@ -2442,9 +2496,12 @@ function renderCannulaChart(side) {
   const roleMetadata = getCannulaRoleMetadata(family);
   const showGraphRoleLabel = getCannulaLibraryCategory(side) === "venous" && Boolean(roleMetadata.graphLabel);
 
+  const chartControlCopy = usesTouchGraphControls()
+    ? "Use the slider above to change the shared target flow."
+    : "Drag across the chart or use the slider to change the shared target flow.";
   panel.chartSummary.textContent = selectedSizeBeyondRange
-    ? `${manufacturer.label} ${family.label}, ${selectedSize.label}. Drag across the chart to estimate pressure drop at the shared target flow. Current target is beyond the printed chart extent, so the end of the curve is extrapolated.`
-    : `${manufacturer.label} ${family.label}, ${selectedSize.label}. Drag across the chart to estimate pressure drop at the shared target flow.`;
+    ? `${manufacturer.label} ${family.label}, ${selectedSize.label}. ${chartControlCopy} Current target is beyond the printed chart extent, so the end of the curve is extrapolated.`
+    : `${manufacturer.label} ${family.label}, ${selectedSize.label}. ${chartControlCopy}`;
   panel.chart.innerHTML = `
     <rect class="curve-bg" x="0" y="0" width="${width}" height="${height}" rx="18"></rect>
     ${yTicks.map((tick) => `
@@ -2475,6 +2532,9 @@ function renderCannulaChart(side) {
     <text class="curve-axis-label" x="${width / 2}" y="${height - 18}" text-anchor="middle">Flow (L/min)</text>
     <text class="curve-axis-label" transform="translate(20 ${height / 2}) rotate(-90)" text-anchor="middle">Pressure drop (mmHg)</text>
   `;
+  if (expandedCannulaSide === side) {
+    renderExpandedCannulaChart();
+  }
 }
 
 function initializeCannulaSelection() {
@@ -2531,7 +2591,16 @@ function initializeCannulaSelection() {
       renderCannulaChart(side);
     });
 
+    panel.useRecommendedButton?.addEventListener("click", () => {
+      resetCannulaSizeToRecommended(side);
+    });
+
+    panel.expandButton?.addEventListener("click", () => {
+      openCannulaChartModal(side);
+    });
+
     panel.chart?.addEventListener("pointerdown", (event) => {
+      if (usesTouchGraphControls()) return;
       cannulaState.draggingSide = side;
       setCannulaManualFlowSource();
       updateCannulaFlowFromPointer(event, side, true);
@@ -2560,6 +2629,8 @@ function initializeCannulaSelection() {
     renderAllCannulaViews();
   });
 
+  closeCannulaCurveModalButton?.addEventListener("click", closeCannulaChartModal);
+
   window.addEventListener("pointermove", (event) => {
     if (!cannulaState.draggingSide) return;
     scheduleCannulaPointerUpdate(event, cannulaState.draggingSide);
@@ -2572,6 +2643,11 @@ function initializeCannulaSelection() {
     }
     cannulaState.draggingSide = null;
     hideCannulaTooltips();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !expandedCannulaSide) return;
+    closeCannulaChartModal();
   });
 
   window.addEventListener("storage", (event) => {
@@ -2706,7 +2782,12 @@ function renderPerfusion() {
     perfusionOutputs.requiredFlow.value.textContent = perfusionOutputs.requiredFlow.format(evaluation.results.requiredFlow);
 
     if (evaluation.results.currentFlow !== null) {
-      perfusionOutputs.requiredFlow.status.textContent = `${formatDelta(evaluation.results.requiredFlow - evaluation.results.currentFlow, "L/min")} from current flow.`;
+      perfusionOutputs.requiredFlow.status.textContent = formatIncreaseToDo2iTarget(
+        evaluation.results.requiredFlow,
+        evaluation.results.currentFlow,
+        "L/min",
+        "from current flow.",
+      );
     } else {
       perfusionOutputs.requiredFlow.status.textContent = "Target flow derived from target CI and BSA.";
     }
@@ -2719,7 +2800,12 @@ function renderPerfusion() {
     perfusionOutputs.requiredCi.value.textContent = perfusionOutputs.requiredCi.format(evaluation.results.requiredCi);
 
     if (evaluation.results.effectiveCi !== null) {
-      perfusionOutputs.requiredCi.status.textContent = `${formatDelta(evaluation.results.requiredCi - evaluation.results.effectiveCi, "L/min/m²")} from current effective CI.`;
+      perfusionOutputs.requiredCi.status.textContent = formatIncreaseToDo2iTarget(
+        evaluation.results.requiredCi,
+        evaluation.results.effectiveCi,
+        "L/min/m²",
+        "from current effective CI.",
+      );
     } else {
       perfusionOutputs.requiredCi.status.textContent = "Target based on current Hgb, SaO2, and PaO2.";
     }
@@ -2732,7 +2818,12 @@ function renderPerfusion() {
     perfusionOutputs.requiredHgb.value.textContent = perfusionOutputs.requiredHgb.format(evaluation.results.requiredHgb);
     if (evaluation.results.currentHgb !== null) {
       const sourceLabel = evaluation.results.hgbSource === "hematocrit" ? "estimated current Hgb" : "current Hgb";
-      perfusionOutputs.requiredHgb.status.textContent = `${formatDelta(evaluation.results.requiredHgb - evaluation.results.currentHgb, "g/dL")} from ${sourceLabel}.`;
+      perfusionOutputs.requiredHgb.status.textContent = formatIncreaseToDo2iTarget(
+        evaluation.results.requiredHgb,
+        evaluation.results.currentHgb,
+        "g/dL",
+        `from ${sourceLabel}.`,
+      );
     } else {
       perfusionOutputs.requiredHgb.status.textContent = "Target hemoglobin derived from current flow/CI and oxygenation inputs.";
     }
@@ -2784,30 +2875,6 @@ function renderPrime() {
     primeOutputs.hctDrop.status.textContent = primeOutputs.hctDrop.empty;
   }
 
-  if (evaluation.results.primeToBloodRatio !== null) {
-    primeOutputs.primeToBloodRatio.value.textContent = primeOutputs.primeToBloodRatio.format(evaluation.results.primeToBloodRatio);
-    primeOutputs.primeToBloodRatio.status.textContent = "Higher ratios indicate more dilution from the clear prime.";
-  } else {
-    primeOutputs.primeToBloodRatio.value.textContent = "--";
-    primeOutputs.primeToBloodRatio.status.textContent = primeOutputs.primeToBloodRatio.empty;
-  }
-
-  if (evaluation.results.crystalloidPrimeBicarbMeq !== null) {
-    primeOutputs.crystalloidPrimeBicarbMeq.value.textContent = primeOutputs.crystalloidPrimeBicarbMeq.format(evaluation.results.crystalloidPrimeBicarbMeq);
-    primeOutputs.crystalloidPrimeBicarbMeq.status.textContent = "Formula: x = 0.025V, using the entered prime volume as V.";
-  } else {
-    primeOutputs.crystalloidPrimeBicarbMeq.value.textContent = "--";
-    primeOutputs.crystalloidPrimeBicarbMeq.status.textContent = primeOutputs.crystalloidPrimeBicarbMeq.empty;
-  }
-
-  if (evaluation.results.primeMannitolG !== null) {
-    primeOutputs.primeMannitolG.value.textContent = primeOutputs.primeMannitolG.format(evaluation.results.primeMannitolG);
-    primeOutputs.primeMannitolG.status.textContent = "Formula: 0.25 g/kg, using the entered weight.";
-  } else {
-    primeOutputs.primeMannitolG.value.textContent = "--";
-    primeOutputs.primeMannitolG.status.textContent = primeOutputs.primeMannitolG.empty;
-  }
-
   if (evaluation.results.prbcVolumeMl !== null) {
     primeOutputs.prbcVolumeMl.value.textContent = primeOutputs.prbcVolumeMl.format(evaluation.results.prbcVolumeMl);
 
@@ -2837,18 +2904,6 @@ function renderPrime() {
     }
   }
 
-  if (evaluation.results.redCellDeficitMl !== null) {
-    primeOutputs.redCellDeficitMl.value.textContent = primeOutputs.redCellDeficitMl.format(evaluation.results.redCellDeficitMl);
-
-    if (evaluation.results.targetMetWithoutPrbc) {
-      primeOutputs.redCellDeficitMl.status.textContent = "No red-cell deficit remains at the selected target.";
-    } else {
-      primeOutputs.redCellDeficitMl.status.textContent = "Red-cell volume gap before accounting for PRBC product concentration.";
-    }
-  } else {
-    primeOutputs.redCellDeficitMl.value.textContent = "--";
-    primeOutputs.redCellDeficitMl.status.textContent = primeOutputs.redCellDeficitMl.empty;
-  }
 }
 
 function renderHeparinCurve(curve, options = {}) {
@@ -2863,7 +2918,7 @@ function renderHeparinCurve(curve, options = {}) {
   chart.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
   if (!curve) {
-    summary.textContent = "Enter ACT response, EBV factor, and prime volume to plot the baseline, measured concentration response, and projected target concentration.";
+    summary.textContent = "Enter ACT response and EBV factor to plot the pre-bypass loading response and projected target concentration.";
     chart.innerHTML = `
       <rect class="curve-bg" x="0" y="0" width="${width}" height="${height}" rx="18"></rect>
       <text class="curve-empty-text" x="${width / 2}" y="${height / 2}" text-anchor="middle">Waiting for ACT response data</text>
@@ -2920,12 +2975,40 @@ function renderHeparinCurve(curve, options = {}) {
   const labelBelowY = (point) => clamp(y(point.actSeconds) + 30, margin.top + 30, height - margin.bottom - 12);
   const labelAboveY = (point) => clamp(y(point.actSeconds) - 28, margin.top + 18, height - margin.bottom - 42);
   const labelHighAboveY = (point) => clamp(y(point.actSeconds) - 46, margin.top + 18, height - margin.bottom - 60);
+  const lineLabelPoint = (lineCurve, lineEndPoint, verticalOffset = -12) => {
+    const concentrationUnitsPerMl = Math.min(
+      lineEndPoint.concentrationUnitsPerMl * 0.58,
+      Math.max(lineCurve.points.measured.concentrationUnitsPerMl * 0.8, 0.6),
+    );
+    const actSeconds = lineCurve.points.baseline.actSeconds + lineCurve.slopeActPerUnitMl * concentrationUnitsPerMl;
+    return {
+      x: clamp(x(concentrationUnitsPerMl), margin.left + 80, width - margin.right - 80),
+      y: clamp(y(actSeconds) + verticalOffset, margin.top + 18, height - margin.bottom - 24),
+    };
+  };
+  const activeSlopeLabelPoint = lineLabelPoint(curve, lineEnd, comparisonCurve ? -16 : -12);
+  const comparisonSlopeLabelPoint = comparisonCurve && comparisonLineEnd
+    ? lineLabelPoint(comparisonCurve, comparisonLineEnd, 22)
+    : null;
+  const slopeLabelMarkup = `
+    <text class="curve-slope-label curve-slope-label-active" x="${activeSlopeLabelPoint.x}" y="${activeSlopeLabelPoint.y}" text-anchor="middle">
+      ${comparisonCurve ? "After-AT3" : "Slope"} ${roundTo(curve.slopeActPerUnitMl, 1).toFixed(1)} sec/u/mL
+    </text>
+    ${comparisonCurve && comparisonSlopeLabelPoint ? `
+      <text class="curve-slope-label curve-slope-label-comparison" x="${comparisonSlopeLabelPoint.x}" y="${comparisonSlopeLabelPoint.y}" text-anchor="middle">
+        Pre-AT3 ${roundTo(comparisonCurve.slopeActPerUnitMl, 1).toFixed(1)} sec/u/mL
+      </text>
+    ` : ""}
+  `;
   const formatReferenceHover = (label, actSeconds) => {
     const concentrationUnitsPerMl = concentrationForAct(actSeconds);
     const dosePerKg = dosePerKgForConcentration(concentrationUnitsPerMl);
     const additionalUnits = Math.max(0, unitsForConcentration(concentrationUnitsPerMl) - curve.givenHeparinUnits);
     return `${label}: ACT ${actSeconds} sec, ${roundTo(concentrationUnitsPerMl, 2).toFixed(2)} units/mL, ${roundTo(dosePerKg, 0).toFixed(0)} units/kg, ${Math.round(additionalUnits).toLocaleString()} additional units`;
   };
+  const graphPointAttributes = (tooltip) => usesTouchGraphControls()
+    ? ""
+    : `tabindex="0" data-tooltip="${tooltip}"`;
   const starPoints = (centerX, centerY, outerRadius, innerRadius, spikes = 5) => {
     const pointsList = [];
     for (let index = 0; index < spikes * 2; index += 1) {
@@ -2940,7 +3023,7 @@ function renderHeparinCurve(curve, options = {}) {
     { key: "measured", label: curve.responseLabel ?? "Measured", point: curve.points.measured },
   ]
     .map(({ key, label, point }) => `
-      <g class="curve-point curve-point-${key}" tabindex="0" data-tooltip="${formatHover(label, point)}">
+      <g class="curve-point curve-point-${key}" ${graphPointAttributes(formatHover(label, point))}>
         <circle cx="${x(point.concentrationUnitsPerMl)}" cy="${y(point.actSeconds)}" r="7"></circle>
         <text x="${labelX(point)}" y="${labelAboveY(point)}" text-anchor="middle">${label}</text>
       </g>
@@ -2949,7 +3032,7 @@ function renderHeparinCurve(curve, options = {}) {
   const comparisonMarkup = comparisonCurve
     ? `
       <line class="curve-comparison-line" x1="${x(0)}" y1="${y(comparisonCurve.points.baseline.actSeconds)}" x2="${x(comparisonLineEnd.concentrationUnitsPerMl)}" y2="${y(comparisonLineEnd.actSeconds)}"></line>
-      <g class="curve-comparison-point" tabindex="0" data-tooltip="${formatHover("Pre-AT3", comparisonCurve.points.measured)}">
+      <g class="curve-comparison-point" ${graphPointAttributes(formatHover("Pre-AT3", comparisonCurve.points.measured))}>
         <circle cx="${x(comparisonCurve.points.measured.concentrationUnitsPerMl)}" cy="${y(comparisonCurve.points.measured.actSeconds)}" r="6"></circle>
         <text x="${labelX(comparisonCurve.points.measured)}" y="${labelBelowY(comparisonCurve.points.measured)}" text-anchor="middle">Pre-AT3</text>
       </g>
@@ -2969,7 +3052,7 @@ function renderHeparinCurve(curve, options = {}) {
     : "";
   const comparisonTargetMarkup = comparisonCurve
     ? `
-      <g class="curve-comparison-target" tabindex="0" data-tooltip="${comparisonTargetTooltip}">
+      <g class="curve-comparison-target" ${graphPointAttributes(comparisonTargetTooltip)}>
         <rect x="${x(comparisonCurve.points.target.concentrationUnitsPerMl) - 7}" y="${y(comparisonCurve.points.target.actSeconds) - 7}" width="14" height="14" transform="rotate(45 ${x(comparisonCurve.points.target.concentrationUnitsPerMl)} ${y(comparisonCurve.points.target.actSeconds)})"></rect>
         <text x="${labelX(comparisonCurve.points.target)}" y="${labelHighAboveY(comparisonCurve.points.target)}" text-anchor="middle">
           <tspan x="${labelX(comparisonCurve.points.target)}">Pre-AT3 to ACT ${comparisonTargetAct}</tspan>
@@ -2980,15 +3063,15 @@ function renderHeparinCurve(curve, options = {}) {
     `
     : "";
   const referencePointMarkup = `
-    <g class="curve-reference curve-reference-480" tabindex="0" data-tooltip="${formatReferenceHover("ACT 480 reference", 480)}">
+    <g class="curve-reference curve-reference-480" ${graphPointAttributes(formatReferenceHover("ACT 480 reference", 480))}>
       <polygon points="${starPoints(x(act480Concentration), y(480), 12, 5)}"></polygon>
       <text x="${x(act480Concentration)}" y="${y(480) - 18}" text-anchor="middle">480</text>
     </g>
-    <g class="curve-reference curve-reference-600" tabindex="0" data-tooltip="${formatReferenceHover("ACT 600 reference", 600)}">
+    <g class="curve-reference curve-reference-600" ${graphPointAttributes(formatReferenceHover("ACT 600 reference", 600))}>
       <circle cx="${x(act600Concentration)}" cy="${y(600)}" r="8"></circle>
       <text x="${x(act600Concentration)}" y="${y(600) - 14}" text-anchor="middle">600</text>
     </g>
-    <g class="curve-selected-target" tabindex="0" data-tooltip="${targetTooltip}">
+    <g class="curve-selected-target" ${graphPointAttributes(targetTooltip)}>
       <rect x="${x(curve.points.target.concentrationUnitsPerMl) - 8}" y="${y(curve.points.target.actSeconds) - 8}" width="16" height="16" transform="rotate(45 ${x(curve.points.target.concentrationUnitsPerMl)} ${y(curve.points.target.actSeconds)})"></rect>
       <text x="${labelX(curve.points.target)}" y="${labelBelowY(curve.points.target)}" text-anchor="middle">
         <tspan x="${labelX(curve.points.target)}">${comparisonCurve ? "After-AT3 target" : targetLabel}</tspan>
@@ -3024,6 +3107,7 @@ function renderHeparinCurve(curve, options = {}) {
     <line class="curve-target-line" x1="${margin.left}" y1="${y(curve.points.target.actSeconds)}" x2="${width - margin.right}" y2="${y(curve.points.target.actSeconds)}"></line>
     ${comparisonMarkup}
     <line class="curve-response-line" x1="${x(0)}" y1="${y(curve.points.baseline.actSeconds)}" x2="${x(lineEnd.concentrationUnitsPerMl)}" y2="${y(lineEnd.actSeconds)}"></line>
+    ${slopeLabelMarkup}
     ${pointMarkup}
     ${referencePointMarkup}
     ${comparisonTargetMarkup}
@@ -3051,6 +3135,10 @@ function hideCurveTooltip() {
 
 function bindCurveTooltip(chart) {
   chart?.addEventListener("pointermove", (event) => {
+    if (usesTouchGraphControls()) {
+      hideCurveTooltip();
+      return;
+    }
     const target = event.target.closest("[data-tooltip]");
     const tooltip = chart === anticoagOutputs.curveModalChart ? anticoagOutputs.curveModalTooltip : anticoagOutputs.curveTooltip;
     if (!target || !tooltip) {
@@ -3063,6 +3151,10 @@ function bindCurveTooltip(chart) {
   });
   chart?.addEventListener("pointerleave", hideCurveTooltip);
   chart?.addEventListener("focusin", (event) => {
+    if (usesTouchGraphControls()) {
+      hideCurveTooltip();
+      return;
+    }
     const target = event.target.closest("[data-tooltip]");
     const tooltip = chart === anticoagOutputs.curveModalChart ? anticoagOutputs.curveModalTooltip : anticoagOutputs.curveTooltip;
     if (!target || !tooltip) return;
@@ -3132,23 +3224,23 @@ function renderAnticoagulation() {
       ? ` Suggested guide factor for this weight is ${suggestedEbvFactor} mL/kg.`
       : "";
     anticoagOutputs.distributionVolumeMl.value.textContent = anticoagOutputs.distributionVolumeMl.format(evaluation.results.distributionVolumeMl);
-    anticoagOutputs.distributionVolumeMl.status.textContent = `EBV ${Math.round(evaluation.results.bloodVolumeMl).toLocaleString()} mL + prime ${Math.round(evaluation.fields.anticoagPrimeVolumeMl.value).toLocaleString()} mL. Teaching estimate for concentration math.${suggestionCopy}`;
+    anticoagOutputs.distributionVolumeMl.status.textContent = `Estimated blood volume ${Math.round(evaluation.results.bloodVolumeMl).toLocaleString()} mL + prime ${Math.round(evaluation.fields.anticoagPrimeVolumeMl.value).toLocaleString()} mL. Use after prime joins circulation; pre-bypass HDR uses EBV only.${suggestionCopy}`;
   } else {
     anticoagOutputs.distributionVolumeMl.value.textContent = "--";
     anticoagOutputs.distributionVolumeMl.status.textContent = anticoagOutputs.distributionVolumeMl.empty;
   }
 
   const talliedHeparinUnits = calculateHeparinAdministrationTotal(heparinLogState.entries);
-  const currentHeparinConcentrationUnitsPerMl = talliedHeparinUnits > 0 && evaluation.results.distributionVolumeMl !== null && evaluation.results.distributionVolumeMl > 0
-    ? talliedHeparinUnits / evaluation.results.distributionVolumeMl
+  const currentHeparinConcentrationUnitsPerMl = talliedHeparinUnits > 0 && evaluation.results.bloodVolumeMl !== null && evaluation.results.bloodVolumeMl > 0
+    ? talliedHeparinUnits / evaluation.results.bloodVolumeMl
     : evaluation.results.heparinLoadingConcentrationUnitsPerMl;
 
   if (currentHeparinConcentrationUnitsPerMl !== null) {
     anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.format(currentHeparinConcentrationUnitsPerMl);
     if (talliedHeparinUnits > 0) {
-      anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(talliedHeparinUnits).toLocaleString()} tallied units / ${Math.round(evaluation.results.distributionVolumeMl).toLocaleString()} mL. HDR slope still follows the dose tied to the measured ACT.`;
+      anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(talliedHeparinUnits).toLocaleString()} units / patient EBV; prime not counted pre-bypass.`;
     } else {
-      anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(evaluation.results.heparinLoadingUnits).toLocaleString()} estimated loading units / ${Math.round(evaluation.results.distributionVolumeMl).toLocaleString()} mL until doses are logged.`;
+      anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.status.textContent = `${Math.round(evaluation.results.heparinLoadingUnits).toLocaleString()} loading units / patient EBV; prime not counted pre-bypass.`;
     }
   } else {
     anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.value.textContent = "--";
@@ -3184,19 +3276,12 @@ function renderAnticoagulation() {
   if (evaluation.results.heparinResponseCurve !== null) {
     const projectedDosePerKg = evaluation.results.heparinResponseCurve.requiredHeparinDosePerKg;
     const isAt3UpdatedCurve = evaluation.results.heparinResponseCurveMode === "at3-updated";
-    const repeatActEntered = evaluation.fields.repeatActAfterAt3Seconds?.value !== null;
-    const repeatActCouldNotUpdate = repeatActEntered && !isAt3UpdatedCurve;
     anticoagOutputs.additionalHeparin.value.textContent = anticoagOutputs.additionalHeparin.format(evaluation.results.heparinResponseCurve);
     anticoagOutputs.additionalHeparin.status.textContent = evaluation.results.heparinResponseCurve.targetReachedByTestDose
       ? `${isAt3UpdatedCurve ? "Repeat ACT after AT3" : "Measured ACT"} already reaches the selected target.`
       : `Extra heparin needed beyond the ${Math.round(evaluation.results.heparinResponseCurve.givenHeparinUnits).toLocaleString()} unit loading dose${isAt3UpdatedCurve ? " using the repeat ACT after AT3" : ""}.`;
 
-    anticoagOutputs.hdrSlope.value.textContent = anticoagOutputs.hdrSlope.format(evaluation.results.heparinResponseCurve.slopeActPerUnitMl);
-    anticoagOutputs.hdrSlope.status.textContent = isAt3UpdatedCurve
-      ? "Updated from the observed repeat ACT after AT3; not predicted from AT3 dose alone."
-      : repeatActCouldNotUpdate
-        ? "Using initial post-heparin ACT because repeat ACT after AT3 must be greater than baseline ACT to update HDR."
-        : "Using baseline ACT and the first post-heparin ACT.";
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.slope.textContent = `${isAt3UpdatedCurve ? "After-AT3 rise/run" : "HDR rise/run"}: ${roundTo(evaluation.results.heparinResponseCurve.slopeActPerUnitMl, 1).toFixed(1)} sec/u/mL`;
 
     if (anticoagOutputs.heparinResistanceWarning) {
       const warningParts = [];
@@ -3214,10 +3299,7 @@ function renderAnticoagulation() {
     anticoagOutputs.additionalHeparin.status.textContent = evaluation.fields.baselineActSeconds?.valid && evaluation.fields.postHeparinActSeconds?.valid
       ? "Post-heparin ACT must be greater than baseline ACT."
       : anticoagOutputs.additionalHeparin.empty;
-    anticoagOutputs.hdrSlope.value.textContent = "--";
-    anticoagOutputs.hdrSlope.status.textContent = evaluation.fields.repeatActAfterAt3Seconds?.valid === false
-      ? "Repeat ACT after AT3 must be greater than baseline ACT to update the curve."
-      : anticoagOutputs.hdrSlope.empty;
+    anticoagOutputs.heparinLoadingConcentrationUnitsPerMl.slope.textContent = "HDR rise/run: --";
     if (anticoagOutputs.heparinResistanceWarning) {
       anticoagOutputs.heparinResistanceWarning.hidden = true;
       anticoagOutputs.heparinResistanceWarning.textContent = "";

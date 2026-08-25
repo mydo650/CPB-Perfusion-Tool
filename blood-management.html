@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Blood Products and Blood Management Strategies</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
   </head>
   <body class="page-blood-management">
     <main class="app-shell">
@@ -23,36 +23,13 @@
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
         <a class="module-button page-link" href="./cannula-selection.html" aria-current="false">Cannula Selection</a>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Drug Library</summary>
-          <div class="dropdown-menu">
-            <a href="./drug-library.html">Overview</a>
-            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
-            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
-            <a href="./drug-library.html#vasopressors">Vasopressors</a>
-            <a href="./drug-library.html#inotropes">Inotropes</a>
-            <a href="./drug-library.html#vasodilators">Vasodilators</a>
-            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
-            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
-            <a href="./drug-library.html#antifibrinolytics">Antifibrinolytics</a>
-            <a href="./drug-library.html#paralytics">Paralytics</a>
-          </div>
-        </details>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Electrolytes/Blood Gas Ranges</summary>
-          <div class="dropdown-menu">
-            <a href="./electrolytes.html">Overview</a>
-            <a href="./electrolytes.html#potassium">Potassium</a>
-            <a href="./electrolytes.html#calcium">Calcium</a>
-            <a href="./electrolytes.html#magnesium">Magnesium</a>
-            <a href="./electrolytes.html#sodium">Sodium</a>
-            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
-          </div>
-        </details>
+        <a class="module-button page-link" href="./drug-library.html" aria-current="false">Drug Library</a>
+        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes/Blood Gas Ranges</a>
         <a class="module-button page-link is-active" href="./blood-management.html" aria-current="page">Blood Products/Blood Management</a>
         <a class="module-button page-link" href="./checklist.html" aria-current="false">Checklist</a>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
+      <p class="mobile-nav-hint" aria-hidden="true">Swipe tabs left/right for more →</p>
 
       <section class="workspace page-workspace" aria-label="Blood products and blood management strategies">
         <section class="panel output-panel" aria-labelledby="blood-management-title">
@@ -245,5 +222,6 @@
         </section>
       </section>
     </main>
+    <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
   </body>
 </html>

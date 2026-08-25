@@ -402,22 +402,22 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
     results.heparinLoadingUnits = calculateHeparinLoadingDose(valueOf("anticoagWeightKg"), valueOf("heparinDosePerKg"));
   }
 
-  if (results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && results.distributionVolumeMl > 0) {
-    results.heparinLoadingConcentrationUnitsPerMl = results.heparinLoadingUnits / results.distributionVolumeMl;
+  if (results.heparinLoadingUnits !== null && results.bloodVolumeMl !== null && results.bloodVolumeMl > 0) {
+    results.heparinLoadingConcentrationUnitsPerMl = results.heparinLoadingUnits / results.bloodVolumeMl;
   }
 
   if (results.heparinLoadingUnits !== null && valid("protamineRatioMgPer100U")) {
     results.protamineDoseMg = calculateProtamineDose(results.heparinLoadingUnits, valueOf("protamineRatioMgPer100U"));
   }
 
-  if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.distributionVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
+  if (valid("anticoagWeightKg") && results.heparinLoadingUnits !== null && results.bloodVolumeMl !== null && valid("baselineActSeconds") && valid("postHeparinActSeconds") && valid("targetActSeconds")) {
     results.preAt3HeparinResponseCurve = calculateHeparinResponseCurve(
       valueOf("baselineActSeconds"),
       valueOf("postHeparinActSeconds"),
       results.heparinLoadingUnits,
       valueOf("targetActSeconds"),
       valueOf("anticoagWeightKg"),
-      results.distributionVolumeMl,
+      results.bloodVolumeMl,
     );
     if (results.preAt3HeparinResponseCurve !== null) {
       results.preAt3HeparinResponseCurve.responseLabel = "Measured";
@@ -432,7 +432,7 @@ export function evaluateAnticoagulationCalculator(rawInputs) {
       results.heparinLoadingUnits,
       valueOf("targetActSeconds"),
       valueOf("anticoagWeightKg"),
-      results.distributionVolumeMl,
+      results.bloodVolumeMl,
     );
 
     if (results.at3UpdatedHeparinResponseCurve !== null) {

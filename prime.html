@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Prime Planner</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
   </head>
-  <body>
+  <body class="page-prime">
     <main class="app-shell">
       <section class="hero">
         <p class="eyebrow">Simulation Support Tool</p>
@@ -23,36 +23,13 @@
         <a class="module-button page-link is-active" href="./prime.html" aria-current="page">Prime</a>
         <a class="module-button page-link" href="./anticoagulation.html" aria-current="false">Anticoagulation</a>
         <a class="module-button page-link" href="./cannula-selection.html" aria-current="false">Cannula Selection</a>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Drug Library</summary>
-          <div class="dropdown-menu">
-            <a href="./drug-library.html">Overview</a>
-            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
-            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
-            <a href="./drug-library.html#vasopressors">Vasopressors</a>
-            <a href="./drug-library.html#inotropes">Inotropes</a>
-            <a href="./drug-library.html#vasodilators">Vasodilators</a>
-            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
-            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
-            <a href="./drug-library.html#antifibrinolytics">Antifibrinolytics</a>
-            <a href="./drug-library.html#paralytics">Paralytics</a>
-          </div>
-        </details>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Electrolytes/Blood Gas Ranges</summary>
-          <div class="dropdown-menu">
-            <a href="./electrolytes.html">Overview</a>
-            <a href="./electrolytes.html#potassium">Potassium</a>
-            <a href="./electrolytes.html#calcium">Calcium</a>
-            <a href="./electrolytes.html#magnesium">Magnesium</a>
-            <a href="./electrolytes.html#sodium">Sodium</a>
-            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
-          </div>
-        </details>
+        <a class="module-button page-link" href="./drug-library.html" aria-current="false">Drug Library</a>
+        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes/Blood Gas Ranges</a>
         <a class="module-button page-link" href="./blood-management.html" aria-current="false">Blood Products/Blood Management</a>
         <a class="module-button page-link" href="./checklist.html" aria-current="false">Checklist</a>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
+      <p class="mobile-nav-hint" aria-hidden="true">Swipe tabs left/right for more →</p>
 
       <section class="workspace page-workspace" aria-label="Prime calculator">
         <section class="panel input-panel" aria-labelledby="prime-inputs-title">
@@ -85,21 +62,15 @@
             </div>
             <p class="prime-plan-body" id="primePlanBody">Enter weight, baseline hematocrit, and prime volume to generate a quick bypass planning summary.</p>
             <div class="prime-plan-badges">
-              <span class="prime-badge" id="primeGapBadge">Target gap: --</span>
               <span class="prime-badge" id="primeUnitsBadge">Estimated PRBC: --</span>
-              <span class="prime-badge" id="primeRatioBadge">Prime ratio: --</span>
             </div>
           </section>
           <div class="results-grid">
             <article class="result-card"><p class="result-label">Estimated Blood Volume</p><output id="primeEbvOutput" class="result-value">--</output><p id="primeEbvStatus" class="result-status">Enter weight and blood volume factor.</p></article>
             <article class="result-card accent-card"><p class="result-label">Predicted Post-Prime Hct</p><output id="primePredictedHctOutput" class="result-value">--</output><p id="primePredictedHctStatus" class="result-status">Enter weight, pre-CPB Hct, and prime volume.</p></article>
             <article class="result-card"><p class="result-label">Hct Drop From Baseline</p><output id="primeHctDropOutput" class="result-value">--</output><p id="primeHctDropStatus" class="result-status">Calculated once pre-CPB Hct and prime volume are entered.</p></article>
-            <article class="result-card"><p class="result-label">Prime To Blood Volume Ratio</p><output id="primeRatioOutput" class="result-value">--</output><p id="primeRatioStatus" class="result-status">Shows how large the clear prime is relative to estimated blood volume.</p></article>
-            <article class="result-card"><p class="result-label">Sodium Bicarb For Crystalloid Prime</p><output id="primeBicarbOutput" class="result-value">--</output><p id="primeBicarbStatus" class="result-status">Calculated from prime volume using x = 0.025V.</p></article>
-            <article class="result-card"><p class="result-label">Mannitol For Prime</p><output id="primeMannitolOutput" class="result-value">--</output><p id="primeMannitolStatus" class="result-status">Calculated from weight using 0.25 g/kg.</p></article>
             <article class="result-card"><p class="result-label">PRBC Volume To Reach Target</p><output id="primePrbcNeededOutput" class="result-value">--</output><p id="primePrbcNeededStatus" class="result-status">Enter target Hct and PRBC Hct assumptions.</p></article>
             <article class="result-card"><p class="result-label">Projected Hct After Added PRBC</p><output id="primeProjectedHctOutput" class="result-value">--</output><p id="primeProjectedHctStatus" class="result-status">Calculated from the estimated PRBC volume.</p></article>
-            <article class="result-card"><p class="result-label">Red Cell Deficit To Target</p><output id="primeRedCellDeficitOutput" class="result-value">--</output><p id="primeRedCellDeficitStatus" class="result-status">Expressed as the red-cell volume missing before any PRBC is added.</p></article>
           </div>
 
           <section class="info-tabs" aria-labelledby="prime-support-title">
@@ -115,11 +86,7 @@
                 <div><dt>Estimated Blood Volume</dt><dd>weight (kg) &times; blood volume factor (mL/kg)</dd></div>
                 <div><dt>Predicted Post-Prime Hct</dt><dd>(estimated blood volume &times; pre-CPB Hct) / (estimated blood volume + prime volume)</dd></div>
                 <div><dt>Hct Drop</dt><dd>pre-CPB Hct - predicted post-prime Hct</dd></div>
-                <div><dt>Prime : Blood Ratio</dt><dd>prime volume / estimated blood volume</dd></div>
-                <div><dt>Sodium Bicarb for Crystalloid Prime</dt><dd>x = 0.025V, where x is mEq of bicarbonate and V is the mL of crystalloid fluid</dd></div>
-                <div><dt>Mannitol for Prime</dt><dd>mannitol (g) = 0.25 &times; weight (kg)</dd></div>
                 <div><dt>PRBC Volume Needed</dt><dd>Exact mass-balance solution using target Hct, current red-cell mass, total diluted volume, and assumed PRBC hematocrit</dd></div>
-                <div><dt>Red Cell Deficit</dt><dd>Target red-cell volume after dilution - current red-cell volume before added PRBC</dd></div>
               </dl>
               <p class="formula-note">This tab assumes a clear prime and uses a configurable adult-default blood volume factor of 70 mL/kg. If your prime strategy or patient population differs, change the assumptions before using the result.</p>
               <p class="disclaimer">Prime calculations are decision-support only and do not replace local transfusion policy, product labeling, or clinician judgment.</p>
@@ -136,6 +103,7 @@
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
+    <script src="./app.js?v=pilot-mobile-21"></script>
   </body>
 </html>

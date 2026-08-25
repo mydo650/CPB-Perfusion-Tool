@@ -17,6 +17,14 @@ test("cannula compare view exposes arterial, venous, and bicaval controls", () =
     "cannulaArterialSizeButtons",
     "cannulaVenousSizeButtons",
     "cannulaBicavalSizeButtons",
+    "cannulaArterialUseRecommended",
+    "cannulaVenousUseRecommended",
+    "cannulaBicavalUseRecommended",
+    "cannulaArterialExpandButton",
+    "cannulaVenousExpandButton",
+    "cannulaBicavalExpandButton",
+    "cannulaCurveModal",
+    "cannulaCurveModalChart",
     "cannulaArterialChart",
     "cannulaVenousChart",
     "cannulaBicavalChart",
@@ -112,6 +120,9 @@ test("cannula recommendation logic tracks auto-selected families and recommended
     "getRecommendedCannulaFamilyId",
     "getRecommendedCannulaSizeForFamily",
     "syncCannulaRecommendedSelection",
+    "resetCannulaSizeToRecommended",
+    "openCannulaChartModal",
+    "renderExpandedCannulaChart",
   ];
 
   expectedSnippets.forEach((snippet) => {

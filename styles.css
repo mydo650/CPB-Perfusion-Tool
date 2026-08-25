@@ -86,7 +86,7 @@ body.page-cannula-selection {
 }
 
 .page-anticoagulation .app-shell {
-  width: min(1440px, calc(100% - 2rem));
+  width: min(1560px, calc(100% - 1.5rem));
 }
 
 .page-drug-library .app-shell {
@@ -158,6 +158,10 @@ h1 {
   padding-inline: 0.95rem;
 }
 
+.mobile-nav-hint {
+  display: none;
+}
+
 .module-button {
   border: 0;
   background: transparent;
@@ -176,64 +180,6 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.nav-dropdown {
-  position: relative;
-  display: inline-flex;
-}
-
-.nav-dropdown > summary {
-  list-style: none;
-}
-
-.nav-dropdown > summary::-webkit-details-marker {
-  display: none;
-}
-
-.nav-dropdown > summary::after {
-  content: "";
-  width: 0.42rem;
-  height: 0.42rem;
-  margin-left: 0.45rem;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: translateY(-0.12rem) rotate(45deg);
-}
-
-.nav-dropdown[open] > summary::after {
-  transform: translateY(0.1rem) rotate(225deg);
-}
-
-.dropdown-menu {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 0.45rem);
-  left: 0;
-  min-width: 14rem;
-  padding: 0.45rem;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: rgba(255, 252, 246, 0.98);
-  box-shadow: 0 18px 38px rgba(22, 33, 38, 0.16);
-  display: grid;
-  gap: 0.15rem;
-}
-
-.dropdown-menu a {
-  color: var(--muted);
-  text-decoration: none;
-  font-weight: 800;
-  line-height: 1.25;
-  padding: 0.7rem 0.8rem;
-  border-radius: 12px;
-}
-
-.dropdown-menu a:hover,
-.dropdown-menu a:focus-visible {
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  outline: none;
 }
 
 .module-button:hover {
@@ -272,7 +218,7 @@ h1 {
 }
 
 .page-anticoagulation .workspace {
-  grid-template-columns: minmax(260px, 0.85fr) minmax(310px, 1fr) minmax(420px, 1.35fr);
+  grid-template-columns: minmax(520px, 1.25fr) minmax(380px, 0.9fr);
   align-items: start;
 }
 
@@ -648,8 +594,29 @@ input[aria-invalid="true"] {
   padding: 0.45rem 0.85rem;
 }
 
+.cannula-recommendation-reset {
+  width: 100%;
+  margin-top: 0.65rem;
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.cannula-recommendation-reset:disabled {
+  cursor: default;
+  opacity: 0.62;
+  transform: none;
+}
+
+.cannula-expand-button {
+  flex: 0 0 auto;
+  min-width: 2.45rem;
+  padding-inline: 0.7rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .quick-select-button:hover,
-.curve-action-button:hover {
+.curve-action-button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
@@ -796,6 +763,67 @@ input[aria-invalid="true"] {
   margin-top: 1rem;
   color: var(--warning);
   font-weight: 600;
+}
+
+.perfusion-live-panel {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 6;
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(239, 247, 244, 0.98), rgba(255, 252, 246, 0.96));
+  box-shadow: 0 16px 32px rgba(22, 33, 38, 0.12);
+}
+
+.perfusion-live-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.perfusion-live-header h3,
+.perfusion-live-header p {
+  margin: 0;
+}
+
+.perfusion-live-header h3 {
+  font-size: 1rem;
+}
+
+.perfusion-live-header p {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.perfusion-live-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.perfusion-live-card {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.perfusion-live-value {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1;
+}
+
+.perfusion-live-card .result-status {
+  min-height: 0;
+  font-size: 0.82rem;
 }
 
 .results-grid {
@@ -1098,6 +1126,14 @@ input[aria-invalid="true"] {
   line-height: 1;
 }
 
+.result-emphasis {
+  margin: 0.45rem 0 0;
+  color: var(--accent-strong);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
 .result-status {
   margin: 0.45rem 0 0;
   min-height: 1.4rem;
@@ -1105,7 +1141,8 @@ input[aria-invalid="true"] {
 }
 
 .perfusion-flow-map-panel {
-  margin-top: 1rem;
+  grid-column: 1 / -1;
+  margin: 0 0 1rem;
 }
 
 .flow-map-grid {
@@ -1158,8 +1195,32 @@ input[aria-invalid="true"] {
   grid-column: 1 / -1;
 }
 
+.page-anticoagulation .anticoag-input-panel {
+  grid-column: 1 / 2;
+  grid-row: 1;
+}
+
 .page-anticoagulation .anticoag-input-panel .field-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.page-anticoagulation .anticoag-results-panel {
+  grid-column: 2 / 3;
+  grid-row: 1;
+}
+
+.page-anticoagulation .curve-panel {
+  grid-column: 1 / 2;
+  grid-row: 2;
+}
+
+.page-anticoagulation .heparin-log-panel {
+  grid-column: 2 / 3;
+  grid-row: 2;
+}
+
+.page-anticoagulation .anticoag-support-panel {
+  grid-row: 3;
 }
 
 .page-anticoagulation .anticoag-results-panel .results-grid {
@@ -1354,7 +1415,7 @@ input[aria-invalid="true"] {
 
 @media (max-width: 1180px) {
   .page-anticoagulation .workspace {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.9fr);
   }
 
   .page-anticoagulation .anticoag-input-panel .field-grid {
@@ -1362,7 +1423,13 @@ input[aria-invalid="true"] {
   }
 
   .page-anticoagulation .curve-panel {
-    grid-column: 1 / -1;
+    grid-column: 1 / 2;
+    grid-row: 2;
+  }
+
+  .page-anticoagulation .heparin-log-panel {
+    grid-column: 2 / 3;
+    grid-row: 2;
   }
 }
 
@@ -1504,6 +1571,26 @@ input[aria-invalid="true"] {
 .curve-modal-chart-wrap .curve-chart {
   height: 100%;
   min-height: 0;
+}
+
+#cannulaCurveModal .curve-modal-panel {
+  grid-template-rows: auto auto auto;
+  overflow: auto;
+}
+
+#cannulaCurveModal .curve-modal-header {
+  align-items: flex-start;
+}
+
+#cannulaCurveModal .curve-modal-chart-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+}
+
+#cannulaCurveModal .curve-modal-chart-wrap .curve-chart {
+  width: 100%;
+  height: 100%;
 }
 
 .curve-bg {
@@ -1652,6 +1739,21 @@ input[aria-invalid="true"] {
   font-weight: 800;
 }
 
+.curve-slope-label {
+  fill: var(--accent-strong);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 900;
+  paint-order: stroke;
+  stroke: rgba(253, 250, 245, 0.94);
+  stroke-linejoin: round;
+  stroke-width: 4px;
+}
+
+.curve-slope-label-comparison {
+  fill: #475569;
+}
+
 .curve-selected-target text {
   fill: #1e3a8a;
   font-family: var(--font-body);
@@ -1744,6 +1846,10 @@ input[aria-invalid="true"] {
   color: var(--muted);
   font-size: 0.94rem;
   line-height: 1.55;
+}
+
+.mobile-caveat-copy {
+  display: none;
 }
 
 .hdr-comparison-panel {
@@ -1993,6 +2099,26 @@ input[aria-invalid="true"] {
     grid-column: 1 / -1;
   }
 
+  .page-anticoagulation .anticoag-input-panel {
+    grid-row: 1;
+  }
+
+  .page-anticoagulation .anticoag-results-panel {
+    grid-row: 2;
+  }
+
+  .page-anticoagulation .curve-panel {
+    grid-row: 3;
+  }
+
+  .page-anticoagulation .heparin-log-panel {
+    grid-row: 4;
+  }
+
+  .page-anticoagulation .anticoag-support-panel {
+    grid-row: 5;
+  }
+
   .home-grid {
     grid-template-columns: 1fr;
   }
@@ -2003,6 +2129,42 @@ input[aria-invalid="true"] {
 
   .page-anticoagulation .anticoag-input-panel .field-grid {
     grid-template-columns: 1fr;
+  }
+
+  .perfusion-live-panel {
+    top: 0.5rem;
+    padding: 0.7rem;
+    border-radius: 18px;
+  }
+
+  .perfusion-live-header {
+    align-items: start;
+    gap: 0.35rem;
+  }
+
+  .perfusion-live-header p {
+    display: none;
+  }
+
+  .perfusion-live-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .perfusion-live-card {
+    padding: 0.65rem;
+  }
+
+  .perfusion-live-card .result-label {
+    font-size: 0.72rem;
+  }
+
+  .perfusion-live-value {
+    font-size: 1.25rem;
+  }
+
+  .perfusion-live-card .result-status {
+    font-size: 0.74rem;
   }
 
   .hdr-comparison-panel {
@@ -2029,6 +2191,11 @@ input[aria-invalid="true"] {
     grid-template-columns: 1fr;
   }
 
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-grid,
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .flow-map-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2040,39 +2207,73 @@ input[aria-invalid="true"] {
 }
 
 @media (max-width: 560px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .module-switcher {
     width: 100%;
-    justify-content: stretch;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
     gap: 0.25rem;
     overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 24px;
     -webkit-overflow-scrolling: touch;
   }
 
   .page-switcher {
-    flex-wrap: wrap;
-    overflow: visible;
-    border-radius: 28px;
+    position: relative;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 24px;
+    margin-bottom: 0.45rem;
+    box-shadow:
+      inset -34px 0 24px -24px rgba(10, 79, 74, 0.55),
+      0 16px 30px rgba(39, 43, 36, 0.08);
+    scrollbar-width: thin;
   }
 
-  .nav-dropdown {
-    flex: 1 1 100%;
-  }
-
-  .nav-dropdown > summary.module-button {
-    width: 100%;
-  }
-
-  .dropdown-menu {
-    position: static;
-    min-width: 100%;
-    margin-top: 0.25rem;
-    box-shadow: none;
+  .mobile-nav-hint {
+    display: block;
+    margin: -0.1rem 0 1.25rem;
+    color: var(--accent-strong);
+    font-size: 0.76rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    text-align: right;
+    text-transform: uppercase;
   }
 
   .app-shell {
-    width: min(100% - 1rem, 100%);
+    width: 100%;
+    max-width: 100%;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
     padding-top: 1rem;
     padding-bottom: 2rem;
+  }
+
+  .workspace,
+  .page-workspace,
+  .panel,
+  .panel-header,
+  .field-grid,
+  .results-grid,
+  .heparin-log-grid,
+  .cannula-setup-grid,
+  .cannula-compare-grid,
+  .flow-map-grid,
+  .input-wrap,
+  .curve-panel,
+  .curve-chart-wrap,
+  .cannula-chart-wrap,
+  .curve-modal-chart-wrap {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .panel {
@@ -2084,11 +2285,25 @@ input[aria-invalid="true"] {
     padding: 0.8rem 0.85rem;
   }
 
-  .module-button {
-    flex: 1 1 0;
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
     min-width: 0;
+    min-height: 2.35rem;
+  }
+
+  .quick-select-button,
+  .curve-action-button {
+    min-height: 2.45rem;
+  }
+
+  .module-button {
+    flex: 0 0 auto;
+    min-width: max-content;
+    min-height: 2.45rem;
     padding: 0.75rem 0.65rem;
     font-size: 0.92rem;
+    white-space: nowrap;
   }
 
   h1 {
@@ -2162,6 +2377,83 @@ input[aria-invalid="true"] {
     min-height: 280px;
   }
 
+  .page-anticoagulation .curve-chart,
+  .page-cannula-selection .curve-chart {
+    pointer-events: none;
+    touch-action: pan-y;
+  }
+
+  .page-anticoagulation .curve-point,
+  .page-anticoagulation .curve-reference,
+  .page-anticoagulation .curve-comparison-point,
+  .page-anticoagulation .curve-comparison-target,
+  .page-anticoagulation .curve-selected-target {
+    cursor: default;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-grid,
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-grid {
+    gap: 0.55rem;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel,
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel {
+    padding: 0.65rem;
+    border-radius: 16px;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .curve-header,
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel .curve-header {
+    margin-bottom: 0.65rem;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .curve-header p,
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel .curve-header p,
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .hint,
+  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-status {
+    font-size: 0.76rem;
+    line-height: 1.35;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel h3,
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel h3 {
+    font-size: 0.98rem;
+    line-height: 1.15;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .input-wrap {
+    padding: 0.55rem 0.6rem;
+    border-radius: 14px;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel select {
+    font-size: 0.82rem;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .field {
+    gap: 0.3rem;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .field + .field {
+    margin-top: 0.55rem;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .result-card,
+  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-card {
+    padding: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .result-value,
+  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-value {
+    font-size: clamp(1.1rem, 6vw, 1.6rem);
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-chart-wrap {
+    min-height: 170px;
+    aspect-ratio: 1 / 1.12;
+  }
+
   .curve-modal {
     padding: 0.5rem;
   }
@@ -2176,6 +2468,15 @@ input[aria-invalid="true"] {
   .curve-modal-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  #cannulaCurveModal .curve-modal-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  #cannulaCurveModal .curve-modal-header .curve-action-button {
+    width: auto;
   }
 
   .result-label {
@@ -2204,6 +2505,17 @@ input[aria-invalid="true"] {
     width: 100%;
   }
 
+  .page-cannula-selection .cannula-compare-panel .curve-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .page-cannula-selection .cannula-expand-button {
+    width: auto;
+    min-width: 2.45rem;
+    padding-inline: 0.7rem;
+  }
+
   .tab-button {
     width: 100%;
     text-align: center;
@@ -2216,5 +2528,530 @@ input[aria-invalid="true"] {
 
   .prime-plan-card {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .page-anticoagulation .workspace.page-workspace {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto auto auto;
+    gap: 0.45rem;
+    align-items: start;
+    overflow: visible;
+  }
+
+  .page-anticoagulation .anticoag-input-panel {
+    grid-column: 1 / 2;
+    grid-row: 2 / span 2;
+  }
+
+  .page-anticoagulation .anticoag-results-panel {
+    grid-column: 2 / 3;
+    grid-row: 2;
+  }
+
+  .page-anticoagulation .curve-panel {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .page-anticoagulation .heparin-log-panel {
+    grid-column: 2 / 3;
+    grid-row: 3;
+  }
+
+  .page-anticoagulation .anticoag-support-panel {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  .page-anticoagulation .anticoag-input-panel,
+  .page-anticoagulation .anticoag-results-panel,
+  .page-anticoagulation .heparin-log-panel,
+  .page-anticoagulation .curve-panel {
+    min-height: 0;
+    height: auto;
+    overflow: visible;
+    padding: 0.65rem;
+  }
+
+  .page-anticoagulation .anticoag-input-panel {
+    border-color: rgba(15, 118, 110, 0.2);
+  }
+
+  .page-anticoagulation .anticoag-results-panel {
+    border-color: rgba(15, 118, 110, 0.28);
+    box-shadow: 0 14px 30px rgba(15, 118, 110, 0.12);
+  }
+
+  .page-anticoagulation .panel-header,
+  .page-anticoagulation .curve-header {
+    margin-bottom: 0.55rem;
+  }
+
+  .page-anticoagulation .anticoag-results-panel > .panel-header {
+    margin-bottom: 0.35rem;
+  }
+
+  .page-anticoagulation .anticoag-results-panel h2 {
+    font-size: 0.92rem;
+  }
+
+  .page-anticoagulation .anticoag-input-panel > .panel-header p,
+  .page-anticoagulation .anticoag-results-panel > .panel-header p {
+    display: none;
+  }
+
+  .page-anticoagulation .anticoag-input-panel .field-grid {
+    grid-template-columns: 1fr;
+    gap: 0.52rem;
+  }
+
+  .page-anticoagulation .field {
+    gap: 0.32rem;
+    scroll-margin-top: 0.75rem;
+    scroll-margin-bottom: 30svh;
+  }
+
+  .page-anticoagulation .hint,
+  .page-anticoagulation .at3-inline-guidance {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+
+  .page-anticoagulation .input-wrap {
+    padding: 0.52rem 0.55rem;
+  }
+
+  .page-anticoagulation input:not([type="checkbox"]):not([type="radio"]) {
+    min-height: 2rem;
+  }
+
+  .page-anticoagulation .input-wrap .unit {
+    font-size: 0.68rem;
+  }
+
+  .page-anticoagulation .quick-select-row {
+    gap: 0.32rem;
+  }
+
+  .page-anticoagulation .quick-select-button {
+    min-height: 2rem;
+    padding: 0.45rem 0.38rem;
+    font-size: 0.66rem;
+    line-height: 1.15;
+  }
+
+  .page-anticoagulation .validation-summary {
+    margin-top: 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .page-anticoagulation .anticoag-results-panel .results-grid {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .page-anticoagulation .anticoag-results-panel .result-card {
+    padding: 0.42rem;
+    border-radius: 12px;
+  }
+
+  .page-anticoagulation .anticoag-results-panel .result-label {
+    font-size: 0.56rem;
+    line-height: 1.15;
+    letter-spacing: 0.05em;
+  }
+
+  .page-anticoagulation .anticoag-results-panel .result-value {
+    margin-top: 0.18rem;
+    font-size: clamp(0.82rem, 3.6vw, 1.08rem);
+  }
+
+  .page-anticoagulation .anticoag-results-panel .result-emphasis {
+    margin-top: 0.18rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.28rem;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.12);
+    font-size: 0.62rem;
+    line-height: 1.18;
+  }
+
+  .page-anticoagulation .anticoag-results-panel .result-status {
+    margin-top: 0.18rem;
+    font-size: 0.56rem;
+    line-height: 1.22;
+  }
+
+  .page-anticoagulation .clinical-warning {
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+
+  .page-anticoagulation .curve-caveat {
+    margin-top: 0.45rem;
+    font-size: 0.62rem;
+    line-height: 1.28;
+  }
+
+  .page-anticoagulation .curve-slope-label {
+    font-size: 11px;
+  }
+
+  .page-anticoagulation .desktop-caveat-copy {
+    display: none;
+  }
+
+  .page-anticoagulation .mobile-caveat-copy {
+    display: inline;
+  }
+
+  .page-anticoagulation .heparin-log-grid,
+  .page-anticoagulation .heparin-log-results {
+    grid-template-columns: 1fr;
+  }
+
+  .page-anticoagulation .heparin-log-panel .panel-header {
+    margin-bottom: 0.45rem;
+  }
+
+  .page-anticoagulation .heparin-log-panel h3 {
+    font-size: 0.82rem;
+    line-height: 1.1;
+  }
+
+  .page-anticoagulation .heparin-log-panel .panel-header p {
+    display: none;
+  }
+
+  .page-prime .workspace.page-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.48fr) minmax(112px, 0.9fr);
+    grid-template-rows: auto;
+    gap: 0.45rem;
+    align-items: start;
+    overflow: visible;
+  }
+
+  .page-prime .input-panel,
+  .page-prime .output-panel {
+    min-height: 0;
+    overflow: visible;
+    padding: 0.65rem;
+  }
+
+  .page-prime .input-panel {
+    border-color: rgba(15, 118, 110, 0.2);
+  }
+
+  .page-prime .output-panel {
+    border-color: rgba(15, 118, 110, 0.28);
+    box-shadow: 0 14px 30px rgba(15, 118, 110, 0.12);
+  }
+
+  .page-prime .panel-header {
+    margin-bottom: 0.55rem;
+  }
+
+  .page-prime .output-panel > .panel-header {
+    margin-bottom: 0.35rem;
+  }
+
+  .page-prime .output-panel h2 {
+    font-size: 0.92rem;
+  }
+
+  .page-prime .input-panel > .panel-header p,
+  .page-prime .output-panel > .panel-header p {
+    display: none;
+  }
+
+  .page-prime .field-grid {
+    gap: 0.52rem;
+  }
+
+  .page-prime .field {
+    gap: 0.32rem;
+    scroll-margin-top: 0.75rem;
+    scroll-margin-bottom: 30svh;
+  }
+
+  .page-prime .hint {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+
+  .page-prime .input-wrap {
+    padding: 0.52rem 0.55rem;
+  }
+
+  .page-prime input:not([type="checkbox"]):not([type="radio"]) {
+    min-height: 2rem;
+  }
+
+  .page-prime .input-wrap .unit {
+    font-size: 0.68rem;
+  }
+
+  .page-prime .quick-select-row {
+    gap: 0.32rem;
+  }
+
+  .page-prime .quick-select-button {
+    min-height: 2rem;
+    padding: 0.45rem 0.38rem;
+    font-size: 0.66rem;
+    line-height: 1.15;
+  }
+
+  .page-prime .validation-summary {
+    margin-top: 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .page-prime .prime-plan-card {
+    margin-bottom: 0.45rem;
+    padding: 0.5rem;
+    border-radius: 14px;
+  }
+
+  .page-prime .prime-plan-kicker {
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+  }
+
+  .page-prime .prime-plan-header h3 {
+    font-size: 0.82rem;
+    line-height: 1.1;
+  }
+
+  .page-prime .prime-plan-body {
+    margin-top: 0.28rem;
+    font-size: 0.58rem;
+    line-height: 1.25;
+  }
+
+  .page-prime .prime-plan-badges {
+    gap: 0.25rem;
+    margin-top: 0.4rem;
+  }
+
+  .page-prime .prime-badge {
+    width: 100%;
+    min-height: 1.55rem;
+    justify-content: center;
+    padding: 0.28rem 0.32rem;
+    text-align: center;
+    font-size: 0.56rem;
+    line-height: 1.15;
+  }
+
+  .page-prime .results-grid {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .page-prime .result-card {
+    padding: 0.42rem;
+    border-radius: 12px;
+  }
+
+  .page-prime .result-label {
+    font-size: 0.56rem;
+    line-height: 1.15;
+    letter-spacing: 0.05em;
+  }
+
+  .page-prime .result-value {
+    margin-top: 0.18rem;
+    font-size: clamp(0.86rem, 3.8vw, 1.15rem);
+  }
+
+  .page-prime .result-status {
+    margin-top: 0.18rem;
+    font-size: 0.56rem;
+    line-height: 1.22;
+  }
+
+  .page-prime .info-tabs {
+    display: none;
+  }
+
+  .page-perfusion .workspace.page-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(112px, 0.9fr);
+    grid-template-rows: auto auto;
+    gap: 0.45rem;
+    overflow: visible;
+  }
+
+  .page-perfusion .input-panel,
+  .page-perfusion .output-panel {
+    min-height: 0;
+    overflow: visible;
+    padding: 0.65rem;
+  }
+
+  .page-perfusion .input-panel {
+    border-color: rgba(15, 118, 110, 0.2);
+  }
+
+  .page-perfusion .output-panel {
+    position: sticky;
+    top: 0.5rem;
+    align-self: start;
+    border-color: rgba(15, 118, 110, 0.28);
+    box-shadow: 0 14px 30px rgba(15, 118, 110, 0.12);
+  }
+
+  .page-perfusion .output-panel > .panel-header {
+    margin-bottom: 0.35rem;
+  }
+
+  .page-perfusion .output-panel h2 {
+    font-size: 0.92rem;
+  }
+
+  .page-perfusion .perfusion-live-panel {
+    display: none;
+  }
+
+  .page-perfusion .panel-header {
+    margin-bottom: 0.55rem;
+  }
+
+  .page-perfusion .input-panel > .panel-header p,
+  .page-perfusion .output-panel > .panel-header p {
+    display: none;
+  }
+
+  .page-perfusion .field-grid {
+    gap: 0.52rem;
+  }
+
+  .page-perfusion .field {
+    gap: 0.32rem;
+    scroll-margin-top: 0.75rem;
+    scroll-margin-bottom: 30svh;
+  }
+
+  .page-perfusion .hint {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+
+  .page-perfusion .input-wrap {
+    padding: 0.52rem 0.55rem;
+  }
+
+  .page-perfusion input:not([type="checkbox"]):not([type="radio"]) {
+    min-height: 2rem;
+  }
+
+  .page-perfusion .input-wrap .unit {
+    font-size: 0.68rem;
+  }
+
+  .page-perfusion .validation-summary {
+    margin-top: 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .page-perfusion .results-grid {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .page-perfusion .result-card {
+    padding: 0.42rem;
+    border-radius: 12px;
+  }
+
+  .page-perfusion .result-label {
+    font-size: 0.58rem;
+    line-height: 1.15;
+    letter-spacing: 0.05em;
+  }
+
+  .page-perfusion .result-value {
+    margin-top: 0.18rem;
+    font-size: clamp(0.9rem, 4vw, 1.18rem);
+  }
+
+  .page-perfusion .result-status {
+    margin-top: 0.18rem;
+    font-size: 0.58rem;
+    line-height: 1.25;
+  }
+
+  .page-perfusion .info-tabs {
+    display: none;
+  }
+
+  .page-perfusion .perfusion-flow-map-panel {
+    grid-column: 1 / -1;
+    order: -1;
+    margin: 0 0 0.2rem;
+    padding: 0.6rem;
+    border-radius: 16px;
+    border-color: rgba(15, 118, 110, 0.22);
+    background: linear-gradient(145deg, rgba(239, 247, 244, 0.98), rgba(255, 252, 246, 0.96));
+  }
+
+  .page-perfusion .perfusion-flow-map-panel .panel-header {
+    margin-bottom: 0.35rem;
+  }
+
+  .page-perfusion .perfusion-flow-map-panel h3 {
+    font-size: 0.88rem;
+  }
+
+  .page-perfusion .perfusion-flow-map-panel .panel-header p {
+    display: none;
+  }
+
+  .page-perfusion #flowMapStatus {
+    margin-top: 0.35rem;
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+
+  .page-perfusion .flow-map-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.32rem;
+    margin-top: 0;
+  }
+
+  .page-perfusion .flow-map-chip {
+    padding: 0.38rem;
+    border-radius: 12px;
+  }
+
+  .page-perfusion .flow-map-chip-ci {
+    font-size: 0.56rem;
+    letter-spacing: 0.05em;
+  }
+
+  .page-perfusion .flow-map-chip-flow {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape), (min-width: 520px) and (max-width: 900px) {
+  .page-perfusion .workspace.page-workspace {
+    grid-template-columns: minmax(0, 1.45fr) minmax(220px, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+  }
+
+  .page-perfusion .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-perfusion .flow-map-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

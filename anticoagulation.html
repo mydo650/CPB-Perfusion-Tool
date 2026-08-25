@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Anticoagulation Support</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
   </head>
   <body class="page-anticoagulation">
     <main class="app-shell">
@@ -24,36 +24,13 @@
         <a class="module-button page-link" href="./prime.html" aria-current="false">Prime</a>
         <a class="module-button page-link is-active" href="./anticoagulation.html" aria-current="page">Anticoagulation</a>
         <a class="module-button page-link" href="./cannula-selection.html" aria-current="false">Cannula Selection</a>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Drug Library</summary>
-          <div class="dropdown-menu">
-            <a href="./drug-library.html">Overview</a>
-            <a href="./drug-library.html#anticoagulants">Anticoagulants</a>
-            <a href="./drug-library.html#reversals-anticoagulants">Reversals for Anticoagulants</a>
-            <a href="./drug-library.html#vasopressors">Vasopressors</a>
-            <a href="./drug-library.html#inotropes">Inotropes</a>
-            <a href="./drug-library.html#vasodilators">Vasodilators</a>
-            <a href="./drug-library.html#antihypertensives">Antihypertensives</a>
-            <a href="./drug-library.html#inhaled-anesthetics">Inhaled Anesthetics</a>
-            <a href="./drug-library.html#antifibrinolytics">Antifibrinolytics</a>
-            <a href="./drug-library.html#paralytics">Paralytics</a>
-          </div>
-        </details>
-        <details class="nav-dropdown">
-          <summary class="module-button page-link">Electrolytes/Blood Gas Ranges</summary>
-          <div class="dropdown-menu">
-            <a href="./electrolytes.html">Overview</a>
-            <a href="./electrolytes.html#potassium">Potassium</a>
-            <a href="./electrolytes.html#calcium">Calcium</a>
-            <a href="./electrolytes.html#magnesium">Magnesium</a>
-            <a href="./electrolytes.html#sodium">Sodium</a>
-            <a href="./electrolytes.html#bicarbonate">Bicarbonate</a>
-          </div>
-        </details>
+        <a class="module-button page-link" href="./drug-library.html" aria-current="false">Drug Library</a>
+        <a class="module-button page-link" href="./electrolytes.html" aria-current="false">Electrolytes/Blood Gas Ranges</a>
         <a class="module-button page-link" href="./blood-management.html" aria-current="false">Blood Products/Blood Management</a>
         <a class="module-button page-link" href="./checklist.html" aria-current="false">Checklist</a>
         <a class="module-button page-link" href="./references.html" aria-current="false">References</a>
       </nav>
+      <p class="mobile-nav-hint" aria-hidden="true">Swipe tabs left/right for more →</p>
 
       <section class="workspace page-workspace anticoag-workspace" aria-label="Anticoagulation calculator">
         <section class="panel input-panel anticoag-input-panel" aria-labelledby="anticoag-inputs-title">
@@ -86,9 +63,8 @@
           </div>
           <div class="results-grid results-grid-compact">
             <article class="result-card accent-card"><p class="result-label">Heparin Loading Dose</p><output id="heparinLoadingOutput" class="result-value">--</output><p id="heparinLoadingStatus" class="result-status">Enter weight and a heparin units/kg assumption.</p></article>
-            <article class="result-card"><p class="result-label">Heparin Distribution Volume</p><output id="heparinDistributionVolumeOutput" class="result-value">--</output><p id="heparinDistributionVolumeStatus" class="result-status">EBV + prime volume estimate for concentration-based HDR.</p></article>
-            <article class="result-card"><p class="result-label">Current Heparin Concentration</p><output id="heparinConcentrationOutput" class="result-value">--</output><p id="heparinConcentrationStatus" class="result-status">Logged heparin units divided by EBV plus prime volume.</p></article>
-            <article class="result-card"><p class="result-label">HDR Slope</p><output id="hdrSlopeOutput" class="result-value">--</output><p id="hdrSlopeStatus" class="result-status">Calculated from observed ACT response.</p></article>
+            <article class="result-card"><p class="result-label">EBV + Prime Volume</p><output id="heparinDistributionVolumeOutput" class="result-value">--</output><p id="heparinDistributionVolumeStatus" class="result-status">On-bypass volume estimate after prime joins circulation.</p></article>
+            <article class="result-card"><p class="result-label">Loading Concentration</p><output id="heparinConcentrationOutput" class="result-value">--</output><p id="hdrSlopeInline" class="result-emphasis">HDR rise/run: --</p><p id="heparinConcentrationStatus" class="result-status">Based on patient EBV before bypass.</p></article>
             <article class="result-card accent-card"><p class="result-label">Bivalirudin Loading Dose</p><output id="bivalirudinLoadingOutput" class="result-value">--</output><p id="bivalirudinLoadingStatus" class="result-status">Enter weight to calculate 1 mg/kg.</p></article>
             <article class="result-card accent-card"><p class="result-label">Argatroban Infusion Rate</p><output id="argatrobanRateOutput" class="result-value">--</output><p id="argatrobanRateStatus" class="result-status">Not approved for CPB; uses shared weight to calculate 2 mcg/kg/min.</p></article>
             <article class="result-card accent-card"><p class="result-label">Additional Heparin</p><output id="additionalHeparinOutput" class="result-value">--</output><p id="additionalHeparinStatus" class="result-status">Calculated from the dose-response projection.</p></article>
@@ -175,7 +151,7 @@
               <p id="afterAt3AdditionalHeparinStatus" class="result-status">Updated from repeat ACT after AT3.</p>
             </article>
           </div>
-          <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
+          <p class="curve-caveat"><span class="desktop-caveat-copy">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</span><span class="mobile-caveat-copy">Linear HDR estimate only. Confirm ACT response, patient factors, and local protocol.</span></p>
         </section>
 
         <section class="panel info-tabs anticoag-support-panel" aria-labelledby="anticoag-support-title">
@@ -190,7 +166,7 @@
               <dl class="formula-list">
                 <div><dt>Heparin Loading Dose</dt><dd>weight (kg) × heparin loading dose (units/kg)</dd></div>
                 <div><dt>Estimated Blood Volume</dt><dd>weight (kg) × EBV factor (mL/kg)</dd></div>
-                <div><dt>Current Heparin Concentration</dt><dd>total logged heparin units / (estimated blood volume + prime volume)</dd></div>
+                <div><dt>Loading Concentration</dt><dd>heparin units / estimated patient blood volume before bypass</dd></div>
                 <div><dt>Bivalirudin Loading Dose</dt><dd>weight (kg) × 1 mg/kg</dd></div>
                 <div><dt>Argatroban Infusion Rate</dt><dd>weight (kg) × 2 mcg/kg/min; argatroban is not approved for CPB/bypass anticoagulation</dd></div>
                 <div><dt>AT3 Dose</dt><dd>(desired AT3 - current AT3) × weight (kg) / 1.4</dd></div>
@@ -199,7 +175,7 @@
                 <div><dt>Projected Concentration to Target</dt><dd>(target ACT - baseline ACT) / HDR rise/run</dd></div>
                 <div><dt>Protamine Reversal Dose</dt><dd>(total logged heparin units / 100) × protamine ratio (mg per 100 units)</dd></div>
               </dl>
-              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the first heparin dose. If a repeat ACT after AT3 is entered, the graph updates from the observed repeat ACT rather than predicting the AT3 effect from dose alone. Prime volume is included in the distribution volume for concentration-based HDR teaching, but the projection still requires local protocol review and clinical confirmation.</p>
+              <p class="formula-note">The curve uses a simple linear ACT response between baseline ACT and the measured ACT after the first heparin dose. Before bypass, the loading heparin concentration is estimated from patient blood volume only; prime volume is displayed separately for on-bypass volume awareness after the circuit joins circulation. If a repeat ACT after AT3 is entered, the graph updates from the observed repeat ACT rather than predicting the AT3 effect from dose alone. The projection still requires local protocol review and clinical confirmation.</p>
               <p class="disclaimer">Decision-support for simulation and workflow use only. Confirm local anticoagulation protocols and product labeling before clinical application.</p>
             </section>
             <section class="formula-panel references-panel tab-panel" id="tab-panel-anticoag-references" role="tabpanel" aria-labelledby="tab-button-anticoag-references" data-tab-group="anticoag-support" data-tab-panel="references" hidden>
@@ -233,10 +209,11 @@
           <svg id="heparinCurveModalChart" class="curve-chart" viewBox="0 0 1100 620" role="img" aria-labelledby="heparin-curve-modal-title heparinCurveModalSummary"></svg>
           <div id="heparinCurveModalTooltip" class="curve-tooltip" role="status" aria-live="polite"></div>
         </div>
-        <p class="curve-caveat">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</p>
+        <p class="curve-caveat"><span class="desktop-caveat-copy">This projection assumes a linear ACT response from the first heparin dose. Actual ACT response can vary with timing after dose, ACT device, hemodilution, temperature, antithrombin level, platelet count, patient factors, and local anticoagulation protocol.</span><span class="mobile-caveat-copy">Linear HDR estimate only. Confirm ACT response, patient factors, and local protocol.</span></p>
       </div>
     </section>
 
-    <script src="./app.js"></script>
+    <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
+    <script src="./app.js?v=pilot-mobile-21"></script>
   </body>
 </html>
