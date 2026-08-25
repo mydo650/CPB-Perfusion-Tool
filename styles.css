@@ -1066,7 +1066,7 @@ input[aria-invalid="true"] {
 }
 
 .drug-detail-list .drug-detail-divider {
-  border-top: 1px solid var(--border);
+  border-top: 1px dotted var(--border);
   min-height: 0;
 }
 
