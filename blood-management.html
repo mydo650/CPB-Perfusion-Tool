@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Blood Products and Blood Management Strategies</title>
-    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-36" />
   </head>
   <body class="page-blood-management">
     <main class="app-shell">
@@ -37,6 +37,68 @@
             <h2 id="blood-management-title">Blood Products and Blood Management Strategies</h2>
             <p>Use this page to organize transfusion products, conservation strategies, and local protocol reminders.</p>
           </div>
+          <article class="result-card blood-compatibility-card" aria-labelledby="blood-compatibility-title">
+            <div class="blood-compatibility-header">
+              <div>
+                <p class="result-label">ABO/Rh Compatibility Helper</p>
+                <h3 id="blood-compatibility-title">Patient Blood Type</h3>
+                <p class="result-status">Select the patient blood type to display commonly compatible transfusion products for simulation planning.</p>
+              </div>
+              <form id="bloodCompatibilityForm" class="blood-compatibility-form">
+                <label class="field" for="patientBloodType">
+                  <span>Patient blood type</span>
+                  <select id="patientBloodType" name="patientBloodType">
+                    <option value="">Select type</option>
+                    <option value="O-">O-</option>
+                    <option value="O+">O+</option>
+                    <option value="A-">A-</option>
+                    <option value="A+">A+</option>
+                    <option value="B-">B-</option>
+                    <option value="B+">B+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="AB+">AB+</option>
+                  </select>
+                </label>
+              </form>
+            </div>
+            <p id="bloodCompatibilitySummary" class="compatibility-summary" role="status" aria-live="polite">
+              Choose a patient blood type to populate compatible products.
+            </p>
+            <div class="blood-compatibility-grid" aria-label="Compatible blood product recommendations">
+              <section class="compatibility-product-card">
+                <p class="compatibility-product-title">PRBCs</p>
+                <ul id="compatibleRbcOutput" class="compatibility-chip-list">
+                  <li class="compatibility-chip is-muted">Select type</li>
+                </ul>
+                <p id="compatibleRbcNote" class="result-status">ABO/Rh-compatible red cells still require blood bank testing and crossmatch unless emergency release applies.</p>
+              </section>
+              <section class="compatibility-product-card">
+                <p class="compatibility-product-title">Plasma / FFP</p>
+                <ul id="compatiblePlasmaOutput" class="compatibility-chip-list">
+                  <li class="compatibility-chip is-muted">Select type</li>
+                </ul>
+                <p id="compatiblePlasmaNote" class="result-status">Plasma must be ABO compatible with recipient red cells; Rh compatibility is generally not required.</p>
+              </section>
+              <section class="compatibility-product-card">
+                <p class="compatibility-product-title">Platelets</p>
+                <ul id="compatiblePlateletsOutput" class="compatibility-chip-list">
+                  <li class="compatibility-chip is-muted">Select type</li>
+                </ul>
+                <p id="compatiblePlateletsNote" class="result-status">ABO-identical platelets are preferred; other ABO groups may be used when clinically necessary.</p>
+              </section>
+              <section class="compatibility-product-card">
+                <p class="compatibility-product-title">Cryoprecipitate</p>
+                <ul id="compatibleCryoOutput" class="compatibility-chip-list">
+                  <li class="compatibility-chip is-muted">Select type</li>
+                </ul>
+                <p id="compatibleCryoNote" class="result-status">Same ABO is preferred when available, but cryoprecipitate is often usable across ABO groups due to small plasma volume.</p>
+              </section>
+            </div>
+            <p class="formula-note">
+              Compatibility helper is educational only and does not replace antibody screen, crossmatch, emergency-release policy,
+              special product requirements, or blood bank approval.
+            </p>
+          </article>
           <div class="results-grid results-grid-compact">
             <article class="result-card" id="blood-products">
               <p class="result-label">Blood Products</p>
@@ -223,5 +285,6 @@
       </section>
     </main>
     <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
+    <script src="./app.js?v=pilot-mobile-26"></script>
   </body>
 </html>

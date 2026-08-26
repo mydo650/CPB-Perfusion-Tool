@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Cannula Selection</title>
-    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-29" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-36" />
   </head>
   <body class="page-cannula-selection">
     <main class="app-shell">
@@ -42,8 +42,8 @@
           <form id="cannulaSelectionForm" novalidate>
             <label class="cannula-toggle-card" for="cannulaBicavalToggle">
               <span class="cannula-toggle-copy">
-                <span class="cannula-toggle-title">Bicaval / Intracardiac Mode</span>
-                <span class="cannula-toggle-text">Turn this on only when you want a third venous comparison lane for separate bicaval planning.</span>
+                <span class="cannula-toggle-title">Bicaval Venous Cannulation Mode</span>
+                <span class="cannula-toggle-text">Turn this on when you want a third venous comparison lane for bicaval planning.</span>
               </span>
               <span class="cannula-toggle-switch">
                 <input id="cannulaBicavalToggle" type="checkbox" name="cannulaBicavalToggle" />
@@ -111,8 +111,8 @@
               <section id="cannulaBicavalSetupPanel" class="curve-panel cannula-setup-panel cannula-theme-blue" aria-labelledby="cannula-bicaval-setup-title" hidden>
                 <div class="curve-header">
                   <div>
-                    <h3 id="cannula-bicaval-setup-title">Bicaval / Intracardiac Setup</h3>
-                    <p>Build a separate venous comparison lane for intracardiac or bicaval drainage planning.</p>
+                    <h3 id="cannula-bicaval-setup-title">Bicaval Venous Cannulation Setup</h3>
+                    <p>Build a separate venous comparison lane for bicaval drainage planning.</p>
                   </div>
                 </div>
                 <label class="field">
@@ -120,7 +120,7 @@
                   <div class="input-wrap">
                     <select id="cannulaBicavalManufacturer" name="cannulaBicavalManufacturer"></select>
                   </div>
-                  <small class="hint">Keep this lane independent when the intracardiac case uses a different venous family than the main drainage plan.</small>
+                  <small class="hint">Keep this lane independent when bicaval cannulation uses a different venous family than the main drainage plan.</small>
                 </label>
                 <label class="field">
                   <span>Bicaval Type</span>
@@ -140,7 +140,10 @@
             <div class="field">
               <div class="range-header">
                 <span>Target Flow</span>
-                <output id="cannulaFlowDisplay" for="cannulaFlowSlider">4.0 L/min</output>
+                <span class="range-output-group">
+                  <output id="cannulaFlowCiDisplay" class="range-secondary-output" for="cannulaFlowSlider">CI --</output>
+                  <output id="cannulaFlowDisplay" for="cannulaFlowSlider">4.0 L/min</output>
+                </span>
               </div>
               <input id="cannulaFlowSlider" class="cannula-flow-slider" type="range" min="0" max="7" step="0.1" value="4" />
               <small id="cannulaFlowHint" class="hint">Use the slider to move arterial and venous comparisons to the same liters per minute. The charts display pressure-drop estimates.</small>
@@ -214,8 +217,8 @@
               <section id="cannulaBicavalComparePanel" class="curve-panel cannula-compare-panel cannula-theme-blue" aria-labelledby="cannula-bicaval-title" hidden>
                 <div class="curve-header">
                   <div>
-                    <h3 id="cannula-bicaval-title">Bicaval / Intracardiac Venous</h3>
-                    <p id="cannulaBicavalSummary">Compare a separate bicaval or intracardiac venous option at the same target flow.</p>
+                    <h3 id="cannula-bicaval-title">Bicaval Venous Cannulation</h3>
+                    <p id="cannulaBicavalSummary">Compare a separate bicaval venous option at the same target flow.</p>
                   </div>
                   <button type="button" class="curve-action-button cannula-expand-button" id="cannulaBicavalExpandButton" data-cannula-expand="bicaval" aria-label="Expand bicaval pressure-drop graph">⤢</button>
                 </div>
@@ -288,7 +291,7 @@
             </dl>
           </section>
 
-          <section class="formula-panel" aria-labelledby="cannula-chart-title">
+          <section class="formula-panel mobile-secondary-section" aria-labelledby="cannula-chart-title">
             <h3 id="cannula-chart-title">Chart Workflow</h3>
             <ol class="references-list">
               <li>Select a manufacturer family.</li>
@@ -299,7 +302,7 @@
             </ol>
           </section>
 
-          <section class="formula-panel" aria-labelledby="cannula-manufacturer-title">
+          <section class="formula-panel mobile-secondary-section" aria-labelledby="cannula-manufacturer-title">
             <h3 id="cannula-manufacturer-title">Manufacturer Families To Build From</h3>
             <dl class="formula-list">
               <div>
@@ -353,6 +356,6 @@
       </div>
     </section>
     <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
-    <script src="./app.js?v=pilot-mobile-21"></script>
+    <script src="./app.js?v=pilot-mobile-26"></script>
   </body>
 </html>

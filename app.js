@@ -48,6 +48,25 @@ const ANTICOAG_LOG_STORAGE_KEY = "cpbSupportAnticoagHeparinLog";
 const DEFAULT_CANNULA_CARDIAC_INDEX = 2.6;
 const CANNULA_SIDES = ["arterial", "venous", "bicaval"];
 const BASE_CANNULA_SIDES = ["arterial", "venous"];
+const BLOOD_TYPE_VALUES = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+const ABO_COMPATIBILITY = {
+  O: {
+    rbc: ["O"],
+    plasma: ["O", "A", "B", "AB"],
+  },
+  A: {
+    rbc: ["A", "O"],
+    plasma: ["A", "AB"],
+  },
+  B: {
+    rbc: ["B", "O"],
+    plasma: ["B", "AB"],
+  },
+  AB: {
+    rbc: ["AB", "A", "B", "O"],
+    plasma: ["AB"],
+  },
+};
 const DRUG_DOSE_CHECKS = {
   "heparin-cpb-bolus": {
     label: "Heparin CPB loading bolus",
@@ -166,21 +185,25 @@ function buildAnchoredCannulaSizes(entries, maxFlow, step = 1) {
 const CANNULA_LIBRARY = {
   medtronic: {
     label: "Medtronic Cannulae",
-    sourceLabel: "CHNOLA Perfusion Team P&P Manual 2021 photo charts, traced first-pass",
+    sourceLabel: "Medtronic Cannulae US Product Catalog, 2025 manufacturer pressure-drop charts, catalog-traced first-pass",
     maxFlow: 7,
     families: {
       femoralArterial: {
-        label: "Femoral arterial",
+        label: "Bio-Medicus NextGen femoral arterial / jugular venous",
         category: "arterial",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 200,
         chartThresholdPressure: 100,
         recommendedMaxPressure: 100,
         sizes: [
-          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 8], [2, 26], [3, 55], [4, 94], [5, 145], [6, 210], [7, 286]] },
-          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 6], [2, 18], [3, 39], [4, 66], [5, 103], [6, 150], [7, 206]] },
-          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 4], [2, 12], [3, 27], [4, 47], [5, 71], [6, 108], [7, 152]] },
-          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 3], [2, 9], [3, 20], [4, 33], [5, 52], [6, 77], [7, 109]] },
+          { id: "15 Fr", label: "15 Fr", points: [[0, 0], [1, 10], [2, 45], [3, 105], [4, 190], [4.2, 210]] },
+          { id: "17 Fr", label: "17 Fr", points: [[0, 0], [1, 7], [2, 28], [3, 62], [4, 112], [5, 180], [5.4, 210]] },
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 4], [2, 16], [3, 35], [4, 62], [5, 95], [6, 125]] },
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 3], [2, 10], [3, 23], [4, 40], [5, 62], [6, 84]] },
+          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 2], [2, 7], [3, 15], [4, 26], [5, 40], [6, 56]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 1], [2, 4], [3, 10], [4, 18], [5, 28], [6, 40]] },
         ],
       },
       dlpArterial: {
@@ -202,7 +225,7 @@ const CANNULA_LIBRARY = {
         ], 4, 0.5),
       },
       nextGenArterialCatalog: {
-        label: "Bio-Medicus NextGen arterial",
+        label: "Bio-Medicus NextGen pediatric arterial",
         category: "arterial",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
@@ -210,12 +233,12 @@ const CANNULA_LIBRARY = {
         chartMaxPressure: 200,
         chartThresholdPressure: 100,
         recommendedMaxPressure: 100,
-        sizes: buildAnchoredCannulaSizes([
-          { label: "8 Fr", anchorFlow: 0.65, anchorPressure: 100 },
-          { label: "10 Fr", anchorFlow: 1.2, anchorPressure: 100 },
-          { label: "12 Fr", anchorFlow: 1.8, anchorPressure: 100 },
-          { label: "14 Fr", anchorFlow: 2.7, anchorPressure: 100 },
-        ], 2, 0.25),
+        sizes: [
+          { id: "8 Fr", label: "8 Fr", points: [[0, 0], [0.25, 12], [0.5, 55], [0.75, 125], [0.9, 200]] },
+          { id: "10 Fr", label: "10 Fr", points: [[0, 0], [0.5, 17], [1, 55], [1.5, 125], [1.85, 200]] },
+          { id: "12 Fr", label: "12 Fr", points: [[0, 0], [0.5, 5], [1, 18], [1.5, 50], [2, 95]] },
+          { id: "14 Fr", label: "14 Fr", points: [[0, 0], [0.5, 2], [1, 8], [1.5, 25], [2, 48]] },
+        ],
       },
       eopaArterial: {
         label: "EOPA arterial",
@@ -234,17 +257,56 @@ const CANNULA_LIBRARY = {
         ], 6),
       },
       femoralVenousMultiStage: {
-        label: "Femoral venous multi-stage",
+        label: "Bio-Medicus multi-stage femoral venous",
         category: "venous",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 180,
         chartThresholdPressure: 40,
         recommendedMaxPressure: 40,
         sizes: [
-          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 9], [2, 26], [3, 55], [4, 97], [5, 152], [6, 221], [7, 306]] },
-          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 6], [2, 16], [3, 35], [4, 59], [5, 90], [6, 129], [7, 178]] },
-          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 5], [2, 13], [3, 28], [4, 47], [5, 70], [6, 101], [7, 139]] },
-          { id: "29 Fr", label: "29 Fr", points: [[0, 0], [1, 3], [2, 8], [3, 17], [4, 28], [5, 42], [6, 60], [7, 82]] },
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 8], [2, 25], [3, 50], [4, 85], [5, 125], [6, 175]] },
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 5], [2, 15], [3, 30], [4, 50], [5, 78], [6, 120]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 2], [2, 5], [3, 12], [4, 24], [5, 40], [6, 60]] },
+        ],
+      },
+      nextGenJugularVenous: {
+        label: "Bio-Medicus NextGen jugular venous",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 200,
+        chartThresholdPressure: 40,
+        recommendedMaxPressure: 40,
+        sizes: [
+          { id: "15 Fr", label: "15 Fr", points: [[0, 0], [1, 10], [2, 45], [3, 105], [4, 190], [4.2, 210]] },
+          { id: "17 Fr", label: "17 Fr", points: [[0, 0], [1, 7], [2, 28], [3, 62], [4, 112], [5, 180], [5.4, 210]] },
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 4], [2, 16], [3, 35], [4, 62], [5, 95], [6, 125]] },
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 3], [2, 10], [3, 23], [4, 40], [5, 62], [6, 84]] },
+          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 2], [2, 7], [3, 15], [4, 26], [5, 40], [6, 56]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 1], [2, 4], [3, 10], [4, 18], [5, 28], [6, 40]] },
+        ],
+      },
+      nextGenFemoralBicavalVenous: {
+        label: "Bio-Medicus NextGen femoral bi-caval venous",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 200,
+        chartThresholdPressure: 40,
+        recommendedMaxPressure: 40,
+        sizes: [
+          { id: "15 Fr", label: "15 Fr", points: [[0, 0], [1, 25], [2, 75], [3, 160], [3.4, 210]] },
+          { id: "17 Fr", label: "17 Fr", points: [[0, 0], [1, 12], [2, 45], [3, 90], [4, 150], [4.6, 210]] },
+          { id: "19 Fr", label: "19 Fr", points: [[0, 0], [1, 7], [2, 25], [3, 55], [4, 90], [5, 130], [6, 180]] },
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 4], [2, 15], [3, 32], [4, 55], [5, 80], [6, 108]] },
+          { id: "23 Fr", label: "23 Fr", points: [[0, 0], [1, 3], [2, 10], [3, 20], [4, 34], [5, 55], [6, 80]] },
+          { id: "25 Fr", label: "25 Fr", points: [[0, 0], [1, 2], [2, 7], [3, 14], [4, 24], [5, 36], [6, 50]] },
+          { id: "27 Fr", label: "27 Fr", points: [[0, 0], [1, 1.5], [2, 5], [3, 10], [4, 18], [5, 28], [6, 38]] },
+          { id: "29 Fr", label: "29 Fr", points: [[0, 0], [1, 1], [2, 4], [3, 8], [4, 14], [5, 22], [6, 30]] },
         ],
       },
       dlpSingleStageStraightVenous: {
@@ -352,7 +414,7 @@ const CANNULA_LIBRARY = {
         ], 6),
       },
       nextGenPediatricVenous: {
-        label: "NextGen pediatric venous",
+        label: "Bio-Medicus NextGen pediatric venous",
         category: "venous",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
@@ -360,12 +422,12 @@ const CANNULA_LIBRARY = {
         chartMaxPressure: 200,
         chartThresholdPressure: 40,
         recommendedMaxPressure: 40,
-        sizes: buildAnchoredCannulaSizes([
-          { label: "8 Fr", anchorFlow: 0.6, anchorPressure: 40 },
-          { label: "10 Fr", anchorFlow: 1.0, anchorPressure: 40 },
-          { label: "12 Fr", anchorFlow: 1.55, anchorPressure: 40 },
-          { label: "14 Fr", anchorFlow: 1.9, anchorPressure: 40 },
-        ], 2, 0.25),
+        sizes: [
+          { id: "8 Fr", label: "8 Fr", points: [[0, 0], [0.25, 8], [0.5, 40], [0.75, 105], [1, 200]] },
+          { id: "10 Fr", label: "10 Fr", points: [[0, 0], [0.5, 14], [1, 55], [1.5, 125], [1.85, 195]] },
+          { id: "12 Fr", label: "12 Fr", points: [[0, 0], [0.5, 5], [1, 18], [1.5, 42], [2, 80]] },
+          { id: "14 Fr", label: "14 Fr", points: [[0, 0], [0.5, 3], [1, 10], [1.5, 24], [2, 45]] },
+        ],
       },
     },
   },
@@ -443,25 +505,158 @@ const CANNULA_LIBRARY = {
   },
   sorin: {
     label: "Sorin / LivaNova Cannulae",
-    sourceLabel: "CHNOLA Perfusion Team P&P Manual 2021 photo charts, traced first-pass",
-    maxFlow: 7,
+    sourceLabel: "LivaNova Cannulae product pages, 2026 official performance chart images, catalog-traced first-pass",
+    maxFlow: 9,
     families: {
-      rightAnglePlasticTipVenous: {
-        label: "Right-angle plastic-tip venous",
-        category: "venous",
+      pureFlexCurvedArterial: {
+        label: "PureFlex curved-tip arterial",
+        category: "arterial",
         flowUnit: "L/min",
         pressureUnit: "mmHg",
         maxFlow: 8,
         chartMaxPressure: 160,
+        chartThresholdPressure: 100,
+        recommendedMaxPressure: 100,
+        sizes: [
+          { id: "18 Fr", label: "18 Fr", points: [[0, 0], [1, 3], [2, 15], [3, 37], [4, 70], [5, 112], [5.8, 160]] },
+          { id: "20 Fr", label: "20 Fr", points: [[0, 0], [1, 2], [2, 8], [3, 22], [4, 41], [5, 64], [6, 95]] },
+          { id: "22 Fr", label: "22 Fr", points: [[0, 0], [1, 1.5], [2, 5], [3, 14], [4, 26], [5, 41], [6, 58], [7, 78], [8, 105]] },
+          { id: "24 Fr", label: "24 Fr", points: [[0, 0], [1, 1], [2, 4], [3, 10], [4, 18], [5, 30], [6, 42], [7, 55], [8, 72]] },
+        ],
+      },
+      pureFlexStraightArterial: {
+        label: "PureFlex straight-tip arterial",
+        category: "arterial",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 8,
+        chartMaxPressure: 120,
+        chartThresholdPressure: 100,
+        recommendedMaxPressure: 100,
+        sizes: [
+          { id: "18 Fr", label: "18 Fr", points: [[0, 0], [1, 2], [2, 12], [3, 30], [4, 58], [5, 92], [5.8, 120]] },
+          { id: "20 Fr", label: "20 Fr", points: [[0, 0], [1, 1.5], [2, 7], [3, 17], [4, 31], [5, 48], [6, 65]] },
+          { id: "22 Fr", label: "22 Fr", points: [[0, 0], [1, 1], [2, 5], [3, 12], [4, 22], [5, 34], [6, 47], [7, 60], [8, 72]] },
+          { id: "24 Fr", label: "24 Fr", points: [[0, 0], [1, 0.7], [2, 3], [3, 8], [4, 15], [5, 23], [6, 32], [7, 43], [8, 52]] },
+        ],
+      },
+      optiflowCurvedArterial: {
+        label: "Optiflow arterial curved-tip",
+        category: "arterial",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 9,
+        chartMaxPressure: 160,
+        chartThresholdPressure: 100,
+        recommendedMaxPressure: 100,
+        sizes: [
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 4], [2, 10], [3, 18], [4, 30], [5, 45], [6, 62], [7, 82], [8, 108]] },
+          { id: "24 Fr", label: "24 Fr", points: [[0, 0], [1, 2], [2, 5], [3, 9], [4, 16], [5, 25], [6, 36], [7, 50], [8, 70], [9, 92]] },
+        ],
+      },
+      optiflowStraightArterial: {
+        label: "Optiflow arterial straight-tip",
+        category: "arterial",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 9,
+        chartMaxPressure: 160,
+        chartThresholdPressure: 100,
+        recommendedMaxPressure: 100,
+        sizes: [
+          { id: "21 Fr", label: "21 Fr", points: [[0, 0], [1, 3], [2, 7], [3, 12], [4, 20], [5, 31], [6, 47], [7, 66], [8, 90], [9, 116]] },
+          { id: "24 Fr", label: "24 Fr", points: [[0, 0], [1, 1.5], [2, 3], [3, 6], [4, 11], [5, 18], [6, 27], [7, 36], [8, 47], [9, 60]] },
+        ],
+      },
+      tripleStageVenous: {
+        label: "Triple-stage venous return",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 25,
         chartThresholdPressure: 40,
         recommendedMaxPressure: 40,
-        sizes: buildAnchoredCannulaSizes([
-          { label: "14 Fr", anchorFlow: 1.3, anchorPressure: 40 },
-          { label: "16 Fr", anchorFlow: 1.8, anchorPressure: 40 },
-          { label: "18 Fr", anchorFlow: 2.6, anchorPressure: 40 },
-          { label: "20 Fr", anchorFlow: 3.6, anchorPressure: 40 },
-          { label: "22 Fr", anchorFlow: 5.0, anchorPressure: 40 },
-        ], 8),
+        sizes: [
+          { id: "29/29/29 Fr", label: "29/29/29 Fr", points: [[1, 0], [2, 0.9], [3, 3], [4, 7], [5, 13], [6, 20]] },
+          { id: "29/37/37 Fr", label: "29/37/37 Fr", points: [[1, 0], [2, 0.4], [3, 1], [4, 2.5], [5, 5], [6, 8.5]] },
+        ],
+      },
+      dualStageVenous: {
+        label: "Dual-stage venous return",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 14,
+        chartThresholdPressure: 40,
+        recommendedMaxPressure: 40,
+        sizes: [
+          { id: "29/37 Fr", label: "29/37 Fr", points: [[1, 0], [2, 1.4], [3, 2.8], [4, 4.4], [5, 8], [6, 12.5]] },
+          { id: "32/40 Fr", label: "32/40 Fr", points: [[1, 0], [2, 1], [3, 2], [4, 3.5], [5, 6.5], [6, 9.5]] },
+          { id: "34/46 Fr", label: "34/46 Fr", points: [[1, 0], [2, 0.6], [3, 1.1], [4, 2.4], [5, 4], [6, 5.5]] },
+          { id: "36/46 Fr", label: "36/46 Fr", points: [[1, 0], [2, 0.4], [3, 0.8], [4, 2], [5, 3.4], [6, 5]] },
+          { id: "36/50 Fr", label: "36/50 Fr", points: [[1, 0], [2, 0.3], [3, 0.7], [4, 1.8], [5, 3], [6, 4.3]] },
+        ],
+      },
+      straightBulletVenous: {
+        label: "Single-stage straight bullet venous",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 9,
+        chartMaxPressure: 160,
+        chartThresholdPressure: 40,
+        recommendedMaxPressure: 40,
+        sizes: [
+          { id: "24 Fr", label: "24 Fr", points: [[0, 0], [1, 6], [2, 14], [3, 24], [4, 42], [5, 62], [6, 82], [7, 104], [8, 126], [9, 146]] },
+          { id: "28 Fr", label: "28 Fr", points: [[0, 0], [1, 4], [2, 9], [3, 17], [4, 32], [5, 48], [6, 63], [7, 78], [8, 94], [9, 112]] },
+          { id: "32 Fr", label: "32 Fr", points: [[0, 0], [1, 3], [2, 7], [3, 12], [4, 22], [5, 34], [6, 45], [7, 56], [8, 68], [9, 80]] },
+          { id: "34 Fr", label: "34 Fr", points: [[0, 0], [1, 2], [2, 5], [3, 10], [4, 18], [5, 28], [6, 38], [7, 48], [8, 58], [9, 68]] },
+          { id: "36 Fr", label: "36 Fr", points: [[0, 0], [1, 1.5], [2, 4], [3, 8], [4, 15], [5, 23], [6, 31], [7, 40], [8, 48], [9, 56]] },
+        ],
+      },
+      straightLighthouseVenous: {
+        label: "Single-stage straight lighthouse venous",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 100,
+        chartThresholdPressure: 40,
+        recommendedMaxPressure: 40,
+        sizes: [
+          { id: "16 Fr", label: "16 Fr", points: [[0, 0], [0.5, 8], [1, 25], [1.5, 48], [2, 78], [2.3, 100]] },
+          { id: "18 Fr", label: "18 Fr", points: [[0, 0], [0.5, 5], [1, 14], [1.5, 28], [2, 48], [2.5, 72], [3, 100]] },
+          { id: "20 Fr", label: "20 Fr", points: [[0, 0], [1, 7], [2, 20], [3, 43], [4, 75], [4.5, 100]] },
+          { id: "22 Fr", label: "22 Fr", points: [[0, 0], [1, 4], [2, 12], [3, 24], [4, 43], [5, 68], [5.8, 100]] },
+          { id: "24 Fr", label: "24 Fr", points: [[0, 0], [1, 3], [2, 8], [3, 16], [4, 29], [5, 50], [6, 80]] },
+          { id: "26 Fr", label: "26 Fr", points: [[0, 0], [1, 2], [2, 6], [3, 13], [4, 24], [5, 42], [6, 64]] },
+          { id: "28 Fr", label: "28 Fr", points: [[0, 0], [1, 1.5], [2, 5], [3, 11], [4, 20], [5, 34], [6, 50]] },
+          { id: "30 Fr", label: "30 Fr", points: [[0, 0], [1, 1], [2, 4], [3, 8], [4, 15], [5, 25], [6, 37]] },
+          { id: "32 Fr", label: "32 Fr", points: [[0, 0], [1, 0.8], [2, 3], [3, 6], [4, 12], [5, 20], [6, 29]] },
+          { id: "34 Fr", label: "34 Fr", points: [[0, 0], [1, 0.6], [2, 2.5], [3, 5], [4, 9], [5, 15], [6, 22]] },
+          { id: "36 Fr", label: "36 Fr", points: [[0, 0], [1, 0.4], [2, 1.5], [3, 3], [4, 6], [5, 10], [6, 14]] },
+        ],
+      },
+      rightAngleLighthouseVenous: {
+        label: "Single-stage right-angle lighthouse venous",
+        category: "venous",
+        flowUnit: "L/min",
+        pressureUnit: "mmHg",
+        maxFlow: 6,
+        chartMaxPressure: 250,
+        chartThresholdPressure: 40,
+        recommendedMaxPressure: 40,
+        sizes: [
+          { id: "20 Fr", label: "20 Fr", points: [[0.5, 0], [1, 20], [2, 45], [3, 78], [4, 118], [5, 165], [6, 222]] },
+          { id: "24 Fr", label: "24 Fr", points: [[0.5, 0], [1, 4], [2, 12], [3, 24], [4, 40], [5, 60], [6, 84]] },
+          { id: "28 Fr", label: "28 Fr", points: [[0.5, 0], [1, 3], [2, 8], [3, 18], [4, 32], [5, 50], [6, 72]] },
+          { id: "32 Fr", label: "32 Fr", points: [[0.5, 0], [1, 2], [2, 6], [3, 13], [4, 24], [5, 39], [6, 58]] },
+          { id: "34 Fr", label: "34 Fr", points: [[0.5, 0], [1, 1.5], [2, 4], [3, 10], [4, 18], [5, 30], [6, 45]] },
+          { id: "36 Fr", label: "36 Fr", points: [[0.5, 0], [1, 1], [2, 3], [3, 7], [4, 13], [5, 22], [6, 32]] },
+          { id: "40 Fr", label: "40 Fr", points: [[0.5, 0], [1, 0.5], [2, 1], [3, 2], [4, 3], [5, 5], [6, 8]] },
+        ],
       },
     },
   },
@@ -470,6 +665,86 @@ const CANNULA_LIBRARY = {
 function roundTo(value, decimals) {
   const factor = 10 ** decimals;
   return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
+function parseBloodType(bloodType) {
+  const match = /^(O|A|B|AB)([+-])$/.exec(bloodType);
+  if (!match) return null;
+  return { abo: match[1], rh: match[2] };
+}
+
+function formatBloodTypeLabel(bloodType) {
+  return bloodType.replace("-", "−");
+}
+
+function formatAboProductLabel(abo, productLabel) {
+  return `${abo} ${productLabel}`;
+}
+
+function orderRhCompatibleDonors(abo, patientRh) {
+  return patientRh === "+"
+    ? [`${abo}+`, `${abo}-`]
+    : [`${abo}-`];
+}
+
+function renderCompatibilityList(listElement, items) {
+  if (!listElement) return;
+  listElement.innerHTML = items.length
+    ? items.map((item) => `<li class="compatibility-chip">${item}</li>`).join("")
+    : '<li class="compatibility-chip is-muted">Select type</li>';
+}
+
+function renderBloodCompatibility() {
+  if (!patientBloodTypeSelect || !bloodCompatibilitySummary) return;
+  const selectedType = patientBloodTypeSelect.value;
+  const parsedType = parseBloodType(selectedType);
+
+  if (!parsedType) {
+    bloodCompatibilitySummary.textContent = "Choose a patient blood type to populate compatible products.";
+    renderCompatibilityList(bloodCompatibilityOutputs.rbc, []);
+    renderCompatibilityList(bloodCompatibilityOutputs.plasma, []);
+    renderCompatibilityList(bloodCompatibilityOutputs.platelets, []);
+    renderCompatibilityList(bloodCompatibilityOutputs.cryo, []);
+    return;
+  }
+
+  const compatibility = ABO_COMPATIBILITY[parsedType.abo];
+  const rbcProducts = compatibility.rbc.flatMap((abo) => orderRhCompatibleDonors(abo, parsedType.rh).map(formatBloodTypeLabel));
+  const plasmaProducts = compatibility.plasma.map((abo) => formatAboProductLabel(abo, "plasma"));
+  const otherPlateletAboGroups = BLOOD_TYPE_VALUES
+    .map((type) => parseBloodType(type)?.abo)
+    .filter((abo, index, list) => abo && list.indexOf(abo) === index && abo !== parsedType.abo);
+  const plateletProducts = [
+    `${parsedType.abo} platelets preferred`,
+    ...otherPlateletAboGroups.map((abo) => `${abo} platelets if needed`),
+  ];
+  const cryoProducts = [
+    `${parsedType.abo} cryo preferred`,
+    ...otherPlateletAboGroups.map((abo) => `${abo} cryo if needed`),
+  ];
+
+  bloodCompatibilitySummary.textContent = `Showing common ABO/Rh compatibility options for a ${formatBloodTypeLabel(selectedType)} patient.`;
+  renderCompatibilityList(bloodCompatibilityOutputs.rbc, rbcProducts);
+  renderCompatibilityList(bloodCompatibilityOutputs.plasma, plasmaProducts);
+  renderCompatibilityList(bloodCompatibilityOutputs.platelets, plateletProducts);
+  renderCompatibilityList(bloodCompatibilityOutputs.cryo, cryoProducts);
+
+  if (bloodCompatibilityOutputs.rbcNote) {
+    bloodCompatibilityOutputs.rbcNote.textContent = parsedType.rh === "+"
+      ? "Rh-positive patients can generally receive Rh-positive or Rh-negative compatible red cells."
+      : "Rh-negative patients should receive Rh-negative red cells unless emergency-release or blood bank policy directs otherwise.";
+  }
+  if (bloodCompatibilityOutputs.plasmaNote) {
+    bloodCompatibilityOutputs.plasmaNote.textContent = "Plasma selection is ABO compatible with recipient red cells; Rh compatibility is generally not required.";
+  }
+  if (bloodCompatibilityOutputs.plateletsNote) {
+    bloodCompatibilityOutputs.plateletsNote.textContent = parsedType.rh === "+"
+      ? "ABO-identical platelets are preferred; Rh-positive patients can generally receive either Rh type."
+      : "ABO-identical platelets are preferred; Rh-negative platelets are preferred when available, but Rh-positive platelets may be used per blood bank policy.";
+  }
+  if (bloodCompatibilityOutputs.cryoNote) {
+    bloodCompatibilityOutputs.cryoNote.textContent = "Same ABO cryoprecipitate is preferred when available; other ABO groups may be used when clinically necessary.";
+  }
 }
 
 function readSharedFieldState() {
@@ -1048,6 +1323,7 @@ const cannulaBicavalToggle = document.querySelector("#cannulaBicavalToggle");
 const cannulaFlowHint = document.querySelector("#cannulaFlowHint");
 const cannulaFlowSlider = document.querySelector("#cannulaFlowSlider");
 const cannulaFlowDisplay = document.querySelector("#cannulaFlowDisplay");
+const cannulaFlowCiDisplay = document.querySelector("#cannulaFlowCiDisplay");
 const cannulaFlowOutput = document.querySelector("#cannulaFlowOutput");
 const cannulaFlowStatus = document.querySelector("#cannulaFlowStatus");
 const cannulaCiOutput = document.querySelector("#cannulaCiOutput");
@@ -1093,7 +1369,7 @@ const cannulaPanels = {
     pressureStatus: document.querySelector("#cannulaVenousPressureStatus"),
   },
   bicaval: {
-    label: "Bicaval",
+    label: "Bicaval Venous Cannulation",
     setupPanel: document.querySelector("#cannulaBicavalSetupPanel"),
     comparePanel: document.querySelector("#cannulaBicavalComparePanel"),
     manufacturerSelect: document.querySelector("#cannulaBicavalManufacturer"),
@@ -1119,6 +1395,19 @@ const cannulaCurveModalSummary = document.querySelector("#cannulaCurveModalSumma
 const cannulaCurveModalChart = document.querySelector("#cannulaCurveModalChart");
 const cannulaCurveModalTooltip = document.querySelector("#cannulaCurveModalTooltip");
 const closeCannulaCurveModalButton = document.querySelector("#closeCannulaCurveModalButton");
+const bloodCompatibilityForm = document.querySelector("#bloodCompatibilityForm");
+const patientBloodTypeSelect = document.querySelector("#patientBloodType");
+const bloodCompatibilitySummary = document.querySelector("#bloodCompatibilitySummary");
+const bloodCompatibilityOutputs = {
+  rbc: document.querySelector("#compatibleRbcOutput"),
+  plasma: document.querySelector("#compatiblePlasmaOutput"),
+  platelets: document.querySelector("#compatiblePlateletsOutput"),
+  cryo: document.querySelector("#compatibleCryoOutput"),
+  rbcNote: document.querySelector("#compatibleRbcNote"),
+  plasmaNote: document.querySelector("#compatiblePlasmaNote"),
+  plateletsNote: document.querySelector("#compatiblePlateletsNote"),
+  cryoNote: document.querySelector("#compatibleCryoNote"),
+};
 const cannulaState = {
   sides: {
     arterial: {
@@ -1806,7 +2095,9 @@ function getCannulaTargetFlowCeiling() {
     .map((side) => getCannulaManufacturer(side)?.maxFlow ?? 0)
     .filter((value) => Number.isFinite(value) && value > 0);
   const manufacturerCeiling = manufacturerMaxima.length ? Math.max(...manufacturerMaxima) : 7;
-  return roundTo(Math.min(Math.max(4, perfusionFlowAtCi3, cannulaState.flow), manufacturerCeiling || 7), 1);
+  const referenceFlow = Math.max(4, perfusionFlowAtCi3);
+  const bufferedCeiling = Math.ceil(referenceFlow + 2);
+  return roundTo(Math.max(bufferedCeiling, cannulaState.flow, manufacturerCeiling || 7), 1);
 }
 
 function getCannulaChartFlowMax(side) {
@@ -1859,10 +2150,10 @@ function getPreferredCannulaFamilyId(side) {
   if (side === "bicaval") {
     const intracardiacFamily = familyEntries.find(([, family]) =>
       cannulaFamilyHasCurveData(family) && !family.label.toLowerCase().includes("femoral")
-      && /(bicaval|two-stage|two stage|dual-stage|dual stage|mc2)/i.test(family.label),
+      && /(bicaval|bi-caval|bi caval|two-stage|two stage|dual-stage|dual stage|mc2)/i.test(family.label),
     );
     const fallbackIntracardiacFamily = familyEntries.find(([, family]) =>
-      cannulaFamilyHasCurveData(family) && /(bicaval|two-stage|two stage|dual-stage|dual stage|mc2|multi-stage|multi stage)/i.test(family.label),
+      cannulaFamilyHasCurveData(family) && /(bicaval|bi-caval|bi caval|two-stage|two stage|dual-stage|dual stage|mc2|multi-stage|multi stage)/i.test(family.label),
     );
     const nonFemoralCurveFamily = familyEntries.find(([, family]) => cannulaFamilyHasCurveData(family) && !family.label.toLowerCase().includes("femoral"));
     const fallbackCurveFamily = familyEntries.find(([, family]) => cannulaFamilyHasCurveData(family));
@@ -1894,7 +2185,7 @@ function getCannulaFamilyRecommendationScore(side, familyId, family) {
     bias += 3;
   }
   if (side === "bicaval") {
-    if (/(mc2|two-stage|two stage|dual-stage|dual stage|multi-stage|multi stage|bicaval)/i.test(label)) {
+    if (/(mc2|two-stage|two stage|dual-stage|dual stage|multi-stage|multi stage|bicaval|bi-caval|bi caval)/i.test(label)) {
       bias -= 1.5;
     }
     if (label.includes("femoral")) {
@@ -2151,12 +2442,21 @@ function syncCannulaFlowControls() {
   if (!cannulaFlowSlider || !cannulaFlowDisplay) return;
   const maxFlow = getCannulaTargetFlowCeiling();
   const sliderMax = maxFlow || 7;
+  const perfusionContext = getSharedPerfusionContext();
+  const targetCardiacIndex = perfusionContext.bsa !== null && perfusionContext.bsa > 0
+    ? cannulaState.flow / perfusionContext.bsa
+    : null;
   cannulaFlowSlider.max = String(sliderMax);
   if (cannulaState.flow > sliderMax) {
     cannulaState.flow = sliderMax;
   }
   cannulaFlowSlider.value = String(cannulaState.flow);
   cannulaFlowDisplay.textContent = `${roundTo(cannulaState.flow, 1).toFixed(1)} L/min`;
+  if (cannulaFlowCiDisplay) {
+    cannulaFlowCiDisplay.textContent = targetCardiacIndex !== null
+      ? `CI ${roundTo(targetCardiacIndex, 2).toFixed(2)}`
+      : "CI --";
+  }
 }
 
 function setCannulaManualFlowSource() {
@@ -2200,7 +2500,7 @@ function syncCannulaBicavalVisibility() {
   cannulaPanels.bicaval.setupPanel.hidden = !isEnabled;
   cannulaPanels.bicaval.comparePanel.hidden = !isEnabled;
   if (cannulaFlowHint) {
-    const sideList = isEnabled ? "arterial, venous, and bicaval" : "arterial and venous";
+    const sideList = isEnabled ? "arterial, venous, and bicaval venous cannulation" : "arterial and venous";
     cannulaFlowHint.textContent = usesTouchGraphControls()
       ? `Use the slider to move ${sideList} comparisons to the same liters per minute. The charts display pressure-drop estimates.`
       : `Use the slider or drag on the charts to move ${sideList} comparisons to the same liters per minute.`;
@@ -2286,10 +2586,10 @@ function renderCannulaSharedOutputs() {
   const sourceLabels = [
     arterialManufacturer ? `Arterial: ${arterialManufacturer.sourceLabel}` : null,
     venousManufacturer ? `Venous: ${venousManufacturer.sourceLabel}` : null,
-    bicavalManufacturer ? `Bicaval: ${bicavalManufacturer.sourceLabel}` : null,
+    bicavalManufacturer ? `Bicaval venous cannulation: ${bicavalManufacturer.sourceLabel}` : null,
   ].filter(Boolean);
   cannulaSourceOutput.textContent = sourceLabels.join(" | ") || "--";
-  cannulaSourceStatus.textContent = "Current plotted families are first-pass traces from the supplied chart photos. They are much closer to the printed graphs than placeholders, but should still be refined against cleaner source charts or PDFs before relying on them for detailed interpretation.";
+  cannulaSourceStatus.textContent = "Manufacturer pressure-drop curves are catalog-traced first-pass estimates. LivaNova PureFlex arterial charts were read on the mmHg axis from dual-unit mmH₂O/mmHg charts; confirm all selections against institutional practice.";
 }
 
 function renderCannulaSideOutputs(side) {
@@ -2336,8 +2636,8 @@ function renderCannulaSideOutputs(side) {
 
   panel.recommendedOutput.textContent = recommendedSize.label;
   panel.recommendedStatus.textContent = recommendedPressure <= family.recommendedMaxPressure
-    ? `Minimum recommended size that stays at or below the ${family.recommendedMaxPressure} mmHg pressure-drop threshold at the selected target flow of ${roundTo(cannulaState.flow, 1).toFixed(1)} L/min.`
-    : `No listed size stays at or below the ${family.recommendedMaxPressure} mmHg pressure-drop threshold at the selected target flow; showing the lowest-resistance available size.`;
+    ? `Minimum size under ${family.recommendedMaxPressure} mmHg at ${roundTo(cannulaState.flow, 1).toFixed(1)} L/min.`
+    : `No size is under ${family.recommendedMaxPressure} mmHg; showing lowest resistance.`;
   panel.selectedOutput.textContent = selectedSize.label;
   panel.selectedStatus.textContent = panelState.manualOverride
     ? `Manual override active for ${manufacturer.label} ${family.label}.`
@@ -3491,6 +3791,12 @@ if (drugDoseCheckForm) {
   applyDrugDoseCheckScenarioDefaults();
   syncDrugDoseCheckScenarioFields();
   renderDrugDoseSafetyCheck();
+}
+
+if (bloodCompatibilityForm) {
+  bloodCompatibilityForm.addEventListener("input", renderBloodCompatibility);
+  bloodCompatibilityForm.addEventListener("change", renderBloodCompatibility);
+  renderBloodCompatibility();
 }
 
 if (anticoagForm) {

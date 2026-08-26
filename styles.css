@@ -663,6 +663,19 @@ input[aria-invalid="true"] {
   color: var(--accent-strong);
 }
 
+.range-output-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  text-align: right;
+}
+
+.range-secondary-output {
+  color: var(--muted) !important;
+  font-size: 0.9rem;
+}
+
 .cannula-toggle-card {
   display: flex;
   align-items: center;
@@ -2061,6 +2074,90 @@ input[aria-invalid="true"] {
   margin-top: 1.5rem;
 }
 
+.blood-compatibility-card {
+  margin-bottom: 1rem;
+}
+
+.blood-compatibility-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.35fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.blood-compatibility-header h3 {
+  margin: 0.15rem 0 0.25rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.blood-compatibility-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.compatibility-summary {
+  margin: 0.9rem 0;
+  color: var(--accent-strong);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.blood-compatibility-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.compatibility-product-card {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid rgba(15, 118, 110, 0.14);
+  border-radius: 18px;
+  background: rgba(240, 253, 250, 0.56);
+}
+
+.compatibility-product-title {
+  margin: 0;
+  color: var(--accent-strong);
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.compatibility-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.compatibility-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  color: #f8fffd;
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.compatibility-chip.is-muted {
+  background: rgba(78, 94, 102, 0.12);
+  color: var(--muted);
+}
+
 .formula-list {
   display: grid;
   gap: 0.9rem;
@@ -2136,6 +2233,14 @@ input[aria-invalid="true"] {
     grid-template-columns: 1fr;
   }
 
+  .blood-compatibility-header {
+    grid-template-columns: 1fr;
+  }
+
+  .blood-compatibility-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .perfusion-live-panel {
     top: 0.5rem;
     padding: 0.7rem;
@@ -2199,6 +2304,12 @@ input[aria-invalid="true"] {
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-grid,
   .page-cannula-selection:not(.has-bicaval) .cannula-compare-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-grid,
+  .page-cannula-selection.has-bicaval .cannula-compare-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
   .flow-map-grid {
@@ -2365,6 +2476,14 @@ input[aria-invalid="true"] {
     padding: 1rem;
   }
 
+  .blood-compatibility-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compatibility-product-card {
+    padding: 0.75rem;
+  }
+
   .heparin-log-entry {
     flex-direction: column;
     align-items: flex-start;
@@ -2396,67 +2515,196 @@ input[aria-invalid="true"] {
     cursor: default;
   }
 
+  .page-cannula-selection .mobile-secondary-section {
+    display: none;
+  }
+
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-grid,
-  .page-cannula-selection:not(.has-bicaval) .cannula-compare-grid {
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-grid,
+  .page-cannula-selection.has-bicaval .cannula-setup-grid,
+  .page-cannula-selection.has-bicaval .cannula-compare-grid {
     gap: 0.55rem;
   }
 
+  .page-cannula-selection.has-bicaval .cannula-setup-grid,
+  .page-cannula-selection.has-bicaval .cannula-compare-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel,
-  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel {
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel {
     padding: 0.65rem;
     border-radius: 16px;
   }
 
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .curve-header,
-  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel .curve-header {
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel .curve-header,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .curve-header,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel .curve-header {
     margin-bottom: 0.65rem;
   }
 
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .curve-header p,
   .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel .curve-header p,
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .hint,
-  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-status {
+  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-status,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .curve-header p,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel .curve-header p,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .hint,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-status {
     font-size: 0.76rem;
     line-height: 1.35;
   }
 
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .curve-header p,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel .curve-header p,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .hint,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-status {
+    display: none;
+  }
+
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel h3,
-  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel h3 {
+  .page-cannula-selection:not(.has-bicaval) .cannula-compare-panel h3,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel h3,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel h3 {
     font-size: 0.98rem;
     line-height: 1.15;
   }
 
-  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .input-wrap {
+  .page-cannula-selection.has-bicaval .cannula-setup-panel h3,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel h3 {
+    font-size: 0.72rem;
+    letter-spacing: -0.01em;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .input-wrap,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .input-wrap {
     padding: 0.55rem 0.6rem;
     border-radius: 14px;
   }
 
-  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel select {
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .input-wrap {
+    padding: 0.32rem 0.34rem;
+    border-radius: 12px;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel select,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel select {
     font-size: 0.82rem;
   }
 
-  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .field {
+  .page-cannula-selection.has-bicaval .cannula-setup-panel select {
+    min-height: 1.8rem;
+    font-size: 0.62rem;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .field > span {
+    font-size: 0.62rem;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .field,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .field {
     gap: 0.3rem;
   }
 
-  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .field + .field {
-    margin-top: 0.55rem;
+  .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .field + .field,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .field + .field {
+    margin-top: 0.35rem;
   }
 
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .result-card,
-  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-card {
+  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-card,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-card,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-card {
     padding: 0.65rem;
     border-radius: 14px;
   }
 
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-card,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-card {
+    padding: 0.34rem;
+    border-radius: 11px;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-card {
+    padding: 0.18rem 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
   .page-cannula-selection:not(.has-bicaval) .cannula-setup-panel .result-value,
-  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-value {
+  .page-cannula-selection:not(.has-bicaval) .cannula-side-results .result-value,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-value,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-value {
     font-size: clamp(1.1rem, 6vw, 1.6rem);
   }
 
-  .page-cannula-selection:not(.has-bicaval) .cannula-chart-wrap {
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-value,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-value {
+    font-size: clamp(0.72rem, 3.5vw, 0.98rem);
+    line-height: 1.05;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-side-results {
+    gap: 0.32rem;
+    margin: 0.4rem 0 0;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-label,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-label {
+    margin-bottom: 0.12rem;
+  }
+
+  .page-cannula-selection.has-bicaval .quick-select-row {
+    flex-wrap: nowrap;
+    gap: 0.22rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.08rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-cannula-selection.has-bicaval .quick-select-button {
+    flex: 0 0 auto;
+    min-height: 1.55rem;
+    padding: 0.16rem 0.35rem;
+    font-size: 0.58rem;
+    line-height: 1;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-recommendation-reset {
+    min-height: 1.55rem;
+    margin-top: 0.26rem;
+    padding: 0.18rem 0.25rem;
+    font-size: 0.54rem;
+    line-height: 1.08;
+    white-space: normal;
+  }
+
+  .page-cannula-selection:not(.has-bicaval) .cannula-chart-wrap,
+  .page-cannula-selection.has-bicaval .cannula-chart-wrap {
     min-height: 170px;
     aspect-ratio: 1 / 1.12;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-chart-wrap {
+    min-height: 118px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-selected-point text,
+  .page-cannula-selection.has-bicaval .cannula-threshold-label,
+  .page-cannula-selection.has-bicaval .cannula-role-label {
+    font-size: 10px;
   }
 
   .curve-modal {
@@ -2519,6 +2767,79 @@ input[aria-invalid="true"] {
     width: auto;
     min-width: 2.45rem;
     padding-inline: 0.7rem;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-grid,
+  .page-cannula-selection.has-bicaval .cannula-compare-grid {
+    grid-template-columns: repeat(3, minmax(78vw, 78vw));
+    gap: 0.75rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 0.1rem 0 0.55rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel {
+    scroll-snap-align: start;
+    padding: 0.8rem;
+    border-radius: 18px;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel h3,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel h3 {
+    font-size: 0.98rem;
+    letter-spacing: normal;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel select {
+    min-height: 2.35rem;
+    font-size: 0.82rem;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .field > span {
+    font-size: 0.78rem;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .input-wrap,
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-card {
+    padding: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-value {
+    font-size: clamp(1.1rem, 6vw, 1.55rem);
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-side-results .result-label,
+  .page-cannula-selection.has-bicaval .cannula-setup-panel .result-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+  }
+
+  .page-cannula-selection.has-bicaval .quick-select-button,
+  .page-cannula-selection.has-bicaval .cannula-recommendation-reset {
+    min-height: 2.15rem;
+    font-size: 0.74rem;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-chart-wrap {
+    min-height: 210px;
+    aspect-ratio: 4 / 3;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-grid,
+  .page-cannula-selection.has-bicaval .cannula-compare-grid {
+    grid-template-columns: 1fr;
+    overflow-x: visible;
+    padding-bottom: 0;
+    scroll-snap-type: none;
+  }
+
+  .page-cannula-selection.has-bicaval .cannula-setup-panel,
+  .page-cannula-selection.has-bicaval .cannula-compare-panel {
+    scroll-snap-align: none;
   }
 
   .tab-button {

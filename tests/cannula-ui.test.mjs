@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const cannulaHtml = readFileSync(new URL("../cannula-selection.html", import.meta.url), "utf8");
+const bloodManagementHtml = readFileSync(new URL("../blood-management.html", import.meta.url), "utf8");
 const appJs = readFileSync(new URL("../app.js", import.meta.url), "utf8");
 
 test("cannula compare view exposes arterial, venous, and bicaval controls", () => {
@@ -23,6 +24,7 @@ test("cannula compare view exposes arterial, venous, and bicaval controls", () =
     "cannulaArterialExpandButton",
     "cannulaVenousExpandButton",
     "cannulaBicavalExpandButton",
+    "cannulaFlowCiDisplay",
     "cannulaCurveModal",
     "cannulaCurveModalChart",
     "cannulaArterialChart",
@@ -102,11 +104,18 @@ test("legacy single-view cannula IDs are not present anymore", () => {
 test("cannula catalog includes the newly added size-only families", () => {
   const expectedFamilies = [
     "DLP arterial",
-    "Bio-Medicus NextGen arterial",
+    "Bio-Medicus NextGen pediatric arterial",
+    "Bio-Medicus NextGen jugular venous",
+    "Bio-Medicus NextGen femoral bi-caval venous",
     "Optisite arterial",
     "DLP single-stage straight venous",
     "MC2 two-stage venous",
-    "Right-angle plastic-tip venous",
+    "PureFlex curved-tip arterial",
+    "PureFlex straight-tip arterial",
+    "Optiflow arterial curved-tip",
+    "Triple-stage venous return",
+    "Dual-stage venous return",
+    "Single-stage right-angle lighthouse venous",
   ];
 
   expectedFamilies.forEach((familyLabel) => {
@@ -151,4 +160,25 @@ test("venous and bicaval selectors include role guidance hooks", () => {
   expectedSnippets.forEach((snippet) => {
     assert.ok(appJs.includes(snippet), `expected role guidance snippet ${snippet} in app.js`);
   });
+});
+
+test("blood management tab includes interactive ABO/Rh compatibility helper", () => {
+  const requiredIds = [
+    "bloodCompatibilityForm",
+    "patientBloodType",
+    "bloodCompatibilitySummary",
+    "compatibleRbcOutput",
+    "compatiblePlasmaOutput",
+    "compatiblePlateletsOutput",
+    "compatibleCryoOutput",
+  ];
+
+  requiredIds.forEach((id) => {
+    assert.ok(bloodManagementHtml.includes(`id="${id}"`), `expected ${id} in blood-management.html`);
+    assert.ok(appJs.includes(`#${id}`), `expected ${id} selector in app.js`);
+  });
+
+  assert.ok(bloodManagementHtml.includes("./app.js?v="), "expected blood-management.html to load app.js");
+  assert.ok(appJs.includes("ABO_COMPATIBILITY"), "expected ABO compatibility data in app.js");
+  assert.ok(appJs.includes("renderBloodCompatibility"), "expected blood compatibility renderer in app.js");
 });
