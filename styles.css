@@ -63,6 +63,18 @@ body.page-perfusion {
     linear-gradient(180deg, #fff1f2 0%, #ffe4e6 48%, #fecdd3 100%);
 }
 
+body.page-prime {
+  --accent: #d97706;
+  --accent-strong: #92400e;
+  --accent-soft: rgba(217, 119, 6, 0.13);
+  --line: rgba(146, 64, 14, 0.16);
+  --shadow: 0 28px 60px rgba(146, 64, 14, 0.13);
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(253, 224, 71, 0.2), transparent 24%),
+    linear-gradient(180deg, #fffbeb 0%, #fef3c7 48%, #fde68a 100%);
+}
+
 body.page-cannula-selection {
   --accent: #b91c1c;
   --accent-strong: #991b1b;
