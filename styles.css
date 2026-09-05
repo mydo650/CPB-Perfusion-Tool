@@ -75,6 +75,18 @@ body.page-prime {
     linear-gradient(180deg, #fffbeb 0%, #fef3c7 48%, #fde68a 100%);
 }
 
+body.page-anticoagulation {
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --line: rgba(29, 78, 216, 0.16);
+  --shadow: 0 28px 60px rgba(30, 64, 175, 0.13);
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 30%),
+    radial-gradient(circle at top right, rgba(125, 211, 252, 0.2), transparent 24%),
+    linear-gradient(180deg, #eff6ff 0%, #dbeafe 48%, #bfdbfe 100%);
+}
+
 body.page-cannula-selection {
   --accent: #b91c1c;
   --accent-strong: #991b1b;
