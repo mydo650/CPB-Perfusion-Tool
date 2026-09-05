@@ -63,16 +63,40 @@ body.page-perfusion {
     linear-gradient(180deg, #fff1f2 0%, #ffe4e6 48%, #fecdd3 100%);
 }
 
-body.page-cannula-selection {
-  --accent: #b91c1c;
-  --accent-strong: #991b1b;
-  --accent-soft: rgba(185, 28, 28, 0.12);
-  --line: rgba(153, 27, 27, 0.16);
-  --shadow: 0 28px 60px rgba(127, 29, 29, 0.14);
+body.page-prime {
+  --accent: #d97706;
+  --accent-strong: #92400e;
+  --accent-soft: rgba(217, 119, 6, 0.13);
+  --line: rgba(146, 64, 14, 0.16);
+  --shadow: 0 28px 60px rgba(146, 64, 14, 0.13);
   background:
-    radial-gradient(circle at top left, rgba(220, 38, 38, 0.22), transparent 30%),
-    radial-gradient(circle at top right, rgba(248, 113, 113, 0.18), transparent 24%),
-    linear-gradient(180deg, #fff1f2 0%, #ffe4e6 48%, #fecdd3 100%);
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(253, 224, 71, 0.2), transparent 24%),
+    linear-gradient(180deg, #fffbeb 0%, #fef3c7 48%, #fde68a 100%);
+}
+
+body.page-anticoagulation {
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --line: rgba(29, 78, 216, 0.16);
+  --shadow: 0 28px 60px rgba(30, 64, 175, 0.13);
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 30%),
+    radial-gradient(circle at top right, rgba(125, 211, 252, 0.2), transparent 24%),
+    linear-gradient(180deg, #eff6ff 0%, #dbeafe 48%, #bfdbfe 100%);
+}
+
+body.page-cannula-selection {
+  --accent: #7c3aed;
+  --accent-strong: #5b21b6;
+  --accent-soft: rgba(124, 58, 237, 0.12);
+  --line: rgba(91, 33, 182, 0.16);
+  --shadow: 0 28px 60px rgba(88, 28, 135, 0.14);
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.2), transparent 24%),
+    linear-gradient(180deg, #f5f3ff 0%, #ede9fe 48%, #ddd6fe 100%);
 }
 
 .app-shell {
