@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPB Pre-Bypass Checklist</title>
-    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-37" />
+    <link rel="stylesheet" href="./styles.css?v=pilot-mobile-38" />
   </head>
   <body class="page-checklist">
     <main class="app-shell">
@@ -35,17 +35,22 @@
         <section class="panel output-panel" aria-labelledby="checklist-title">
           <div class="panel-header">
             <h2 id="checklist-title">Pre-Bypass Checklist</h2>
-            <p>Add pre-bypass setup reminders and local simulation prompts here.</p>
+            <p>Add pre-bypass setup reminders and local simulation prompts here. Use Tab or ↑/↓ to move item by item, then press Enter or Space to check an item.</p>
+          </div>
+          <div class="checklist-controls" aria-label="Checklist quick controls">
+            <button class="curve-action-button checklist-reset-button" id="resetChecklistButton" type="button">Reset checklist</button>
+            <p class="checklist-keyboard-hint">Keyboard: Tab, ↑/↓, Enter, or Space</p>
           </div>
           <div class="results-grid results-grid-compact">
             <article class="result-card" id="gas-electrical-supply">
               <p class="result-label">Gas/Electrical Supply</p>
               <div class="checklist-items" role="group" aria-label="Gas and electrical supply checklist">
                 <label><input type="checkbox" /> <span>Power cord(s) secure and connected</span></label>
-                <label><input type="checkbox" /> <span>Gas lines connected</span></label>
+                <label><input type="checkbox" /> <span>Battery/UPS on and operational</span></label>
+                <label><input type="checkbox" /> <span>Gas and vacuum sources connected and operational</span></label>
                 <label><input type="checkbox" /> <span>Oxygen line connected to vaporizer</span></label>
-                <label><input type="checkbox" /> <span>WAG line connected to blender</span></label>
-                <label><input type="checkbox" /> <span>Vacuum line connected to blender</span></label>
+                <label><input type="checkbox" /> <span>WAG/scavenge line connected from blender to vacuum source</span></label>
+                <label><input type="checkbox" /> <span>Gas flow path unobstructed</span></label>
                 <label><input type="checkbox" /> <span>Blender functional</span></label>
                 <label><input type="checkbox" /> <span>Forane vaporizer full</span></label>
               </div>
@@ -53,70 +58,62 @@
             <article class="result-card">
               <p class="result-label">Heater-cooler</p>
               <div class="checklist-items" role="group" aria-label="Heater-cooler checklist">
-                <label><input type="checkbox" /> <span>Exhaust is connected to suction</span></label>
+                <label><input type="checkbox" /> <span>Water leak test completed</span></label>
+                <label><input type="checkbox" /> <span>Heater-cooler lines connected in the correct in/out direction</span></label>
+                <label><input type="checkbox" /> <span>Water volume status checked</span></label>
                 <label><input type="checkbox" /> <span>Water lines open</span></label>
                 <label><input type="checkbox" /> <span>Water source is functional and set appropriately</span></label>
               </div>
             </article>
             <article class="result-card">
-              <p class="result-label">Pump</p>
-              <div class="checklist-items" role="group" aria-label="Pump checklist">
+              <p class="result-label">Pump and Prime</p>
+              <div class="checklist-items" role="group" aria-label="Pump and prime checklist">
                 <label><input type="checkbox" /> <span>Flow probes zeroed</span></label>
                 <label><input type="checkbox" /> <span>Pressure transducers zeroed</span></label>
+                <label><input type="checkbox" /> <span>Patient height and weight entered</span></label>
                 <label><input type="checkbox" /> <span>Tubing direction traced and correct</span></label>
                 <label><input type="checkbox" /> <span>No kinks in tubing</span></label>
-                <label><input type="checkbox" /> <span>Circuit de-bubbled and leak free</span></label>
+                <label><input type="checkbox" /> <span>Circuit primed, de-bubbled, and leak free</span></label>
+                <label><input type="checkbox" /> <span>Pre-bypass filter removed after fluid recirculation for recommended time</span></label>
                 <label><input type="checkbox" /> <span>Speed controls operational</span></label>
-                <label><input type="checkbox" /> <span>Roller heads occlusive</span></label>
+                <label><input type="checkbox" /> <span>Roller head occlusions set, direction verified, and tubing size confirmed</span></label>
+                <label><input type="checkbox" /> <span>One-way valves patent and oriented correctly</span></label>
                 <label><input type="checkbox" /> <span>Cardiotomy reservoir vented</span></label>
               </div>
             </article>
             <article class="result-card">
               <p class="result-label">Safety/Monitoring</p>
               <div class="checklist-items" role="group" aria-label="Safety and monitoring checklist">
-                <label><input type="checkbox" /> <span>Safe flow probe attached and enabled</span></label>
-                <label><input type="checkbox" /> <span>Art flow probe attached and enabled</span></label>
-                <label><input type="checkbox" /> <span>Venous flow probe attached</span></label>
-                <label><input type="checkbox" /> <span>Safe and protected level detectors attached and enabled</span></label>
+                <label><input type="checkbox" /> <span>Flow probes attached, oriented correctly, and operational</span></label>
+                <label><input type="checkbox" /> <span>Level detectors on and operational</span></label>
+                <label><input type="checkbox" /> <span>Pressure limits set and operational</span></label>
                 <label><input type="checkbox" /> <span>Back-flow prevention enabled</span></label>
                 <label><input type="checkbox" /> <span>Arterial and venous temperature probes in place</span></label>
                 <label><input type="checkbox" /> <span>Blood gas sensors in place</span></label>
               </div>
             </article>
             <article class="result-card">
-              <p class="result-label">Backup</p>
-              <div class="checklist-items" role="group" aria-label="Backup checklist">
+              <p class="result-label">Backup Supplies</p>
+              <div class="checklist-items" role="group" aria-label="Backup supplies checklist">
                 <label><input type="checkbox" /> <span>Emergency lighting available</span></label>
                 <label><input type="checkbox" /> <span>Duplicate circuit components available</span></label>
-              </div>
-            </article>
-            <article class="result-card">
-              <p class="result-label">Supplies</p>
-              <div class="checklist-items" role="group" aria-label="Supplies checklist">
+                <label><input type="checkbox" /> <span>Oxygen or backup gas tanks full and operational</span></label>
+                <label><input type="checkbox" /> <span>Hand cranks available</span></label>
                 <label><input type="checkbox" /> <span>Tubing clamps available</span></label>
-                <label><input type="checkbox" /> <span>Drugs available and labeled</span></label>
-                <label><input type="checkbox" /> <span>Blood available</span></label>
+                <label><input type="checkbox" /> <span>Drugs available, labeled, correct concentration confirmed, and expiration checked</span></label>
+                <label><input type="checkbox" /> <span>Blood checked and available, matching patient type and screen</span></label>
               </div>
             </article>
             <article class="result-card">
               <p class="result-label">Cardioplegia</p>
               <div class="checklist-items" role="group" aria-label="Cardioplegia checklist">
-                <label><input type="checkbox" /> <span>Quest system de-bubbled and leak free</span></label>
-                <label><input type="checkbox" /> <span>Drugs checked</span></label>
+                <label><input type="checkbox" /> <span>Cardioplegia delivery system primed, de-bubbled, and heat exchanger leak free</span></label>
+                <label><input type="checkbox" /> <span>Correct cardioplegia solution confirmed and added</span></label>
                 <label><input type="checkbox" /> <span>Appropriate Quest protocol selected</span></label>
-                <label><input type="checkbox" /> <span>Verify arrest and additive agent cartridges loaded and stopcock open to system</span></label>
+                <label><input type="checkbox" /> <span>Cardioplegia occlusions set</span></label>
+                <label><input type="checkbox" /> <span>Expiration verified</span></label>
+                <label><input type="checkbox" /> <span>Cardioplegia system is cold</span></label>
                 <label><input type="checkbox" /> <span>Arrest and additive lines primed</span></label>
-                <label><input type="checkbox" /> <span>Verify del Nido bag spiked and line primed (if needed)</span></label>
-              </div>
-            </article>
-            <article class="result-card">
-              <p class="result-label">VAD</p>
-              <div class="checklist-items" role="group" aria-label="VAD checklist">
-                <label><input type="checkbox" /> <span>HeartWare</span></label>
-                <label><input type="checkbox" /> <span>HeartMate II</span></label>
-                <label><input type="checkbox" /> <span>HeartMate III</span></label>
-                <label><input type="checkbox" /> <span>Other</span></label>
-                <label><input type="checkbox" /> <span>VAD was not used for this case</span></label>
               </div>
             </article>
             <article class="result-card">
@@ -125,7 +122,7 @@
                 <label><input type="checkbox" /> <span>Time-out completed</span></label>
                 <label><input type="checkbox" /> <span>Heparin dose verified</span></label>
                 <label><input type="checkbox" /> <span>Sweep and FiO2 set for bypass</span></label>
-                <label><input type="checkbox" /> <span>Isoflurane turned on</span></label>
+                <label><input type="checkbox" /> <span>Anesthetic gas ready</span></label>
                 <label><input type="checkbox" /> <span>ACT tested and appropriate</span></label>
                 <label><input type="checkbox" /> <span>Patency of arterial cannula verified</span></label>
               </div>
@@ -139,5 +136,6 @@
       </section>
     </main>
     <script src="./nav-scroll.js?v=pilot-mobile-1"></script>
+    <script src="./checklist.js?v=pilot-mobile-2"></script>
   </body>
 </html>

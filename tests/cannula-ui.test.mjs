@@ -4,7 +4,9 @@ import { readFileSync } from "node:fs";
 
 const cannulaHtml = readFileSync(new URL("../cannula-selection.html", import.meta.url), "utf8");
 const bloodManagementHtml = readFileSync(new URL("../blood-management.html", import.meta.url), "utf8");
+const checklistHtml = readFileSync(new URL("../checklist.html", import.meta.url), "utf8");
 const appJs = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+const checklistJs = readFileSync(new URL("../checklist.js", import.meta.url), "utf8");
 
 test("cannula compare view exposes arterial, venous, and bicaval controls", () => {
   const requiredIds = [
@@ -181,4 +183,15 @@ test("blood management tab includes interactive ABO/Rh compatibility helper", ()
   assert.ok(bloodManagementHtml.includes("./app.js?v="), "expected blood-management.html to load app.js");
   assert.ok(appJs.includes("ABO_COMPATIBILITY"), "expected ABO compatibility data in app.js");
   assert.ok(appJs.includes("renderBloodCompatibility"), "expected blood compatibility renderer in app.js");
+});
+
+test("checklist page supports fast keyboard completion", () => {
+  assert.ok(checklistHtml.includes("./checklist.js?v=pilot-mobile-2"), "expected checklist page to load checklist.js");
+  assert.ok(checklistHtml.includes("Use Tab or ↑/↓ to move item by item"), "expected keyboard instructions");
+  assert.ok(checklistHtml.includes('id="resetChecklistButton"'), "expected checklist reset button");
+  assert.ok(checklistJs.includes('event.key === "Enter"'), "expected Enter key handling");
+  assert.ok(checklistJs.includes("checkbox.checked = !checkbox.checked"), "expected Enter to toggle checkbox");
+  assert.ok(checklistJs.includes('event.key === "ArrowDown"'), "expected ArrowDown focus handling");
+  assert.ok(checklistJs.includes('event.key === "ArrowUp"'), "expected ArrowUp focus handling");
+  assert.ok(checklistJs.includes("resetButton?.addEventListener"), "expected reset button handling");
 });

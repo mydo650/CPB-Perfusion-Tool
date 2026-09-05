@@ -287,6 +287,25 @@ h1 {
   margin-top: 0.85rem;
 }
 
+.checklist-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: -0.35rem 0 1.1rem;
+}
+
+.checklist-reset-button {
+  min-width: 8.5rem;
+}
+
+.checklist-keyboard-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .checklist-items label {
   display: grid;
   grid-template-columns: 1.35rem 1fr;
@@ -300,6 +319,22 @@ h1 {
   color: var(--ink);
   font-weight: 700;
   line-height: 1.35;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.checklist-items label:has(input:focus-visible) {
+  border-color: rgba(15, 118, 110, 0.72);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.16);
+  transform: translateY(-1px);
+}
+
+.checklist-items label:has(input:checked) {
+  background: rgba(15, 118, 110, 0.1);
+  border-color: rgba(15, 118, 110, 0.24);
+}
+
+.checklist-items label:has(input:checked) span {
+  color: var(--accent-strong);
 }
 
 .checklist-items input {
