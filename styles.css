@@ -88,15 +88,15 @@ body.page-anticoagulation {
 }
 
 body.page-cannula-selection {
-  --accent: #b91c1c;
-  --accent-strong: #991b1b;
-  --accent-soft: rgba(185, 28, 28, 0.12);
-  --line: rgba(153, 27, 27, 0.16);
-  --shadow: 0 28px 60px rgba(127, 29, 29, 0.14);
+  --accent: #7c3aed;
+  --accent-strong: #5b21b6;
+  --accent-soft: rgba(124, 58, 237, 0.12);
+  --line: rgba(91, 33, 182, 0.16);
+  --shadow: 0 28px 60px rgba(88, 28, 135, 0.14);
   background:
-    radial-gradient(circle at top left, rgba(220, 38, 38, 0.22), transparent 30%),
-    radial-gradient(circle at top right, rgba(248, 113, 113, 0.18), transparent 24%),
-    linear-gradient(180deg, #fff1f2 0%, #ffe4e6 48%, #fecdd3 100%);
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.2), transparent 24%),
+    linear-gradient(180deg, #f5f3ff 0%, #ede9fe 48%, #ddd6fe 100%);
 }
 
 .app-shell {
