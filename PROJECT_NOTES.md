@@ -1,5 +1,25 @@
 # CPB Perfusion Tool Project Notes
 
+## Repository Separation And Change-Control Policy
+
+The project uses two GitHub repositories with different purposes. Keep their contents and publishing workflows separate.
+
+- **Private internal project:** `https://github.com/sydneyranee256-spec/CPB-Perfusion-Tool-Private.git`
+  - Git remote: `internal`
+  - Purpose: the complete project, internal development, project documentation, research materials, tests, and features that are not approved for public release.
+- **Public demo project:** `https://github.com/mydo650/CPB-Perfusion-Tool.git`
+  - Git remote: `origin`
+  - Purpose: the limited, approved GitHub Pages demonstration only.
+  - Do not assume that every internal page, feature, document, or asset may be published here.
+
+Before making, committing, pushing, or deploying any change, confirm with the project owners which target is intended:
+
+1. the **private internal project** (`internal`),
+2. the **public demo project** (`origin`), or
+3. both, with an explicit description of which files or features may be copied to the public demo.
+
+Do not push the full internal project to `origin`. Do not remove files from or change the public GitHub Pages deployment unless the project owners explicitly request it. Hiding a navigation link is not sufficient to make a page private; public demo deployments must include only the approved pages and assets. Never place real patient information, identifiable research data, credentials, or other sensitive material in the public repository or GitHub Pages deployment.
+
 ## Official Capstone Project Title
 
 Development and Evaluation of a Web-Based Cardiopulmonary Bypass Perfusion Support Tool for Education and Simulation
