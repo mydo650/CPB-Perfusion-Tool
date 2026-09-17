@@ -115,6 +115,38 @@ Additional modules can support the broader capstone product if validated and kep
 - demo profiles or learner modes for limited-exposure students versus more advanced students
 - eventual pediatric mode, pediatric prime support, and pediatric-relevant drug content
 
+### September 2026 Implementation Plan Update
+
+Current assignment-ready implementation summary:
+
+Our capstone project is currently in the implementation and preparation phase. The project is a mobile-friendly, web-based CPB Perfusion Tool designed for perfusion education, simulation, and planning support. The current scope includes perfusion flow and cardiac index calculations, prime planning, anticoagulation support, cannula selection, a drug library, references, and checklist-style workflow support. Although the full tool has several functions, the team is still deciding which functions will be most appropriate to trial with potential participants. Since participants are students who are just beginning to learn extracorporeal technology, the participant-facing scope should be narrowed to the features that best support early learning. To avoid scope creep, the priority features for the student pilot are basic flow calculations, checklist support, prime concepts, and guided workflow prompts.
+
+Where the project is today: the project has been uploaded to GitHub Pages and is available online. The team is continuing to refine calculations, references, mobile usability, and the student-facing workflow so the tool is easier to use during simulation. IRB approval has been received, and the team is waiting to meet with the mentor to decide the best course of action for the remaining implementation period. Participant materials, the simulation case, and surveys should continue to match the approved study plan.
+
+Two implementation paths remain possible. The first and ideal path is to move forward with the original plan by narrowing the tool's scope so it can realistically be tested with participants. This would allow the team to focus on features that are most useful for students and easiest to evaluate during simulation. Since the project due date is getting closer, another possible route is to finalize the tool to its best current version and leave it as a foundation for a future cohort to continue developing. Either way, the goal is to keep the project organized, realistic, and useful instead of adding too many features at the end.
+
+The goal of the tool is not to solve every problem or replace clinical judgment. The goal is to provide guidance and serve as a source of information that may be difficult to recall during simulation or case planning. Ideally, the tool should help guide a perfusionist or perfusion student through a case by using built-in calculations, references, and workflow support. This includes helping the user think through CPB planning steps such as flow, cardiac index, prime planning, anticoagulation, cannula selection, and case preparation.
+
+Progress should be monitored through specific key performance indicators and milestones. These include completion of planned tool features, calculation accuracy, mobile usability, participant task completion, time needed to complete simulation tasks, NASA-TLX workload scores, usability survey results, and feedback from students or mentors. Current risks include limited time before the due date, narrowing the tool enough for student testing, recruitment or scheduling issues, and making sure the tool is accurate and easy to use. Mitigation strategies include keeping the scope realistic, focusing on the most important student-facing features, using mentor feedback, and documenting future improvements that cannot be completed during this capstone timeline.
+
+Updated Gantt chart dates:
+
+| Task | Start Date | End Date | Status |
+| --- | --- | --- | --- |
+| Update implementation plan and Gantt chart | 09/15/2026 | 09/18/2026 | In progress |
+| Meet with mentor to confirm direction | 09/18/2026 | 09/25/2026 | Planned |
+| Narrow participant-facing tool scope | 09/22/2026 | 09/30/2026 | Planned |
+| Refine calculations and references | 09/22/2026 | 10/06/2026 | In progress |
+| Improve mobile usability and student workflow | 09/29/2026 | 10/13/2026 | Planned |
+| Finalize participant materials and surveys | 10/01/2026 | 10/15/2026 | Planned |
+| Finalize simulation case | 10/06/2026 | 10/15/2026 | Planned |
+| Rehearse simulation workflow | 10/16/2026 | 10/23/2026 | Planned |
+| Recruit and schedule participants | 10/24/2026 | 11/07/2026 | Planned |
+| Conduct participant trial or final tool review | 11/09/2026 | 11/24/2026 | Planned |
+| Review data and feedback | 11/25/2026 | 12/02/2026 | Planned |
+| Make final tool revisions | 12/03/2026 | 12/10/2026 | Planned |
+| Complete final capstone report and presentation | 12/11/2026 | 12/18/2026 | Planned |
+
 ### Outcomes And Measures
 
 Primary pilot data elements:
