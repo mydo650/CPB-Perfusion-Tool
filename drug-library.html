@@ -37,6 +37,17 @@
             <h2 id="drug-library-title">Drug Library</h2>
             <p>Add medication references, dosing ranges, and local simulation notes here.</p>
           </div>
+          <section class="drug-search-panel" aria-label="Drug library search">
+            <label class="field drug-search-field" for="drugLibrarySearch">
+              <span>Search Drug Library</span>
+              <div class="drug-search-row">
+                <input id="drugLibrarySearch" type="search" autocomplete="off" placeholder="Search drug, class, MOA, dose, or consideration" />
+                <button type="button" class="quick-select-button drug-search-clear" id="clearDrugLibrarySearch">Clear</button>
+              </div>
+              <small class="hint">Matches open automatically and non-matching sections are hidden while searching.</small>
+            </label>
+            <p id="drugLibrarySearchStatus" class="drug-search-status" role="status" aria-live="polite">Search all drug library sections.</p>
+          </section>
           <div class="results-grid results-grid-compact">
             <article class="result-card" id="anticoagulants">
               <p class="result-label">Anticoagulants</p>

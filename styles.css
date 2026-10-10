@@ -946,6 +946,64 @@ input[aria-invalid="true"] {
   gap: 0.75rem;
 }
 
+.drug-search-panel {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(22, 33, 38, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.drug-search-field {
+  margin: 0;
+}
+
+.drug-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.drug-search-row input[type="search"] {
+  width: 100%;
+  border: 1px solid rgba(22, 33, 38, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 0.95rem 1rem;
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+
+.drug-search-row input[type="search"]:focus {
+  border-color: rgba(15, 118, 110, 0.38);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.drug-search-clear {
+  white-space: nowrap;
+}
+
+.drug-search-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .drug-search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .drug-search-clear {
+    width: 100%;
+  }
+}
+
 .drug-check-panel {
   padding: 0 1rem 1rem;
 }

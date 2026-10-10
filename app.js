@@ -1625,6 +1625,10 @@ const drugDoseCheckOutputs = drugDoseCheckForm
     }
   : null;
 
+const drugLibrarySearchInput = document.querySelector("#drugLibrarySearch");
+const drugLibrarySearchClearButton = document.querySelector("#clearDrugLibrarySearch");
+const drugLibrarySearchStatus = document.querySelector("#drugLibrarySearchStatus");
+const drugLibraryCards = Array.from(document.querySelectorAll(".page-drug-library .result-card"));
 const tabButtons = Array.from(document.querySelectorAll("[data-tab-target]"));
 const tabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
 const referenceFilterButtons = Array.from(document.querySelectorAll("[data-reference-filter]"));
@@ -1701,6 +1705,100 @@ function initializeReferenceFilters() {
   });
 
   applyFilter("all");
+}
+
+function normalizeDrugSearchText(value) {
+  return String(value ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function getDirectDrugSummaryText(item) {
+  const summary = item.querySelector(":scope > .drug-summary");
+  return normalizeDrugSearchText(summary?.textContent ?? "");
+}
+
+function hasMatchingDrugAncestorSummary(item, card, tokens) {
+  let parent = item.parentElement?.closest(".drug-item");
+
+  while (parent && card.contains(parent)) {
+    const parentSummaryText = getDirectDrugSummaryText(parent);
+    if (tokens.every((token) => parentSummaryText.includes(token))) return true;
+    parent = parent.parentElement?.closest(".drug-item");
+  }
+
+  return false;
+}
+
+function initializeDrugLibrarySearch() {
+  if (!drugLibrarySearchInput || drugLibraryCards.length === 0) return;
+
+  const applySearch = () => {
+    const query = normalizeDrugSearchText(drugLibrarySearchInput.value);
+    const tokens = query.split(" ").filter(Boolean);
+
+    if (tokens.length === 0) {
+      drugLibraryCards.forEach((card) => {
+        card.hidden = false;
+        card.querySelectorAll(".drug-item").forEach((item) => {
+          item.hidden = false;
+        });
+      });
+
+      if (drugLibrarySearchStatus) {
+        drugLibrarySearchStatus.textContent = "Search all drug library sections.";
+      }
+      return;
+    }
+
+    let visibleCards = 0;
+    let matchingItems = 0;
+
+    drugLibraryCards.forEach((card) => {
+      const cardLabelText = normalizeDrugSearchText(card.querySelector(".result-label")?.textContent ?? "");
+      const cardLabelMatches = tokens.every((token) => cardLabelText.includes(token));
+      const items = Array.from(card.querySelectorAll(".drug-item"));
+      const matchingItemSet = new Set(items.filter((item) => {
+        const itemText = normalizeDrugSearchText(item.textContent);
+        return tokens.every((token) => itemText.includes(token));
+      }));
+
+      items.forEach((item) => {
+        const directSummaryText = getDirectDrugSummaryText(item);
+        const directSummaryMatches = tokens.every((token) => directSummaryText.includes(token));
+        const hasMatchingDescendant = Array.from(item.querySelectorAll(".drug-item")).some((child) => matchingItemSet.has(child));
+        const showItem = cardLabelMatches
+          || matchingItemSet.has(item)
+          || hasMatchingDescendant
+          || hasMatchingDrugAncestorSummary(item, card, tokens);
+
+        item.hidden = !showItem;
+
+        if (showItem && (matchingItemSet.has(item) || hasMatchingDescendant || directSummaryMatches || cardLabelMatches)) {
+          item.open = true;
+        }
+      });
+
+      const hasVisibleItem = items.some((item) => !item.hidden);
+      card.hidden = !cardLabelMatches && !hasVisibleItem;
+
+      if (!card.hidden) visibleCards += 1;
+      matchingItems += matchingItemSet.size;
+    });
+
+    if (drugLibrarySearchStatus) {
+      drugLibrarySearchStatus.textContent = matchingItems === 0
+        ? "No drug library entries match that search."
+        : `${matchingItems} matching ${matchingItems === 1 ? "entry" : "entries"} in ${visibleCards} ${visibleCards === 1 ? "section" : "sections"}.`;
+    }
+  };
+
+  drugLibrarySearchInput.addEventListener("input", applySearch);
+  drugLibrarySearchClearButton?.addEventListener("click", () => {
+    drugLibrarySearchInput.value = "";
+    drugLibrarySearchInput.focus();
+    applySearch();
+  });
+
+  applySearch();
 }
 
 function setHeparinLogValidation(message = "") {
@@ -3749,6 +3847,7 @@ tabButtons.forEach((button) => {
 });
 
 initializeReferenceFilters();
+initializeDrugLibrarySearch();
 
 if (perfusionForm) {
   hydrateSharedFields(perfusionForm);
