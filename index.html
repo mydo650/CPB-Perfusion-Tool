@@ -32,6 +32,138 @@
       </nav>
       <p class="mobile-nav-hint" aria-hidden="true">Swipe tabs left/right for more →</p>
 
+      <section class="home-roadmap" aria-label="Project roadmap and team checklist">
+        <article class="panel roadmap-checklist">
+          <div class="roadmap-header">
+            <div>
+              <p class="home-kicker">Live Checklist</p>
+              <h2>Current Build Queue</h2>
+            </div>
+          </div>
+          <div class="roadmap-list">
+            <details class="roadmap-item">
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-yellow">Priority</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">Heparin tally + final protamine workflow</span>
+                  <span class="roadmap-preview">Track total heparin given during the case and calculate protamine from the selected source.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>Build a running heparin log that can feed the protamine reversal calculation without losing the current simple loading-dose workflow.</p>
+                <ul class="roadmap-action-list">
+                  <li>Add case-dose entries with time and units.</li>
+                  <li>Show total heparin given and selected reversal basis.</li>
+                  <li>Keep the final protamine math visible and editable.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="roadmap-item" open>
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-yellow">Capstone</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">IRB review for simulator study</span>
+                  <span class="roadmap-preview">Submit an IRB determination before using the tool with students in the Califia simulator or collecting NASA-TLX workload data.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>This project evaluates whether a web-based perfusion support tool used during simulated cardiopulmonary bypass scenarios affects perceived cognitive workload among perfusion students, measured with NASA-TLX. No real patients or patient records are involved.</p>
+                <ul class="roadmap-action-list">
+                  <li>Draft the IRB determination request before collecting any student data.</li>
+                  <li>Describe the Califia heart-lung simulator scenario, participant group, and NASA-TLX timing.</li>
+                  <li>Plan consent, voluntary participation, de-identification, data storage, and separation from grading.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="roadmap-item">
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-yellow">Scope</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">Pediatric mode trigger and behavior rules</span>
+                  <span class="roadmap-preview">Decide whether the tool suggests pediatric mode from weight, BSA, or a manual institution-based cutoff.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>Define when pediatric assumptions should appear and which calculations or labels change once pediatric mode is active.</p>
+                <ul class="roadmap-action-list">
+                  <li>Compare weight-only, BSA-based, and manual trigger options.</li>
+                  <li>Identify which adult defaults should be hidden or replaced.</li>
+                  <li>Document the chosen rule in the project notes and calculator copy.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="roadmap-item">
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-gray">Not Started</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">Pediatric prime updates</span>
+                  <span class="roadmap-preview">Separate adult versus pediatric assumptions and decide whether bicarb and mannitol stay in the workflow.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>Keep adult prime planning stable while making room for pediatric-specific assumptions and labels.</p>
+                <ul class="roadmap-action-list">
+                  <li>List pediatric prime assumptions that differ from adult defaults.</li>
+                  <li>Decide which additives belong in the calculator versus reference notes.</li>
+                  <li>Add tests for any new pediatric dilution calculations.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="roadmap-item">
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-gray">Not Started</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">Anticoagulation additions</span>
+                  <span class="roadmap-preview">Add AT3, bivalirudin, and argatroban support with clearer heparin-resistance guidance.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>Expand anticoagulation support while keeping the current heparin and protamine workflow readable during simulation.</p>
+                <ul class="roadmap-action-list">
+                  <li>Gather references for AT3, bivalirudin, and argatroban use in CPB contexts.</li>
+                  <li>Separate calculator functions from reference-only medication notes.</li>
+                  <li>Add safety copy for institution-specific protocols and faculty review.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="roadmap-item">
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-gray">Not Started</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">Drug library expansion</span>
+                  <span class="roadmap-preview">Add DDAVP, insulin, diuretics, Cyanokit, methylene blue, and a paralysis section.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>Build out the medication reference in small, source-backed groups so the page stays usable while it grows.</p>
+                <ul class="roadmap-action-list">
+                  <li>Add one medication group at a time with indication, dosing note, and caution fields.</li>
+                  <li>Link each important recommendation to the master references page.</li>
+                  <li>Keep simulation reminders separate from clinical protocol language.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="roadmap-item">
+              <summary class="roadmap-summary">
+                <span class="status-pill status-pill-green">Ongoing</span>
+                <span class="roadmap-summary-copy">
+                  <span class="roadmap-title">Cannula data verification</span>
+                  <span class="roadmap-preview">Keep refining manufacturer curve references and labeling as cleaner source graphs become available.</span>
+                </span>
+              </summary>
+              <div class="roadmap-details">
+                <p>Continue treating cannula chart data as first-pass support until cleaner manufacturer source graphs can be checked.</p>
+                <ul class="roadmap-action-list">
+                  <li>Track source images or PDFs used for each curve.</li>
+                  <li>Recheck pressure-drop points against cleaner charts when available.</li>
+                  <li>Keep visible labels clear about reference quality and intended use.</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </article>
+      </section>
+
       <section class="home-grid" aria-label="Tool selection">
         <article class="panel home-card">
           <div class="home-card-header">
